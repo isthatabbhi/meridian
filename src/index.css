@@ -1,0 +1,726 @@
+/* Kumo UI (Cloudflare's component library): Tailwind v4 does not scan
+   node_modules by default, so @source tells it to discover the utility
+   classes Kumo's components use. The Kumo styles import must come
+   before tailwindcss so its @theme tokens register first. */
+@source "../node_modules/@cloudflare/kumo/dist/**/*.{js,jsx,ts,tsx}";
+@import "@cloudflare/kumo/styles";
+@import "tailwindcss";
+
+/* ── Cloudflare design tokens (from cloudflare-dashboard.css) ──
+   Dark is the default. Adding .light to <html> switches every surface,
+   border and text color to the light theme. The toggle lives in App.jsx
+   and persists in localStorage.
+   The page background and panel colour are the user's own choices
+   (#030303 / #0f0f0f), overriding the file's #0d1117 / #161b22.
+   Every other token is Cloudflare's exact value. */
+:root {
+  /* Color Tokens (Dark Theme - Default) */
+  --cf-bg-page: #030303;
+  --cf-bg-panel: #0f0f0f;
+  --cf-bg-subtle: #21262d;
+  --cf-bg-hover: #21262d;
+
+  --cf-border-panel: #30363d;
+  --cf-border-hover: #8b949e;
+  --cf-border-faint: rgba(48, 54, 61, 0.6);
+
+  --cf-text-primary: #ffffff;
+  --cf-text-secondary: #c9d1d9;
+  --cf-text-muted: #8b949e;
+  --cf-text-faint: #484f58;
+
+  /* Accent & Brand Colors */
+  --cf-accent-blue: #2f7cf6;
+  --cf-accent-blue-hover: #2868d8;
+  --cf-brand-orange: #f38020;
+
+  /* HTTP Status Code Colors */
+  --cf-status-2xx: #2f7cf6;
+  --cf-status-3xx: #22c55e;
+  --cf-status-4xx: #ef4444;
+  --cf-status-5xx: #ec4899;
+
+  /* KPI Deltas & Indicators */
+  --cf-delta-up: #22c55e;
+  --cf-delta-down: #ef4444;
+  --cf-delta-neutral: #8b949e;
+  --cf-delta-spike: #ec4899;
+
+  /* Chart 10-Color Series */
+  --cf-chart-1: #2f7cf6;
+  --cf-chart-2: #f59e0b;
+  --cf-chart-3: #22c55e;
+  --cf-chart-4: #8b5cf6;
+  --cf-chart-5: #ec4899;
+  --cf-chart-6: #06b6d4;
+  --cf-chart-7: #ef4444;
+  --cf-chart-8: #84cc16;
+  --cf-chart-9: #f97316;
+  --cf-chart-10: #6366f1;
+
+  /* Globe Colors */
+  --cf-globe-land: rgba(47, 124, 246, 0.75);
+  --cf-globe-ocean: rgba(100, 130, 170, 0.15);
+  --cf-globe-glow: rgba(47, 124, 246, 0.9);
+  --cf-globe-marker: rgba(140, 200, 255, 0.95);
+
+  /* Typography Stacks */
+  --cf-font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --cf-font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+  /* Radii */
+  --cf-radius-panel: 12px;
+  --cf-radius-card: 8px;
+  --cf-radius-btn: 6px;
+  --cf-radius-pill: 9999px;
+
+  /* Transitions */
+  --cf-ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --cf-duration-fast: 150ms;
+  --cf-duration-normal: 200ms;
+
+  /* Meridian variables, mapped to the Cloudflare tokens */
+  --bg: var(--cf-bg-page);
+  --surface: var(--cf-bg-panel);
+  --surface-2: var(--cf-bg-subtle);
+  --border: var(--cf-border-panel);
+  --text: var(--cf-text-primary);
+  --text-2: var(--cf-text-secondary);
+  --muted: var(--cf-text-muted);
+  --faint: var(--cf-text-faint);
+  --accent: var(--cf-accent-blue);
+  --good: var(--cf-delta-up);
+}
+
+html.light {
+  --cf-bg-page: #f6f8fa;
+  --cf-bg-panel: #ffffff;
+  --cf-bg-subtle: #f3f4f6;
+  --cf-bg-hover: #e5e7eb;
+
+  --cf-border-panel: #d0d7de;
+  --cf-border-hover: #afb8c1;
+  --cf-border-faint: #e1e4e8;
+
+  --cf-text-primary: #1f2328;
+  --cf-text-secondary: #57606a;
+  --cf-text-muted: #6e7781;
+  --cf-text-faint: #8c959f;
+
+  --cf-accent-blue: #0969da;
+  --cf-accent-blue-hover: #0858b8;
+
+  --cf-status-2xx: #0969da;
+  --cf-status-3xx: #1a7f37;
+  --cf-status-4xx: #cf222e;
+  --cf-status-5xx: #bf3989;
+
+  --cf-globe-land: rgba(9, 105, 218, 0.75);
+  --cf-globe-ocean: rgba(160, 175, 195, 0.25);
+
+  --bg: var(--cf-bg-page);
+  --surface: var(--cf-bg-panel);
+  --surface-2: var(--cf-bg-subtle);
+  --border: var(--cf-border-panel);
+  --text: var(--cf-text-primary);
+  --text-2: var(--cf-text-secondary);
+  --muted: var(--cf-text-muted);
+  --faint: var(--cf-text-faint);
+  --accent: var(--cf-accent-blue);
+  --good: #1a7f37;
+}
+
+/* ── Kumo UI token overrides ──
+   Kumo's own dark tokens are lighter than Meridian's Cloudflare theme
+   (its base is #232323, Meridian's panels are #0f0f0f), so these
+   unlayered rules remap them to Meridian's exact colours: page
+   #030303, panels #0f0f0f, accent #2f7cf6. Unlayered beats Kumo's
+   @layer base values, and html.light (higher specificity) beats this
+   :root block, so both themes stay correct. */
+:root {
+  --color-kumo-canvas: #030303;
+  --color-kumo-base: #0f0f0f;
+  --color-kumo-elevated: #161616;
+  --color-kumo-recessed: #030303;
+  --color-kumo-tint: #21262d;
+  --color-kumo-line: #30363d;
+  --color-kumo-hairline: #30363d;
+  --color-kumo-brand: #2f7cf6;
+  --color-kumo-brand-hover: #2868d8;
+  --color-kumo-focus: #2f7cf6;
+  --color-kumo-control: #0f0f0f;
+  --color-kumo-interact: #30363d;
+  --color-kumo-fill: #21262d;
+  --color-kumo-fill-hover: #30363d;
+  --color-kumo-overlay: #21262d;
+  --color-kumo-contrast: #ffffff;
+  --text-color-kumo-default: #ffffff;
+  --text-color-kumo-strong: #ffffff;
+  --text-color-kumo-subtle: #8b949e;
+  --text-color-kumo-inactive: #484f58;
+  --text-color-kumo-placeholder: #8b949e;
+  --text-color-kumo-brand: #2f7cf6;
+  --text-color-kumo-link: #2f7cf6;
+  --text-color-kumo-info: #2f7cf6;
+}
+
+html.light {
+  --color-kumo-canvas: #f6f8fa;
+  --color-kumo-base: #ffffff;
+  --color-kumo-elevated: #f6f8fa;
+  --color-kumo-recessed: #f6f8fa;
+  --color-kumo-tint: #f3f4f6;
+  --color-kumo-line: #d0d7de;
+  --color-kumo-hairline: #e1e4e8;
+  --color-kumo-brand: #0969da;
+  --color-kumo-brand-hover: #0858b8;
+  --color-kumo-focus: #0969da;
+  --color-kumo-control: #ffffff;
+  --color-kumo-interact: #d0d7de;
+  --color-kumo-fill: #f3f4f6;
+  --color-kumo-fill-hover: #e5e7eb;
+  --color-kumo-overlay: #f3f4f6;
+  --color-kumo-contrast: #1f2328;
+  --text-color-kumo-default: #1f2328;
+  --text-color-kumo-strong: #1f2328;
+  --text-color-kumo-subtle: #6e7781;
+  --text-color-kumo-inactive: #8c959f;
+  --text-color-kumo-placeholder: #6e7781;
+  --text-color-kumo-brand: #0969da;
+  --text-color-kumo-link: #0969da;
+  --text-color-kumo-info: #0969da;
+}
+
+/* Live refresh ON state (Kumo Button, outline variant): blue border
+   with a soft blue glow and a blue-tinted fill, pause icon. No status
+   dot. Mirrors the old .cf-btn-toggle.active rule. Unlayered, so it
+   beats Kumo's layered ring/background utilities. */
+.live-refresh-on {
+  --tw-ring-color: var(--accent);
+  background-color: rgba(47, 124, 246, 0.12);
+  box-shadow: 0 0 0 1px rgba(47, 124, 246, 0.35), 0 0 10px rgba(47, 124, 246, 0.25);
+  color: var(--text);
+}
+
+/* Kumo's Sidebar is a flex sibling, not fixed: pin the desktop
+   <aside> to the viewport top so the nav stays visible while the
+   page scrolls, like the old fixed sidebar. Scoped to the aside
+   only, so the mobile drawer (<nav data-mobile>) keeps Kumo's
+   fixed positioning and never takes flex space. */
+aside[data-sidebar="sidebar"] {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+}
+
+html,
+body {
+  background-color: var(--bg);
+  /* Cloudflare's font stack, so the dashboard type matches the
+     Cloudflare dashboard. Was falling back to Tailwind's default
+     sans, which renders the numbers and labels in a different face. */
+  font-family: var(--cf-font-sans);
+}
+
+/* The Meridian mark is blue, so it reads on both dark and light
+   sidebars without a tile behind it. */
+
+/* (The old custom .skeleton shimmer was removed: loading placeholders
+   are now Kumo SkeletonLine, so nothing uses this rule anymore.) */
+
+/* Tooltip fade: opacity 0 to 1 over 100ms ease. Opacity only, so it
+   never fights the inline transform that positions the tooltip. */
+@keyframes tooltip-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.tooltip-in {
+  animation: tooltip-in 100ms ease both;
+}
+
+/* Sparkline draw: the line draws left to right once on mount, the
+   fill fades in with it. 500ms ease-in-out, as the reference specifies. */
+.spark-line {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: spark-draw 500ms ease-in-out forwards;
+}
+@keyframes spark-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.spark-fill {
+  opacity: 0;
+  animation: spark-fade 500ms ease-in-out forwards;
+}
+@keyframes spark-fade {
+  to {
+    opacity: 1;
+  }
+}
+
+/* Status bar segments: width animates over 200ms ease when the
+   distribution changes, opacity over 100ms ease on hover. */
+.status-segment {
+  transition: width 200ms ease, opacity 100ms ease;
+}
+
+/* Panel entrance: 6px upward fade, 250ms, staggered per panel. */
+@keyframes panel-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-enter {
+  animation: panel-enter 250ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Dropdown menus: scale from 0.96 with a 4px rise, 120ms. */
+@keyframes menu-open {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+.animate-menu {
+  animation: menu-open 120ms cubic-bezier(0, 0, 0.2, 1) forwards;
+  transform-origin: top right;
+}
+.animate-menu-left {
+  animation: menu-open 120ms cubic-bezier(0, 0, 0.2, 1) forwards;
+  transform-origin: top left;
+}
+
+/* Focus ring on interactive elements. */
+button:focus-visible,
+a:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent);
+}
+
+/* ── Lenis smooth scroll (same as the portfolio) ── */
+html.lenis, html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden !important;
+}
+
+/* ── Cloudflare component classes (from cloudflare-dashboard.css) ──
+   The dashboard's own class names, kept alongside Meridian's Tailwind
+   utilities so the Cloudflare stylesheet is fully present. */
+
+/* Keyframe Animations */
+@keyframes cfShimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes cfPanelEntrance {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes cfDropdownOpen {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes cfPulse {
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Panels & Cards */
+.cf-panel {
+  background-color: var(--cf-bg-panel);
+  border: 1px solid var(--cf-border-panel);
+  border-radius: var(--cf-radius-panel);
+  overflow: hidden;
+  transition: border-color var(--cf-duration-fast) var(--cf-ease-default);
+}
+
+.cf-panel-header {
+  padding: 16px 20px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--cf-text-muted);
+}
+
+.cf-panel-body {
+  padding: 0 20px 20px 20px;
+}
+
+.cf-panel-entrance {
+  animation: cfPanelEntrance 250ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Buttons (from buttons.css, Cloudflare Dashboard Button Stylesheet).
+   All colours resolve through the --cf-* tokens, so they follow the
+   dark/light theme. The page background and panel tokens are the user's
+   own #030303 / #0f0f0f overrides. */
+.cf-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  white-space: nowrap;
+  vertical-align: middle;
+  cursor: pointer;
+  user-select: none;
+  text-decoration: none;
+  border-radius: 6px;
+  border: 1px solid var(--cf-border-panel, #30363d);
+  background-color: transparent;
+  color: var(--cf-text-secondary, #c9d1d9);
+  padding: 6px 12px;
+  outline: none;
+  transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+              background-color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1),
+              transform 100ms ease;
+}
+
+.cf-btn:hover {
+  color: var(--cf-text-primary, #ffffff);
+  background-color: var(--cf-bg-hover, #21262d);
+  border-color: var(--cf-border-hover, #8b949e);
+}
+
+.cf-btn:active {
+  transform: scale(0.98);
+}
+
+.cf-btn:focus-visible {
+  border-color: var(--cf-accent-blue, #2f7cf6);
+  box-shadow: 0 0 0 2px rgba(47, 124, 246, 0.35);
+}
+
+.cf-btn:disabled,
+.cf-btn[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Primary Action Button (Blue) */
+.cf-btn-primary {
+  color: #ffffff;
+  background-color: var(--cf-accent-blue, #2f7cf6);
+  border-color: transparent;
+  font-weight: 600;
+}
+
+.cf-btn-primary:hover {
+  color: #ffffff;
+  background-color: var(--cf-accent-blue-hover, #2868d8);
+  border-color: transparent;
+}
+
+.cf-btn-primary:focus-visible {
+  box-shadow: 0 0 0 2px var(--cf-bg-page, #0d1117), 0 0 0 4px var(--cf-accent-blue, #2f7cf6);
+}
+
+/* Outline / Secondary Button (Default Toolbar Button) */
+.cf-btn-secondary {
+  color: var(--cf-text-muted, #8b949e);
+  background-color: transparent;
+  border: 1px solid var(--cf-border-panel, #30363d);
+}
+
+.cf-btn-secondary:hover {
+  color: var(--cf-text-primary, #ffffff);
+  background-color: var(--cf-bg-hover, #21262d);
+  border-color: var(--cf-border-panel, #30363d);
+}
+
+/* Ghost / Sub-nav Button */
+.cf-btn-ghost {
+  border-color: transparent;
+  background-color: transparent;
+  color: var(--cf-text-muted, #8b949e);
+}
+
+.cf-btn-ghost:hover {
+  color: var(--cf-text-primary, #ffffff);
+  background-color: var(--cf-bg-hover, #21262d);
+}
+
+/* Toggle / Active Button (e.g. Live Refresh Active).
+   Cloudflare's live-refresh ON state: blue border with a soft blue glow
+   and a blue-tinted fill, pause icon. No status dot. */
+.cf-btn-toggle.active {
+  color: var(--cf-text-primary, #ffffff);
+  border-color: var(--cf-accent, #2f7cf6);
+  background-color: rgba(47, 124, 246, 0.12);
+  box-shadow: 0 0 0 1px rgba(47, 124, 246, 0.35), 0 0 10px rgba(47, 124, 246, 0.25);
+}
+
+/* Sizing */
+.cf-btn-xs {
+  font-size: 11px;
+  line-height: 14px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  gap: 4px;
+}
+
+.cf-btn-sm {
+  font-size: 12px;
+  line-height: 16px;
+  padding: 5px 10px;
+}
+
+.cf-btn-md {
+  font-size: 13px;
+  line-height: 18px;
+  padding: 7px 14px;
+}
+
+/* Icon-only Button */
+.cf-btn-icon {
+  padding: 6px;
+  border-radius: 6px;
+  color: var(--cf-text-muted, #8b949e);
+  border-color: transparent;
+}
+
+.cf-btn-icon:hover {
+  color: var(--cf-text-primary, #ffffff);
+  background-color: var(--cf-bg-hover, #21262d);
+}
+
+/* Button Groups & Clusters */
+.cf-btn-group {
+  display: inline-flex;
+  align-items: center;
+}
+
+.cf-btn-group > .cf-btn:not(:first-child) {
+  margin-left: -1px;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.cf-btn-group > .cf-btn:not(:last-child) {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.cf-btn-group > .cf-btn:hover {
+  z-index: 1;
+}
+
+/* SVG Icon alignment inside buttons */
+.cf-btn svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+/* Dropdown Menu */
+.cf-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  min-width: 160px;
+  background-color: var(--cf-bg-panel);
+  border: 1px solid var(--cf-border-panel);
+  border-radius: var(--cf-radius-card);
+  padding: 4px 0;
+  z-index: 50;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
+  transform-origin: top right;
+  animation: cfDropdownOpen 120ms cubic-bezier(0, 0, 0.2, 1) forwards;
+}
+
+.cf-dropdown-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 6px 12px;
+  font-size: 12px;
+  color: var(--cf-text-muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.cf-dropdown-item:hover {
+  background-color: var(--cf-bg-hover);
+  color: var(--cf-text-primary);
+}
+
+.cf-dropdown-item.active {
+  color: var(--cf-text-primary);
+  font-weight: 500;
+}
+
+/* Skeleton Loading Shimmer */
+.cf-skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--cf-bg-panel) 0%,
+    var(--cf-bg-subtle) 50%,
+    var(--cf-bg-panel) 100%
+  );
+  background-size: 200% 100%;
+  border: 1px solid var(--cf-border-panel);
+  border-radius: var(--cf-radius-panel);
+  animation: cfShimmer 1.5s linear infinite;
+}
+
+/* Status Codes Bar */
+.cf-status-track {
+  display: flex;
+  height: 28px;
+  border-radius: var(--cf-radius-btn);
+  overflow: hidden;
+  background-color: var(--cf-bg-subtle);
+}
+
+.cf-status-segment {
+  height: 100%;
+  transition: opacity 100ms ease;
+}
+
+.cf-status-segment:hover {
+  opacity: 0.85;
+}
+
+/* KPI Card Sparkline Container */
+.cf-sparkline-box {
+  height: 50px;
+  margin-top: 4px;
+}
+
+/* Table Row Structure */
+.cf-table-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 32px;
+  font-size: 12px;
+}
+
+.cf-table-bar-track {
+  width: 80px;
+  height: 8px;
+  border-radius: var(--cf-radius-pill);
+  background-color: var(--cf-bg-subtle);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.cf-table-bar-fill {
+  height: 100%;
+  border-radius: var(--cf-radius-pill);
+  background-color: var(--cf-accent-blue);
+  min-width: 4px;
+}
+
+/* Chart Tooltip */
+.cf-tooltip {
+  background-color: var(--cf-bg-panel);
+  border: 1px solid var(--cf-border-panel);
+  border-radius: var(--cf-radius-card);
+  padding: 8px 12px;
+  font-size: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+  transition: transform 60ms ease-out, opacity 100ms ease;
+}
+
+/* Live Refresh Pulse */
+.cf-live-refresh {
+  transition: opacity 200ms ease-in-out;
+}
+
+.cf-live-refresh.polling {
+  opacity: 0.85;
+}
+
+/* Thin visible scrollbar for the country list (Cloudflare's list
+   shows a scrollbar). */
+.thin-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface-2) transparent;
+}
+.thin-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+.thin-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.thin-scroll::-webkit-scrollbar-thumb {
+  background: var(--surface-2);
+  border-radius: 4px;
+}
+
+/* Kumo Meter used as a bare bar inside TopList / country rows: the
+   row already carries its own label (left) and count (right), so
+   hide the Meter's label/value header row and show only the track.
+   The Meter root is flex-col, so hiding the first child leaves just
+   the 8px track. */
+.meter-bar-only > div:first-child {
+  display: none;
+}
+
+/* Events table on phones and tablets: Kumo's table cells use p-3 (12px),
+   which plus the columns does not fit narrow viewports. Tighten the
+   horizontal cell padding below lg so the table fits without a
+   horizontal scroll. Specificity (two classes + element) beats
+   Kumo's [&_td]:p-3, and this unlayered rule sits after the imports. */
+@media (max-width: 1023px) {
+  .events-table table th,
+  .events-table table td {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+}
