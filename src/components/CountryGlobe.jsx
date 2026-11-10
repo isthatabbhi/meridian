@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { geoOrthographic } from 'd3-geo';
 import { Meter } from "@cloudflare/kumo/components/meter";
+import { Text } from "@cloudflare/kumo/components/text";
 import dotGrid from '../lib/dot-grid-countries.json';
 
 /* ─────────────────────────────────────────────────────────
@@ -232,7 +233,7 @@ export default function CountryGlobe({ data, dark }) {
          not hollow. Dark uses the exact #030304 he asked for. */
       ctx.beginPath();
       ctx.arc(SIZE / 2, SIZE / 2, R, 0, Math.PI * 2);
-      ctx.fillStyle = dark ? '#030304' : '#e6ebf0';
+      ctx.fillStyle = dark ? '#030304' : '#e5e7eb';
       ctx.fill();
 
       const traffic = trafficCodesRef.current;
@@ -265,7 +266,7 @@ export default function CountryGlobe({ data, dark }) {
              size; the list-hovered country is shown by the globe
              facing it and the tooltip, not by bigger dots. */
           ctx.globalAlpha = 0.55 + 0.45 * depth;
-          ctx.fillStyle = '#2f7cf6';
+          ctx.fillStyle = dark ? '#2f7cf6' : '#0969da';
           ctx.beginPath();
           ctx.arc(x, y, TOP_R, 0, Math.PI * 2);
           ctx.fill();
@@ -365,9 +366,9 @@ export default function CountryGlobe({ data, dark }) {
   return (
     <div className="rounded-[12px] border border-[var(--border)] bg-[var(--surface)] h-full flex flex-col">
       <div className="px-5 py-4">
-        <p className="text-[12px] font-medium text-[var(--muted)]">
+        <Text variant="secondary" size="xs" bold>
           Requests by country
-        </p>
+        </Text>
       </div>
       <div className="px-5 pb-5 flex flex-col md:flex-row gap-5 flex-1 md:items-stretch">
         {/* Globe column: dot-grid canvas, 280px. */}
@@ -385,7 +386,7 @@ export default function CountryGlobe({ data, dark }) {
           {/* Hover tooltip, updated imperatively in the draw loop. */}
           <div
             ref={tipRef}
-            className="absolute pointer-events-none whitespace-nowrap rounded-[6px] border border-[var(--border)] bg-[var(--surface)] px-2 py-1 text-[12px] text-[var(--text)] opacity-0 transition-opacity duration-100 z-10"
+            className={`absolute pointer-events-none whitespace-nowrap rounded-[8px] border border-[var(--border)] px-3 py-2 text-[12px] leading-4 opacity-0 transition-opacity duration-100 z-10 shadow-[0_4px_12px_rgba(0,0,0,0.35)] ${dark ? 'bg-[#161b22] text-white' : 'bg-white text-[#1f2328]'}`}
           />
         </div>
         {/* Thin vertical divider between globe and list, md+ only. */}
@@ -393,6 +394,9 @@ export default function CountryGlobe({ data, dark }) {
         {/* Country list: plain scrollable column, NO bordered box.
             data-lenis-prevent keeps this inner scroll area native. */}
         <div data-lenis-prevent className="thin-scroll flex-1 min-w-0 w-full overflow-y-auto overflow-x-hidden max-h-[340px] space-y-0.5">
+          {sorted.length === 0 && (
+            <p className="text-[12px] leading-4 text-[var(--muted)] py-6 text-center">No data available for this time range</p>
+          )}
           {sorted.map(([code, count]) => {
             const name = COUNTRY_NAMES[code] || code;
             const isUnknown = code === 'Unknown';
@@ -400,11 +404,11 @@ export default function CountryGlobe({ data, dark }) {
             return (
               <div
                 key={code}
-                className="flex items-center gap-3 rounded-[6px] px-2 py-1 hover:bg-[var(--surface-2)] transition-colors"
+                className="flex items-center gap-3 rounded-[6px] px-2 py-1.5 hover:bg-[var(--surface-2)] transition-colors"
                 onMouseEnter={() => setHoveredCode(code)}
                 onMouseLeave={() => setHoveredCode(null)}
               >
-                <span className="text-[12px] text-[var(--text-2)] w-[100px] shrink-0 truncate">{name}</span>
+                <span className="text-[12px] leading-4 text-[var(--text-2)] w-[100px] shrink-0 truncate">{name}</span>
                 {/* Kumo Meter as the bar. The row carries its own
                     label and count, so the Meter's label/value
                     header is hidden by .meter-bar-only in index.css.
@@ -414,12 +418,12 @@ export default function CountryGlobe({ data, dark }) {
                   showValue={false}
                   value={barPct}
                   className="meter-bar-only flex-1 min-w-0 w-auto"
-                  trackClassName="bg-[var(--surface-2)]"
+                  trackClassName="bg-[var(--cf-bg-track)]"
                   indicatorClassName={isUnknown
                     ? 'from-[#6b7280] via-[#6b7280] to-[#6b7280]'
-                    : 'from-[#2f7cf6] via-[#2f7cf6] to-[#2f7cf6]'}
+                    : 'from-[var(--accent)] via-[var(--accent)] to-[var(--accent)]'}
                 />
-                <span className="text-[12px] font-medium text-[var(--text)] tabular-nums w-[40px] text-right shrink-0">{count}</span>
+                <span className="text-[12px] leading-4 font-medium text-[var(--text)] tabular-nums w-[40px] text-right shrink-0">{count}</span>
               </div>
             );
           })}

@@ -3,32 +3,23 @@ import { LayerCard } from "@cloudflare/kumo/components/layer-card";
 import { Chart } from "@cloudflare/kumo/components/chart";
 import echarts from '../lib/echarts';
 import { istDayKey, istKeyToMs } from '../lib/dates';
+import { CF_SERIES, formatCompact } from '../lib/palette';
 
-/* The four KPI cards, in the same Kumo categorical palette order as
-   the Requests over time chart, so the chart and the cards share one
-   palette. `seriesKey` is the bucket field; `prevKey` is the matching
-   field in the backend's prevPeriod object. */
+/* The four KPI cards, in Cloudflare's categorical series order, so
+   the chart and the cards share one palette. `seriesKey` is the
+   bucket field; `prevKey` is the matching field in the backend's
+   prevPeriod object. */
 const CARDS = [
-  { label: 'Total events', seriesKey: 'events', prevKey: 'events', color: '#4290F0' },
-  { label: 'Unique visitors', seriesKey: 'visitors', prevKey: 'visitors', color: '#F5B647' },
-  { label: 'Project clicks', seriesKey: 'projectClicks', prevKey: 'projectClicks', color: '#E8649D' },
-  { label: 'Resume downloads', seriesKey: 'resumeDownloads', prevKey: 'resumeDownloads', color: '#8D58EE' },
+  { label: 'Total events', seriesKey: 'events', prevKey: 'events', color: CF_SERIES[0] },
+  { label: 'Unique visitors', seriesKey: 'visitors', prevKey: 'visitors', color: CF_SERIES[1] },
+  { label: 'Project clicks', seriesKey: 'projectClicks', prevKey: 'projectClicks', color: CF_SERIES[2] },
+  { label: 'Resume downloads', seriesKey: 'resumeDownloads', prevKey: 'resumeDownloads', color: CF_SERIES[3] },
 ];
 
 /* Delta colour (user order 2026-11-10): greyed #A1A1A1 for all cards,
    up and down alike. The arrow direction still shows up/down. */
 const DELTA_UP = '#A1A1A1';
 const DELTA_DOWN = '#A1A1A1';
-
-/* Compact value, Cloudflare style: 1150 -> "1.15k", 139 -> "139". */
-function formatCompact(v) {
-  if (v >= 1000) {
-    const k = v / 1000;
-    const s = k >= 100 ? k.toFixed(0) : k >= 10 ? k.toFixed(1) : k.toFixed(2);
-    return s.replace(/\.?0+$/, '') + 'k';
-  }
-  return String(v);
-}
 
 /* Sparkline on Kumo's custom Chart (ECharts). The TimeseriesChart
    cannot be a 50px sparkline: it has no axis-hide props and its grid
@@ -59,7 +50,7 @@ function Sparkline({ rows, seriesKey, color }) {
         lineStyle: { width: 1.5, color },
         areaStyle: {
           color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            { offset: 0, color: color + '73' },
+            { offset: 0, color: color + '4D' },
             { offset: 1, color: color + '0D' },
           ]),
         },
@@ -201,7 +192,7 @@ const deltaEl = (delta) => {
   };
 
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4 xl:gap-4">
+    <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4 xl:gap-4">
       {CARDS.map((c) => {
         const value = totals[c.seriesKey] || 0;
         const delta = deltaFor(c.prevKey);
@@ -212,7 +203,7 @@ const deltaEl = (delta) => {
             className="rounded-[12px] flex flex-col min-h-[136px]"
           >
             <div className="px-4 pt-2 pb-0 flex-1">
-              <p className="text-[11px] leading-none font-medium text-[var(--muted)] truncate mb-1">{c.label}</p>
+              <p className="text-[11px] leading-[14px] font-medium text-[var(--muted)] truncate mb-1">{c.label}</p>
               <div className="flex items-baseline gap-2">
                 <span className="text-[25px] font-bold text-[var(--text)] leading-none tabular-nums">
                   {formatCompact(value)}

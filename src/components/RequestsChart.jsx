@@ -1,5 +1,6 @@
 import { useMemo, useState, useEffect } from 'react';
 import { Chart } from "@cloudflare/kumo/components/chart";
+import { Text } from "@cloudflare/kumo/components/text";
 import echarts from '../lib/echarts';
 
 /* Country names for the legend. Never fall back to a raw code in the
@@ -19,9 +20,9 @@ const COUNTRY_NAMES = {
   RO: 'Romania', CZ: 'Czech Republic', AT: 'Austria', CH: 'Switzerland',
 };
 
-/* Kumo categorical palette, in order, assigned by rank (top country
-   gets #4290F0). Cycles with modulo if more than 6 countries plot. */
-const CHART_COLORS = ['#4290F0', '#F5B647', '#E8649D', '#8D58EE', '#50C3B6', '#D37536'];
+/* Cloudflare 10-color categorical series, in rank order (top country
+   gets #2f7cf6). Cycles with modulo past 10 countries. */
+import { CF_SERIES as CHART_COLORS, formatCompact } from '../lib/palette';
 
 import { istDayKey, istKeyToMs, msToIstKey, formatMsIndian, formatHourKeyShort, formatHourOnly, formatDayKeyShort } from '../lib/dates';
 
@@ -173,9 +174,9 @@ export default function RequestsChart({ data, since, timeRange, dark }) {
      cluttered and slanted (user order 2026-11-09). Daily ranges use
      a time axis ticking once per day. */
   const options = useMemo(() => {
-    const axisColor = dark ? '#8b949e' : '#656d76';
-    const gridColor = dark ? '#21262d' : '#d0d7de';
-    const tooltipBg = dark ? '#0f0f0f' : '#ffffff';
+    const axisColor = dark ? '#8b949e' : '#6e7781';
+    const gridColor = dark ? '#30363d' : '#e5e7eb';
+    const tooltipBg = dark ? '#161b22' : '#ffffff';
     const tooltipBorder = dark ? '#30363d' : '#d0d7de';
     const tooltipText = dark ? '#ffffff' : '#1f2328';
     const is24h = timeRange === '24h';
@@ -195,19 +196,21 @@ export default function RequestsChart({ data, since, timeRange, dark }) {
         borderColor: tooltipBorder,
         borderWidth: 1,
         padding: [8, 12],
-        textStyle: { color: tooltipText, fontSize: 12 },
+        transitionDuration: 0.1,
+        textStyle: { color: tooltipText, fontSize: 12, fontFamily: 'Inter Variable, system-ui, sans-serif' },
         extraCssText: 'border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.35);',
         formatter: (params) => {
           if (!params || params.length === 0) return '';
           const header = is24h
             ? echarts.format.encodeHTML(params[0].name)
             : echarts.format.encodeHTML(formatTooltipTime(params[0].value[0]));
-          const lines = [`<div style="margin-bottom:4px">${header}</div>`];
+          const headerColor = dark ? '#8b949e' : '#6e7781';
+          const lines = [`<div style="margin-bottom:4px;font-size:11px;color:${headerColor}">${header}</div>`];
           for (const p of params) {
             const name = echarts.format.encodeHTML(p.seriesName);
             const color = echarts.format.encodeHTML(String(p.color));
             const val = is24h ? p.value : p.value[1];
-            lines.push(`<div><span style="display:inline-block;width:8px;height:8px;border-radius:9999px;background:${color};margin-right:6px"></span>${name} <strong>${val}</strong></div>`);
+            lines.push(`<div style="font-variant-numeric:tabular-nums"><span style="display:inline-block;width:8px;height:8px;border-radius:9999px;background:${color};margin-right:6px"></span>${name} <span style="font-weight:600">${val}</span></div>`);
           }
           return lines.join('');
         },
@@ -216,12 +219,13 @@ export default function RequestsChart({ data, since, timeRange, dark }) {
         type: 'category',
         boundaryGap: false,
         data: twoHour ? twoHour.labels : [],
-        axisLine: { show: false },
+        axisLine: { show: true, lineStyle: { color: gridColor } },
         axisTick: { show: false },
         splitLine: { show: false },
         axisLabel: {
           color: axisColor,
           fontSize: 11,
+          fontFamily: 'Inter Variable, system-ui, sans-serif',
           rotate: 0,
           /* Mobile (2026-11-10, user order): 12-13 two-hour labels
              overlap and run together on a narrow screen. Show every
@@ -232,12 +236,13 @@ export default function RequestsChart({ data, since, timeRange, dark }) {
       } : {
         type: 'time',
         boundaryGap: false,
-        axisLine: { show: false },
+        axisLine: { show: true, lineStyle: { color: gridColor } },
         axisTick: { show: false },
         splitLine: { show: false },
         axisLabel: {
           color: axisColor,
           fontSize: 11,
+          fontFamily: 'Inter Variable, system-ui, sans-serif',
           rotate: 0,
           formatter: (value) => formatXAxis(value),
         },
@@ -248,22 +253,22 @@ export default function RequestsChart({ data, since, timeRange, dark }) {
         minInterval: 1,
         axisLine: { show: false },
         axisTick: { show: false },
-        splitLine: { show: true, lineStyle: { color: gridColor, type: 'dashed', dashOffset: 0 } },
-        axisLabel: { color: axisColor, fontSize: 11 },
+        splitLine: { show: true, lineStyle: { color: gridColor, type: [3, 3] } },
+        axisLabel: { color: axisColor, fontSize: 11, fontFamily: 'Inter Variable, system-ui, sans-serif' },
       },
       series: topCountries.map((code, i) => {
         const color = CHART_COLORS[i % CHART_COLORS.length];
         return {
           name: COUNTRY_NAMES[code] || code,
           type: 'line',
-          smooth: false,
+          smooth: true,
           symbol: 'none',
-          lineStyle: { width: 2, color },
+          lineStyle: { width: 1.5, color },
           itemStyle: { color },
           areaStyle: {
             color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-              { offset: 0, color: color + '33' },
-              { offset: 1, color: color + '00' },
+              { offset: 0, color: color + '40' },
+              { offset: 1, color: color + '05' },
             ]),
           },
           emphasis: { focus: 'series' },
@@ -278,9 +283,9 @@ export default function RequestsChart({ data, since, timeRange, dark }) {
   return (
     <div className="rounded-[12px] border border-[var(--border)] bg-[var(--surface)]">
       <div className="px-5 py-4">
-        <p className="text-[12px] font-medium text-[var(--muted)] mb-3">
+        <Text variant="secondary" size="xs" bold DANGEROUS_className="mb-3">
           Requests over time
-        </p>
+        </Text>
         {/* Legend: country names (never raw codes) with totals */}
         <div className="flex flex-wrap gap-x-5 gap-y-1 mb-2">
           {topCountries.map((code, i) => (
@@ -289,11 +294,11 @@ export default function RequestsChart({ data, since, timeRange, dark }) {
                 className="inline-block w-[8px] h-[8px] rounded-full"
                 style={{ backgroundColor: CHART_COLORS[i % CHART_COLORS.length] }}
               />
-              <span className="text-[12px] text-[var(--text-2)]">
+              <span className="text-[12px] leading-4 text-[var(--text-2)]">
                 {COUNTRY_NAMES[code] || code}
               </span>
-              <span className="text-[12px] text-[var(--text)] font-medium tabular-nums">
-                {countryTotals[code] || 0}
+              <span className="text-[12px] leading-4 text-[var(--text)] font-medium tabular-nums">
+                {formatCompact(countryTotals[code] || 0)}
               </span>
             </div>
           ))}
@@ -301,12 +306,12 @@ export default function RequestsChart({ data, since, timeRange, dark }) {
       </div>
       <div className="px-5 pb-5">
         {chartData.length === 0 ? (
-          <p className="text-[12px] text-[var(--faint)] h-[280px] flex items-center justify-center">No data yet</p>
+          <p className="text-[12px] leading-4 text-[var(--muted)] h-[280px] flex items-center justify-center">No data available for this time range</p>
         ) : (
           <Chart
             echarts={echarts}
             options={options}
-            height={280}
+            height={isMobile ? 220 : 280}
             isDarkMode={dark}
             ariaDescription="Requests over time by country"
           />

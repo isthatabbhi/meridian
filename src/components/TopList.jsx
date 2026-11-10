@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { LayerCard } from "@cloudflare/kumo/components/layer-card";
 import { Tooltip } from "@cloudflare/kumo/components/tooltip";
 import { Meter } from "@cloudflare/kumo/components/meter";
+import { Text } from "@cloudflare/kumo/components/text";
 
 /* Small icon buttons that appear on a row when it is hovered, like
    Cloudflare's Top N tables (verified live 2026-11-10): Filter
@@ -11,9 +12,7 @@ import { Meter } from "@cloudflare/kumo/components/meter";
    again, or the "Clear" chip, restores the full list. */
 function FilterIcon() {
   return (
-    <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M1 2h14l-5.5 6.5V14l-3-1.5V8.5L1 2z" />
-    </svg>
+    <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="m1.774 3.72.37-.836h11.711l.371.836-4.649 5.135v3.26l-.214.411-2.155 1.5-.785-.41V8.855L1.773 3.72Zm1.498.164 4.021 4.443.13.335v3.997l1.154-.804V8.662l.13-.335 4.021-4.443H3.272Z" fill-rule="evenodd"/></svg>
   );
 }
 function ExcludeIcon() {
@@ -26,10 +25,7 @@ function ExcludeIcon() {
 }
 function CopyIcon() {
   return (
-    <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="5.5" y="5.5" width="8" height="8" rx="1.5" />
-      <path d="M10.5 5.5v-3a1.5 1.5 0 0 0-1.5-1.5H4A1.5 1.5 0 0 0 2.5 2.5v5A1.5 1.5 0 0 0 4 9h1.5" />
-    </svg>
+    <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M14 1.5H6l-.5.5v2.5h1v-2h7v7h-2v1H14l.5-.5V2l-.5-.5z"/><path d="M2 5.5l-.5.5v8l.5.5h8l.5-.5V6l-.5-.5H2zm7.5 8h-7v-7h7v7z"/></svg>
   );
 }
 
@@ -56,7 +52,7 @@ export default function TopList({ title, items }) {
   return (
     <LayerCard className="rounded-[12px] flex flex-col h-full">
       <div className="px-5 py-4 border-b border-[var(--border)] flex items-center justify-between gap-2">
-        <p className="text-[12px] font-medium text-[var(--muted)]">{title}</p>
+        <Text variant="secondary" size="xs" bold>{title}</Text>
         {filterLabel && (
           <button
             onClick={() => setFilterLabel(null)}
@@ -69,7 +65,7 @@ export default function TopList({ title, items }) {
       </div>
       <div className="px-5 py-3 flex-1 overflow-y-auto">
         {items.length === 0 ? (
-          <p className="text-[12px] text-[var(--faint)] py-4 text-center">No data</p>
+          <p className="text-[12px] leading-4 text-[var(--faint)] py-6 text-center">No data</p>
         ) : visible.length === 0 ? (
           <p className="text-[12px] text-[var(--faint)] py-4 text-center">
             {filterLabel ? 'No rows match the filter' : 'All rows excluded'}
@@ -94,7 +90,7 @@ export default function TopList({ title, items }) {
                       (py-2 + 16px line). */}
                   <div className="flex-1 min-w-0 text-left">
                     <Tooltip content={item.label} side="top" className="block w-full text-left">
-                      <span className="block text-left text-[12px] leading-4 text-[var(--text-2)] truncate hover:text-white transition-colors">
+                      <span className="block text-left text-[12px] leading-4 text-[var(--text-2)] truncate hover:text-[var(--text)] transition-colors">
                         {item.label}
                       </span>
                     </Tooltip>
@@ -109,9 +105,9 @@ export default function TopList({ title, items }) {
                     label={item.label}
                     showValue={false}
                     value={barPct}
-                    className="meter-bar-only w-[160px] shrink-0"
-                    trackClassName="bg-[var(--surface-2)]"
-                    indicatorClassName="from-[#2f7cf6] via-[#2f7cf6] to-[#2f7cf6]"
+                    className="meter-bar-only w-[80px] shrink-0"
+                    trackClassName="bg-[var(--cf-bg-track)]"
+                    indicatorClassName="from-[var(--accent)] via-[var(--accent)] to-[var(--accent)]"
                   />
                   <span className="text-[12px] leading-4 font-medium text-[var(--text)] tabular-nums w-[40px] text-right shrink-0">
                     {item.count}

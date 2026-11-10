@@ -1,24 +1,20 @@
 import { useMemo } from 'react';
 import { Chart } from "@cloudflare/kumo/components/chart";
+import { Text } from "@cloudflare/kumo/components/text";
 import echarts from '../lib/echarts';
 
-/* Kumo categorical palette, for nominal categories with no inherent
-   polarity (device types). Assigned by device name so the pie slice
-   and the legend dot always match, even when a device has no data
-   and is filtered out. Replaces the old single-blue scheme (Desktop
-   was #2f7cf6, Unknown was grey). */
-const CATEGORICAL = ['#4290F0', '#F5B647', '#E8649D', '#8D58EE', '#50C3B6', '#D37536'];
+/* Device colors follow Cloudflare's categorical series order:
+   Desktop #2f7cf6, Mobile #f59e0b, Tablet #ec4899, Unknown #8b5cf6.
+   Assigned by device name so the pie slice and the legend dot always
+   match, even when a device has no data. */
+import { DEVICE_COLORS } from '../lib/palette';
 const DEVICE_ORDER = ['Desktop', 'Mobile', 'Tablet', 'Unknown'];
-const DEVICE_COLORS = Object.fromEntries(
-  DEVICE_ORDER.map((name, i) => [name, CATEGORICAL[i % CATEGORICAL.length]])
-);
 
 export default function DeviceTypeChart({ data, dark }) {
   const deviceData = useMemo(() => {
     const byDevice = data?.requestsByDevice || {};
     return DEVICE_ORDER
-      .map((name) => ({ name, value: byDevice[name] || 0 }))
-      .filter((d) => d.value > 0);
+      .map((name) => ({ name, value: byDevice[name] || 0 }));
   }, [data]);
 
   const total = deviceData.reduce((sum, d) => sum + d.value, 0);
@@ -31,11 +27,12 @@ export default function DeviceTypeChart({ data, dark }) {
   const options = useMemo(() => {
     const tooltip = {
       trigger: 'item',
-      backgroundColor: dark ? '#0f0f0f' : '#ffffff',
+      backgroundColor: dark ? '#161b22' : '#ffffff',
       borderColor: dark ? '#30363d' : '#d0d7de',
       borderWidth: 1,
       padding: [8, 12],
-      textStyle: { color: dark ? '#ffffff' : '#1f2328', fontSize: 12 },
+      transitionDuration: 0.1,
+      textStyle: { color: dark ? '#ffffff' : '#1f2328', fontSize: 12, fontFamily: 'Inter Variable, system-ui, sans-serif' },
       extraCssText: 'border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.35);',
       /* HTML tooltip (dot + name + value), like the old custom one.
          Names are fixed device labels, but encode them anyway, as the
@@ -43,7 +40,7 @@ export default function DeviceTypeChart({ data, dark }) {
       dangerousHtmlFormatter: (params) => {
         const name = echarts.format.encodeHTML(params.name);
         const color = echarts.format.encodeHTML(String(params.color));
-        return `<span style="display:inline-block;width:8px;height:8px;border-radius:9999px;background:${color};margin-right:6px"></span><span>${name}</span> <strong>${params.value}</strong>`;
+        return `<span style="display:inline-block;width:8px;height:8px;border-radius:9999px;background:${color};margin-right:6px"></span><span>${name}</span> <span style="font-weight:600;font-variant-numeric:tabular-nums">${params.value}</span>`;
       },
     };
     if (!hasData) {
@@ -59,7 +56,7 @@ export default function DeviceTypeChart({ data, dark }) {
           labelLine: { show: false },
           itemStyle: { borderColor: 'transparent', borderWidth: 0 },
           emphasis: { scale: false },
-          data: [{ name: 'empty', value: 1, itemStyle: { color: dark ? '#0f0f0f' : '#e5e7eb' } }],
+          data: [{ name: 'empty', value: 1, itemStyle: { color: dark ? '#21262d' : '#e5e7eb' } }],
         }],
       };
     }
@@ -101,16 +98,16 @@ export default function DeviceTypeChart({ data, dark }) {
   return (
     <div className="rounded-[12px] border border-[var(--border)] bg-[var(--surface)] h-full flex flex-col">
       <div className="px-5 py-4">
-        <p className="text-[12px] font-medium text-[var(--muted)] mb-3">
+        <Text variant="secondary" size="xs" bold DANGEROUS_className="mb-3">
           Requests by device type
-        </p>
-        {/* Legend: only devices that actually have data */}
-        <div className="flex flex-wrap gap-x-4 gap-y-1 mb-4">
-          {DEVICE_ORDER.filter((name) => ((data?.requestsByDevice || {})[name] || 0) > 0).map((name) => (
+        </Text>
+        {/* Legend: all three device types, like Cloudflare, even at 0 */}
+        <div className="flex flex-wrap gap-x-5 gap-y-1 mb-4">
+          {DEVICE_ORDER.map((name) => (
             <div key={name} className="flex items-center gap-1.5">
               <span className="inline-block w-[8px] h-[8px] rounded-full" style={{ backgroundColor: DEVICE_COLORS[name] }} />
-              <span className="text-[12px] text-[var(--text-2)]">{name}</span>
-              <span className="text-[12px] text-[var(--text)] font-medium tabular-nums">
+              <span className="text-[12px] leading-4 text-[var(--text-2)]">{name}</span>
+              <span className="text-[12px] leading-4 text-[var(--text)] font-medium tabular-nums">
                 {(data?.requestsByDevice || {})[name] || 0}
               </span>
             </div>
@@ -119,11 +116,6 @@ export default function DeviceTypeChart({ data, dark }) {
       </div>
       <div className="flex-1 flex flex-col items-center justify-center pb-5 px-5">
         <Chart echarts={echarts} options={options} height={280} isDarkMode={dark} />
-        {!hasData && (
-          <p className="text-[11px] text-[var(--faint)] mt-2 text-center">
-            No device data yet, new visits will appear here
-          </p>
-        )}
       </div>
     </div>
   );

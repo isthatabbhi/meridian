@@ -1,19 +1,20 @@
 import { Table } from "@cloudflare/kumo/components/table";
 import { formatIndian, formatIndianShort } from '../lib/dates';
+import { EVENT_COLORS } from '../lib/palette';
 
 export default function EventsTable({ events, loading }) {
   if (loading && (!events || events.length === 0)) {
     return (
-      <div className="animate-pulse space-y-2">
+      <div className="space-y-2">
         {[1, 2, 3].map(i => (
-          <div key={i} className="h-4 bg-[var(--surface-2)] rounded" />
+          <div key={i} className="cf-skeleton h-4" />
         ))}
       </div>
     );
   }
 
   if (!events || events.length === 0) {
-    return <p className="text-xs text-[var(--faint)]">No data yet</p>;
+    return <p className="text-xs leading-4 text-[var(--muted)]">No data yet</p>;
   }
 
   return (
@@ -60,14 +61,22 @@ export default function EventsTable({ events, loading }) {
 }
 
 function TypeBadge({ type }) {
-  const styles = {
-    pageview:         'bg-[#2f7cf6]/15 text-[#2f7cf6]',
-    project_click:    'bg-[#f59e0b]/15 text-[#f59e0b]',
-    resume_download:  'bg-[#22c55e]/15 text-[#22c55e]',
-    contact:          'bg-[#8b5cf6]/15 text-[#8b5cf6]',
-  };
+  const color = EVENT_COLORS[type];
+  if (!color) {
+    return (
+      <span className="inline-block whitespace-nowrap px-2 py-0.5 rounded-md text-[10px] leading-[14px] font-medium bg-[var(--surface-2)] text-[var(--muted)]">
+        {type?.replace(/_/g, ' ') ?? 'unknown'}
+      </span>
+    );
+  }
+  /* Pageview uses var(--accent) so the badge follows the theme
+     (dark #2f7cf6, light #0969da); the other event colors are the
+     same in both themes. */
+  const style = type === 'pageview'
+    ? { color: 'var(--accent)', backgroundColor: 'color-mix(in srgb, var(--accent) 15%, transparent)' }
+    : { color, backgroundColor: color + '26' };
   return (
-    <span className={`inline-block whitespace-nowrap px-2 py-0.5 rounded-md text-[10px] font-medium ${styles[type] || 'bg-[var(--surface-2)] text-[var(--muted)]'}`}>
+    <span className="inline-block whitespace-nowrap px-2 py-0.5 rounded-md text-[10px] leading-[14px] font-medium" style={style}>
       {type?.replace(/_/g, ' ') ?? 'unknown'}
     </span>
   );

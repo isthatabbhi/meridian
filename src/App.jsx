@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import Lenis from 'lenis';
 import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarFooter, SidebarTrigger, SidebarGroup, SidebarGroupLabel, useSidebar } from "@cloudflare/kumo/components/sidebar";
 import { DropdownMenu } from "@cloudflare/kumo/components/dropdown";
-import { Loader, SkeletonLine } from "@cloudflare/kumo/components/loader";
+import { SkeletonLine } from "@cloudflare/kumo/components/loader";
+import { Text } from "@cloudflare/kumo/components/text";
 import { PageHeader } from "./components/kumo/page-header/page-header";
 import { fetchStats } from './lib/api';
 import StatusCodesBar from './components/StatusCodesBar';
@@ -17,37 +18,22 @@ import { Button, IconButton } from './components/Button';
 /* ── Icons ───────────────────────────────────────────── */
 function ExternalLinkIcon() {
   return (
-    <svg className="w-4 h-4 shrink-0" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M7.5 3.75H3.75v12.5h12.5v-3.75" /><path d="M11.25 2.5h6.25v6.25" /><path d="M17.5 2.5L8.75 11.25" />
-    </svg>
+    <svg className="w-4 h-4 shrink-0" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M9.996 1.532l.008 1 2.779-.022-4.136 4.136.707.707 4.136-4.136-.023 2.779 1 .008.037-4.508-4.508.036z"/><path d="M12 12H4V4h4.5V3h-5l-.5.5v9l.5.5h9l.5-.5v-5h-1V12z"/></svg>
   );
 }
 function PrintIcon() {
   return (
-    <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4 5V1h8v4" /><path d="M4 12H2V7h12v5h-2" /><rect x="4" y="10" width="8" height="5" />
-    </svg>
+    <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M13.5 3.5h-2V1.988l-.5-.5H5l-.5.5V3.5h-2L2 4v6l.5.5h1.944v2l.146.354 2.5 2.5.354.146h3.5l.5-.5v-4.5H13.5l.5-.5V4l-.5-.5zm-8-1.012h5V3.5h-5V2.488zM5.65 12.5h1.793v1.793L5.65 12.5zm4.793 2h-2V12l-.5-.5h-2.5v-3h5v6zM13 9.5h-1.556V8l-.5-.5h-6l-.5.5v1.5H3v-5h10v5z"/></svg>
   );
 }
 function LinkIcon() {
   return (
-    <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M6.5 9.5a3.5 3.5 0 005 0l2-2a3.5 3.5 0 00-5-5l-1 1" /><path d="M9.5 6.5a3.5 3.5 0 00-5 0l-2 2a3.5 3.5 0 005 5l1-1" />
-    </svg>
-  );
-}
-function PlusIcon() {
-  return (
-    <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-      <path d="M8 3v10M3 8h10" />
-    </svg>
+    <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M1 6.75A2.253 2.253 0 013.25 4.5h4.5a2.25 2.25 0 110 4.5H7v1h.75a3.25 3.25 0 000-6.5h-4.5a3.25 3.25 0 000 6.5H4V9h-.75A2.253 2.253 0 011 6.75z"/><path d="M12.75 6H12v1h.75a2.25 2.25 0 010 4.5h-4.5a2.25 2.25 0 010-4.5H9V6h-.75a3.25 3.25 0 000 6.5h4.5a3.25 3.25 0 100-6.5z"/></svg>
   );
 }
 function FilterIcon() {
   return (
-    <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M1 2h14l-5.5 6.5V14l-3-1.5V8.5L1 2z" />
-    </svg>
+    <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="m1.774 3.72.37-.836h11.711l.371.836-4.649 5.135v3.26l-.214.411-2.155 1.5-.785-.41V8.855L1.773 3.72Zm1.498.164 4.021 4.443.13.335v3.997l1.154-.804V8.662l.13-.335 4.021-4.443H3.272Z" fill-rule="evenodd"/></svg>
   );
 }
 function PlayIcon() {
@@ -59,24 +45,17 @@ function PlayIcon() {
 }
 function PauseIcon() {
   return (
-    <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none">
-      <rect x="4" y="3" width="3" height="10" rx="0.5" fill="currentColor" />
-      <rect x="9" y="3" width="3" height="10" rx="0.5" fill="currentColor" />
-    </svg>
+    <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1.5A6.5 6.5 0 1014.5 8 6.507 6.507 0 008 1.5zm0 12A5.5 5.5 0 1113.5 8 5.507 5.507 0 018 13.5z"/><path d="M7 5H6v6h1V5zM10 5H9v6h1V5z"/></svg>
   );
 }
 function ClockIcon() {
   return (
-    <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="8" cy="8" r="6.5" /><path d="M8 4v4l3 1.5" />
-    </svg>
+    <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zm0 12a5.5 5.5 0 110-11 5.5 5.5 0 010 11z"/><path d="M8.5 3.725h-1V8.36l2.7 2.808.72-.693L8.5 7.957V3.725z"/></svg>
   );
 }
 function HomeIcon() {
   return (
-    <svg className="w-4 h-4 shrink-0" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 10.5 10 3l7 7.5" /><path d="M5 9.5V17h10V9.5" />
-    </svg>
+    <svg className="w-4 h-4 shrink-0" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M14.172 7.878 8 2.52 1.828 7.878l-.656-.756 6.5-5.641h.656l6.5 5.641-.656.756Z"/><path d="M4 8.101V13h2.125V9.759l.5-.5h2.75l.5.5V13H12V8.101h1V13.5l-.5.5h-9l-.5-.5V8.101h1ZM8.875 13h-1.75v-2.741h1.75V13Z" fill-rule="evenodd"/></svg>
   );
 }
 function ListIcon() {
@@ -97,17 +76,13 @@ function PanelLeftIcon() {
 }
 function ChevronDown() {
   return (
-    <svg className="w-3 h-3" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4 6l4 4 4-4" />
-    </svg>
+    <svg className="w-3 h-3" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M14.15 4.492H1.85l-.354.854 6.15 6.15h.707l6.15-6.15-.353-.854z"/></svg>
   );
 }
 
 function MenuIcon() {
   return (
-    <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-      <path d="M2 4h12M2 8h12M2 12h12" />
-    </svg>
+    <svg className="w-4 h-4" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M14 3.5H2v1h12v-1zM14 7.5H2v1h12v-1zM14 11.5H2v1h12v-1z"/></svg>
   );
 }
 function SunIcon() {
@@ -166,7 +141,7 @@ function SidebarBrand({ dark }) {
   return (
     <span className="flex items-center gap-2 min-w-0">
       <img src={markSrc} alt="Meridian" className="sidebar-logo w-8 h-8 object-contain shrink-0" />
-      <span className={`whitespace-nowrap overflow-hidden transition-opacity duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] text-[20px] font-semibold text-[var(--text)] ${shown ? 'opacity-100 max-w-[160px]' : 'opacity-0 max-w-0'}`}>
+      <span className={`whitespace-nowrap overflow-hidden transition-opacity duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] text-[20px] leading-7 tracking-[-0.015em] font-semibold text-[var(--text)] ${shown ? 'opacity-100 max-w-[160px]' : 'opacity-0 max-w-0'}`}>
         Meridian
       </span>
     </span>
@@ -183,8 +158,8 @@ function SidebarSiteCard() {
   return (
     <div className={`transition-opacity duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] ${shown ? 'opacity-100' : 'opacity-0'}`}>
       <div className="mx-1 mb-3 px-3 py-2.5 rounded-[8px] border border-[var(--border)] bg-[var(--bg)] whitespace-nowrap">
-        <p className="text-[13px] text-[var(--text)] font-medium">isthatabbhi.tech</p>
-        <p className="text-[11px] text-[var(--muted)]">Portfolio</p>
+        <p className="text-[14px] leading-[18px] text-[var(--text)] font-bold">isthatabbhi.tech</p>
+        <p className="text-[11px] leading-[14px] text-[var(--muted)]">Portfolio</p>
       </div>
     </div>
   );
@@ -246,6 +221,7 @@ function MeridianSidebar({ view, onNavigate, dark, onPeek }) {
                 active={view === 'overview'}
                 tooltip="Overview"
                 onClick={() => handleNavigate('overview')}
+                className="min-h-8 text-[13px] rounded-[6px]"
               >
                 <SidebarNavLabel>Overview</SidebarNavLabel>
               </SidebarMenuButton>
@@ -256,6 +232,7 @@ function MeridianSidebar({ view, onNavigate, dark, onPeek }) {
                 active={view === 'events'}
                 tooltip="Events"
                 onClick={() => handleNavigate('events')}
+                className="min-h-8 text-[13px] rounded-[6px]"
               >
                 <SidebarNavLabel>Events</SidebarNavLabel>
               </SidebarMenuButton>
@@ -271,6 +248,7 @@ function MeridianSidebar({ view, onNavigate, dark, onPeek }) {
                 href="https://isthatabbhi.tech"
                 target="_blank"
                 rel="noopener noreferrer"
+                className="min-h-8 text-[13px] rounded-[6px]"
               >
                 <SidebarNavLabel>Portfolio</SidebarNavLabel>
               </SidebarMenuButton>
@@ -560,7 +538,7 @@ export default function App() {
 
       {/* Main content, flexed beside the sidebar (55px rail / 220px expanded) */}
       <main className="flex-1 min-w-0 min-h-screen">
-        <div className="px-4 pb-16 md:px-6 w-full">
+        <div className="mx-auto max-w-[1600px] px-3 pb-16 md:px-6 w-full">
           {/* ── Header row, locked (sticky) at the top so the
               Traffic overview / Recent events title and actions
               stay visible while scrolling. Same bar in both views,
@@ -570,11 +548,18 @@ export default function App() {
               with the mobile hamburger as its leading slot, actions
               on the right. No tabs (the sidebar handles Overview /
               Events navigation) and no breadcrumbs. ── */}
-          <div className="sticky top-0 z-40 bg-[var(--bg)] border-b border-[var(--border)] -mx-4 px-4 py-3 md:-mx-6 md:px-6 mb-4 print:hidden">
+          <div className="sticky top-0 z-40 bg-[var(--bg)] border-b border-[var(--border)] -mx-3 px-3 pt-5 pb-4 md:-mx-6 md:px-6 mb-4 print:hidden">
             <PageHeader
               spacing="compact"
               title={view === 'events' ? 'Recent events' : 'Traffic overview'}
               leading={<HamburgerButton />}
+              breadcrumbs={(
+                <nav className="flex items-center gap-1.5 py-2 text-[12px] leading-4 text-[var(--muted)]" aria-label="Breadcrumb">
+                  <span>Meridian</span>
+                  <span aria-hidden="true">/</span>
+                  <span className="text-[var(--text-2)]">{view === 'events' ? 'Recent events' : 'Traffic overview'}</span>
+                </nav>
+              )}
             >
               {/* Icon-only on mobile so the three actions fit beside
                   the title on one row; labels return from the sm
@@ -616,7 +601,7 @@ export default function App() {
                 shape="square"
                 loading={copying}
                 onClick={handleCopyLink}
-                className={copied === 'failed' ? 'text-red-400! sm:w-auto sm:px-2' : copied ? 'text-[var(--text)]! bg-[var(--surface-2)]! sm:w-auto sm:px-2' : 'sm:w-auto sm:px-2'}
+                className={copied === 'failed' ? 'text-[var(--cf-status-4xx)]! sm:w-auto sm:px-2' : copied ? 'text-[var(--text)]! bg-[var(--surface-2)]! sm:w-auto sm:px-2' : 'sm:w-auto sm:px-2'}
               >
                 <span className="hidden sm:inline">{copied === 'failed' ? 'Copy failed' : copied ? 'Copied!' : 'Copy link'}</span>
               </Button>
@@ -647,12 +632,13 @@ export default function App() {
                   )}
                 </Button>
               </DropdownMenu.Trigger>
-              <DropdownMenu.Content align="start">
+              <DropdownMenu.Content align="start" className="min-w-[160px] py-1 px-0">
                 {TYPE_FILTERS.map((f) => (
                   <DropdownMenu.Item
                     key={f.value}
                     selected={typeFilter === f.value}
                     onClick={() => { setTypeFilter(f.value); setView('events'); }}
+                    className="px-3 py-1.5 text-xs"
                   >
                     {f.label}
                   </DropdownMenu.Item>
@@ -667,6 +653,7 @@ export default function App() {
                 variant="toggle"
                 size="md"
                 active={liveRefresh}
+                className="text-xs rounded-md"
                 icon={liveRefresh ? <PauseIcon /> : <PlayIcon />}
                 onClick={() => { setLiveRefresh(!liveRefresh); if (!liveRefresh) doFetch(); }}
                 aria-pressed={liveRefresh}
@@ -682,16 +669,18 @@ export default function App() {
                     variant="secondary"
                     size="md"
                     icon={<ClockIcon />}
+                    className="text-xs rounded-md"
                   >
                     {currentRangeLabel} <ChevronDown />
                   </Button>
                 </DropdownMenu.Trigger>
-                <DropdownMenu.Content align="end">
+                <DropdownMenu.Content align="end" className="min-w-[160px] py-1 px-0">
                   {TIME_RANGES.map((r) => (
                     <DropdownMenu.Item
                       key={r.value}
                       selected={timeRange === r.value}
                       onClick={() => setTimeRange(r.value)}
+                      className="px-3 py-1.5 text-xs"
                     >
                       {r.label}
                     </DropdownMenu.Item>
@@ -703,50 +692,45 @@ export default function App() {
 
           {/* ── Error ── */}
           {error && (
-            <div className="mb-4 px-4 py-2 rounded-[8px] border border-red-800/50 bg-red-900/20 text-[12px] text-red-400">
+            <div className="mb-4 px-4 py-2 rounded-[8px] border text-[12px] leading-4" style={{ borderColor: 'var(--cf-status-4xx)', backgroundColor: 'color-mix(in srgb, var(--cf-status-4xx) 12%, transparent)', color: 'var(--cf-status-4xx)' }}>
               Failed to fetch data: {error}
             </div>
           )}
 
           {/* ── Loading: Kumo SkeletonLine placeholders shaped like the
-              dashboard panels, plus a Loader spinner while the first
-              fetch is in flight. SkeletonLine takes a fixed height
-              via className (it is an 8px line by default) and full
-              width via minWidth/maxWidth 100. ── */}
+              dashboard panels, uniform 1.5s linear shimmer like
+              Cloudflare, no spinner or loading text. SkeletonLine
+              takes a fixed height via className (it is an 8px line
+              by default) and full width via minWidth/maxWidth 100. ── */}
           {loading && !data ? (
             <div className="space-y-4">
-              <div className="flex items-center justify-center gap-2 py-2 text-[12px] text-[var(--muted)]">
-                <Loader size="sm" aria-label="Loading live stats" />
-                Loading live stats
-              </div>
-              <SkeletonLine minWidth={100} maxWidth={100} className="h-[110px] rounded-[12px] border border-[var(--border)]" />
+              <SkeletonLine minWidth={100} maxWidth={100} minDuration={1.5} maxDuration={1.5} minDelay={0} maxDelay={0} className="h-[80px] rounded-[12px] border border-[var(--border)]" />
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4 xl:gap-4">
                 {[1, 2, 3, 4].map((n) => (
-                  <SkeletonLine key={n} minWidth={100} maxWidth={100} className="h-[150px] rounded-[12px] border border-[var(--border)]" />
+                  <SkeletonLine key={n} minWidth={100} maxWidth={100} minDuration={1.5} maxDuration={1.5} minDelay={0} maxDelay={0} className="h-[120px] rounded-[12px] border border-[var(--border)]" />
                 ))}
               </div>
-              <SkeletonLine minWidth={100} maxWidth={100} className="h-[360px] rounded-[12px] border border-[var(--border)]" />
-              <SkeletonLine minWidth={100} maxWidth={100} className="h-[320px] rounded-[12px] border border-[var(--border)]" />
-              <SkeletonLine minWidth={100} maxWidth={100} className="h-[340px] rounded-[12px] border border-[var(--border)]" />
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-                {[1, 2, 3, 4, 5, 6].map((n) => (
-                  <SkeletonLine key={n} minWidth={100} maxWidth={100} className="h-[180px] rounded-[12px] border border-[var(--border)]" />
+              <SkeletonLine minWidth={100} maxWidth={100} minDuration={1.5} maxDuration={1.5} minDelay={0} maxDelay={0} className="h-[340px] rounded-[12px] border border-[var(--border)]" />
+              <SkeletonLine minWidth={100} maxWidth={100} minDuration={1.5} maxDuration={1.5} minDelay={0} maxDelay={0} className="h-[280px] rounded-[12px] border border-[var(--border)]" />
+              <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 xl:grid-cols-3 xl:gap-4">
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
+                  <SkeletonLine key={n} minWidth={100} maxWidth={100} minDuration={1.5} maxDuration={1.5} minDelay={0} maxDelay={0} className="h-[260px] rounded-[12px] border border-[var(--border)]" />
                 ))}
               </div>
             </div>
           ) : view === 'events' ? (
             <div className="rounded-[12px] border border-[var(--border)] bg-[var(--surface)] px-3 py-4 md:px-5">
-              <p className="text-[12px] text-[var(--muted)] mb-3">
+              <Text variant="secondary" size="xs" DANGEROUS_className="mb-3">
                 {filteredEvents.length} of {data?.recent?.length || 0} most recent events
                 {typeFilter !== 'all' ? ` · ${currentFilterLabel}` : ''} · {currentRangeLabel}
-              </p>
+              </Text>
               <EventsTable events={filteredEvents} loading={false} />
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className={`space-y-4 cf-live-refresh ${fetching ? 'polling' : ''}`}>
               {/* Status codes bar */}
               <div className="animate-enter" style={{ animationDelay: '0ms' }}>
-                <StatusCodesBar data={data} />
+                <StatusCodesBar data={data} dark={dark} />
               </div>
 
               {/* KPI cards */}
@@ -778,7 +762,7 @@ export default function App() {
                   row 1 paths / client IPs / hosts, row 2 OS /
                   browsers / user agents, row 3 HTTP versions / cache
                   statuses / origin status codes. */}
-              <div className="animate-enter grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3" style={{ animationDelay: '160ms' }}>
+              <div className="animate-enter grid grid-cols-1 gap-3 lg:grid-cols-2 xl:grid-cols-3 xl:gap-4" style={{ animationDelay: '160ms' }}>
                 <TopList title="Top paths" items={topPaths} />
                 <TopList title="Top client IPs" items={topClientIps} />
                 <TopList title="Top hosts" items={topHosts} />

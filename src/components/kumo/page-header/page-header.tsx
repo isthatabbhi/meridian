@@ -82,7 +82,7 @@ export function PageHeader({
             {leading}
             <div className="flex flex-col gap-2 min-w-0">
               {title && (
-                <h1 className="text-[20px] md:text-[22px] font-semibold text-[var(--text)] truncate">
+                <h1 className="text-[22px] leading-7 tracking-[-0.015em] font-semibold text-[var(--text)] truncate">
                   {title}
                 </h1>
               )}

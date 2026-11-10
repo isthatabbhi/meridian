@@ -38,10 +38,10 @@
   --cf-bg-panel: #0f0f0f;
   --cf-bg-subtle: #21262d;
   --cf-bg-hover: #21262d;
+  --cf-bg-track: #21262d;
 
   --cf-border-panel: #30363d;
   --cf-border-hover: #8b949e;
-  --cf-border-faint: rgba(48, 54, 61, 0.6);
 
   --cf-text-primary: #ffffff;
   --cf-text-secondary: #c9d1d9;
@@ -101,6 +101,34 @@
   --cf-ease-default: cubic-bezier(0.4, 0, 0.2, 1);
   --cf-duration-fast: 150ms;
   --cf-duration-normal: 200ms;
+  --cf-duration-slow: 250ms;
+
+  /* Font stacks wired to Inter Variable / Paper Mono so Kumo
+     components and font-sans / font-mono utilities render in the
+     Cloudflare fonts instead of the system stack. */
+  --font-sans: var(--cf-font-sans);
+  --font-mono: var(--cf-font-mono);
+
+  /* Font weights (Cloudflare scale) */
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+  --font-weight-black: 900;
+
+  /* Letter spacing (Cloudflare scale) */
+  --tracking-tight: -0.025em;
+  --tracking-normal: 0em;
+  --tracking-wide: 0.025em;
+  --tracking-wider: 0.05em;
+  --tracking-widest: 0.1em;
+
+  /* Shadows */
+  --cf-shadow-panel-light: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+  --cf-shadow-dropdown: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+  --cf-shadow-tooltip: 0 4px 12px rgba(0, 0, 0, 0.35);
 
   /* Meridian variables, mapped to the Cloudflare tokens */
   --bg: var(--cf-bg-page);
@@ -119,11 +147,15 @@ html.light {
   --cf-bg-page: #f6f8fa;
   --cf-bg-panel: #ffffff;
   --cf-bg-subtle: #f3f4f6;
-  --cf-bg-hover: #e5e7eb;
+  --cf-bg-hover: #f3f4f6;
+  --cf-bg-track: #e5e7eb;
 
   --cf-border-panel: #d0d7de;
   --cf-border-hover: #afb8c1;
-  --cf-border-faint: #e1e4e8;
+
+  --cf-delta-up: #1a7f37;
+  --cf-delta-down: #cf222e;
+  --cf-delta-neutral: #6e7781;
 
   --cf-text-primary: #1f2328;
   --cf-text-secondary: #57606a;
@@ -262,45 +294,7 @@ aside[data-sidebar="sidebar"] button {
 
 /* Tooltip fade: opacity 0 to 1 over 100ms ease. Opacity only, so it
    never fights the inline transform that positions the tooltip. */
-@keyframes tooltip-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-.tooltip-in {
-  animation: tooltip-in 100ms ease both;
-}
 
-/* Sparkline draw: the line draws left to right once on mount, the
-   fill fades in with it. 500ms ease-in-out, as the reference specifies. */
-.spark-line {
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-  animation: spark-draw 500ms ease-in-out forwards;
-}
-@keyframes spark-draw {
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-.spark-fill {
-  opacity: 0;
-  animation: spark-fade 500ms ease-in-out forwards;
-}
-@keyframes spark-fade {
-  to {
-    opacity: 1;
-  }
-}
-
-/* Status bar segments: width animates over 200ms ease when the
-   distribution changes, opacity over 100ms ease on hover. */
-.status-segment {
-  transition: width 200ms ease, opacity 100ms ease;
-}
 
 /* Panel entrance: 6px upward fade, 250ms, staggered per panel. */
 @keyframes panel-enter {
@@ -375,27 +369,6 @@ html.lenis, html.lenis body {
   }
 }
 
-@keyframes cfPanelEntrance {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes cfDropdownOpen {
-  from {
-    opacity: 0;
-    transform: scale(0.96) translateY(-4px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
 
 @keyframes cfPulse {
   50% {
@@ -403,236 +376,12 @@ html.lenis, html.lenis body {
   }
 }
 
-/* Panels & Cards */
-.cf-panel {
-  background-color: var(--cf-bg-panel);
-  border: 1px solid var(--cf-border-panel);
-  border-radius: var(--cf-radius-panel);
-  overflow: hidden;
-  transition: border-color var(--cf-duration-fast) var(--cf-ease-default);
-}
-
-.cf-panel-header {
-  padding: 16px 20px;
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--cf-text-muted);
-}
-
-.cf-panel-body {
-  padding: 0 20px 20px 20px;
-}
-
-.cf-panel-entrance {
-  animation: cfPanelEntrance 250ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
 
 /* Buttons (from buttons.css, Cloudflare Dashboard Button Stylesheet).
    All colours resolve through the --cf-* tokens, so they follow the
    dark/light theme. The page background and panel tokens are the user's
    own #030303 / #0f0f0f overrides. */
-.cf-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  font-family: inherit;
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 16px;
-  white-space: nowrap;
-  vertical-align: middle;
-  cursor: pointer;
-  user-select: none;
-  text-decoration: none;
-  border-radius: 6px;
-  border: 1px solid var(--cf-border-panel, #30363d);
-  background-color: transparent;
-  color: var(--cf-text-secondary, #c9d1d9);
-  padding: 6px 12px;
-  outline: none;
-  transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1),
-              background-color 150ms cubic-bezier(0.4, 0, 0.2, 1),
-              border-color 150ms cubic-bezier(0.4, 0, 0.2, 1),
-              box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1),
-              transform 100ms ease;
-}
 
-.cf-btn:hover {
-  color: var(--cf-text-primary, #ffffff);
-  background-color: var(--cf-bg-hover, #21262d);
-  border-color: var(--cf-border-hover, #8b949e);
-}
-
-.cf-btn:active {
-  transform: scale(0.98);
-}
-
-.cf-btn:focus-visible {
-  border-color: var(--cf-accent-blue, #2f7cf6);
-  box-shadow: 0 0 0 2px rgba(47, 124, 246, 0.35);
-}
-
-.cf-btn:disabled,
-.cf-btn[aria-disabled="true"] {
-  opacity: 0.5;
-  cursor: not-allowed;
-  pointer-events: none;
-}
-
-/* Primary Action Button (Blue) */
-.cf-btn-primary {
-  color: #ffffff;
-  background-color: var(--cf-accent-blue, #2f7cf6);
-  border-color: transparent;
-  font-weight: 600;
-}
-
-.cf-btn-primary:hover {
-  color: #ffffff;
-  background-color: var(--cf-accent-blue-hover, #2868d8);
-  border-color: transparent;
-}
-
-.cf-btn-primary:focus-visible {
-  box-shadow: 0 0 0 2px var(--cf-bg-page, #0d1117), 0 0 0 4px var(--cf-accent-blue, #2f7cf6);
-}
-
-/* Outline / Secondary Button (Default Toolbar Button) */
-.cf-btn-secondary {
-  color: var(--cf-text-muted, #8b949e);
-  background-color: transparent;
-  border: 1px solid var(--cf-border-panel, #30363d);
-}
-
-.cf-btn-secondary:hover {
-  color: var(--cf-text-primary, #ffffff);
-  background-color: var(--cf-bg-hover, #21262d);
-  border-color: var(--cf-border-panel, #30363d);
-}
-
-/* Ghost / Sub-nav Button */
-.cf-btn-ghost {
-  border-color: transparent;
-  background-color: transparent;
-  color: var(--cf-text-muted, #8b949e);
-}
-
-.cf-btn-ghost:hover {
-  color: var(--cf-text-primary, #ffffff);
-  background-color: var(--cf-bg-hover, #21262d);
-}
-
-/* Toggle / Active Button (e.g. Live Refresh Active).
-   Cloudflare's live-refresh ON state: blue border with a soft blue glow
-   and a blue-tinted fill, pause icon. No status dot. */
-.cf-btn-toggle.active {
-  color: var(--cf-text-primary, #ffffff);
-  border-color: var(--cf-accent, #2f7cf6);
-  background-color: rgba(47, 124, 246, 0.12);
-  box-shadow: 0 0 0 1px rgba(47, 124, 246, 0.35), 0 0 10px rgba(47, 124, 246, 0.25);
-}
-
-/* Sizing */
-.cf-btn-xs {
-  font-size: 11px;
-  line-height: 14px;
-  padding: 3px 8px;
-  border-radius: 4px;
-  gap: 4px;
-}
-
-.cf-btn-sm {
-  font-size: 12px;
-  line-height: 16px;
-  padding: 5px 10px;
-}
-
-.cf-btn-md {
-  font-size: 13px;
-  line-height: 18px;
-  padding: 7px 14px;
-}
-
-/* Icon-only Button */
-.cf-btn-icon {
-  padding: 6px;
-  border-radius: 6px;
-  color: var(--cf-text-muted, #8b949e);
-  border-color: transparent;
-}
-
-.cf-btn-icon:hover {
-  color: var(--cf-text-primary, #ffffff);
-  background-color: var(--cf-bg-hover, #21262d);
-}
-
-/* Button Groups & Clusters */
-.cf-btn-group {
-  display: inline-flex;
-  align-items: center;
-}
-
-.cf-btn-group > .cf-btn:not(:first-child) {
-  margin-left: -1px;
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-}
-
-.cf-btn-group > .cf-btn:not(:last-child) {
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-}
-
-.cf-btn-group > .cf-btn:hover {
-  z-index: 1;
-}
-
-/* SVG Icon alignment inside buttons */
-.cf-btn svg {
-  width: 14px;
-  height: 14px;
-  flex-shrink: 0;
-}
-
-/* Dropdown Menu */
-.cf-dropdown {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  margin-top: 4px;
-  min-width: 160px;
-  background-color: var(--cf-bg-panel);
-  border: 1px solid var(--cf-border-panel);
-  border-radius: var(--cf-radius-card);
-  padding: 4px 0;
-  z-index: 50;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
-  transform-origin: top right;
-  animation: cfDropdownOpen 120ms cubic-bezier(0, 0, 0.2, 1) forwards;
-}
-
-.cf-dropdown-item {
-  display: block;
-  width: 100%;
-  text-align: left;
-  padding: 6px 12px;
-  font-size: 12px;
-  color: var(--cf-text-muted);
-  background: transparent;
-  border: none;
-  cursor: pointer;
-}
-
-.cf-dropdown-item:hover {
-  background-color: var(--cf-bg-hover);
-  color: var(--cf-text-primary);
-}
-
-.cf-dropdown-item.active {
-  color: var(--cf-text-primary);
-  font-weight: 500;
-}
 
 /* Skeleton Loading Shimmer */
 .cf-skeleton {
@@ -648,65 +397,20 @@ html.lenis, html.lenis body {
   animation: cfShimmer 1.5s linear infinite;
 }
 
-/* Status Codes Bar */
-.cf-status-track {
-  display: flex;
-  height: 28px;
-  border-radius: var(--cf-radius-btn);
-  overflow: hidden;
-  background-color: var(--cf-bg-subtle);
-}
 
-.cf-status-segment {
-  height: 100%;
-  transition: opacity 100ms ease;
-}
-
-.cf-status-segment:hover {
-  opacity: 0.85;
-}
-
-/* KPI Card Sparkline Container */
-.cf-sparkline-box {
-  height: 50px;
-  margin-top: 4px;
-}
-
-/* Table Row Structure */
-.cf-table-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  height: 32px;
-  font-size: 12px;
-}
-
-.cf-table-bar-track {
-  width: 80px;
-  height: 8px;
-  border-radius: var(--cf-radius-pill);
-  background-color: var(--cf-bg-subtle);
-  overflow: hidden;
-  flex-shrink: 0;
-}
-
-.cf-table-bar-fill {
-  height: 100%;
-  border-radius: var(--cf-radius-pill);
-  background-color: var(--cf-accent-blue);
-  min-width: 4px;
-}
-
-/* Chart Tooltip */
-.cf-tooltip {
-  background-color: var(--cf-bg-panel);
-  border: 1px solid var(--cf-border-panel);
-  border-radius: var(--cf-radius-card);
+/* Kumo Tooltip popup, restyled to Cloudflare's dashboard tooltip:
+   dark #161b22, radius 8px, padding 8px 12px, 12px text, soft shadow. */
+.kumo-tooltip-popup {
+  background-color: #161b22;
+  border-radius: 8px;
   padding: 8px 12px;
   font-size: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-  pointer-events: none;
-  transition: transform 60ms ease-out, opacity 100ms ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+html.light .kumo-tooltip-popup {
+  background-color: #ffffff;
+  border: 1px solid #d0d7de;
+  color: #1f2328;
 }
 
 /* Live Refresh Pulse */
