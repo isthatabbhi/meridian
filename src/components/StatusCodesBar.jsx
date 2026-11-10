@@ -106,7 +106,7 @@ export default function StatusCodesBar({ data, dark }) {
   }), [visible, dark]);
 
   return (
-    <div className="rounded-[12px] border border-[var(--border)] bg-[var(--surface)]">
+    <div className="rounded-[12px] border border-[var(--border)] bg-[var(--surface)] w-full">
       <div className="px-5 py-4">
         <Text variant="secondary" size="xs" bold DANGEROUS_className="mb-3">Event distribution</Text>
         {/* Legend */}
@@ -123,7 +123,7 @@ export default function StatusCodesBar({ data, dark }) {
             the bar, it sits directly on the card background
             (verified live 2026-11-10). The bar is 32px tall, like
             CF. The container is transparent; the chart fills it. */}
-        <div className="h-[32px] rounded-[6px] overflow-hidden">
+        <div className="h-[32px] w-full rounded-[6px] overflow-hidden">
           <Chart echarts={echarts} options={options} height={32} isDarkMode={dark} />
         </div>
       </div>

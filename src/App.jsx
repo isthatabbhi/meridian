@@ -160,7 +160,7 @@ function SidebarSiteCard() {
   const shown = open || isPeeking;
   return (
     <div className={`transition-opacity duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] ${shown ? 'opacity-100' : 'opacity-0'}`}>
-      <div className="mx-1 mb-3 px-3 py-2.5 rounded-[8px] border border-[var(--border)] bg-[var(--bg)] whitespace-nowrap">
+      <div className="mx-1 mb-3 px-3 py-2.5 rounded-[8px] border-4 border-[var(--border)] bg-[var(--bg)] whitespace-nowrap">
         <p className="text-[14px] leading-[18px] text-[var(--text)] font-bold">isthatabbhi.tech</p>
         <p className="text-[11px] leading-[14px] text-[var(--muted)]">Portfolio</p>
       </div>
