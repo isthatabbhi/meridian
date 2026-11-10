@@ -38,19 +38,17 @@ function FilterIcon() {
 }
 function PlayIcon() {
   return (
-    <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none">
-      <polygon points="5,3 13,8 5,13" fill="currentColor" />
-    </svg>
+    <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" aria-hidden="true"><path d="M4.5 2.8 L12.5 8 L4.5 13.2 Z" /></svg>
   );
 }
 function PauseIcon() {
   return (
-    <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1.5A6.5 6.5 0 1014.5 8 6.507 6.507 0 008 1.5zm0 12A5.5 5.5 0 1113.5 8 5.507 5.507 0 018 13.5z"/><path d="M7 5H6v6h1V5zM10 5H9v6h1V5z"/></svg>
+    <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M5.5 3h2v10h-2zM8.5 3h2v10h-2z" /></svg>
   );
 }
-function ClockIcon() {
+function CalendarIcon() {
   return (
-    <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zm0 12a5.5 5.5 0 110-11 5.5 5.5 0 010 11z"/><path d="M8.5 3.725h-1V8.36l2.7 2.808.72-.693L8.5 7.957V3.725z"/></svg>
+    <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M14 3h-2.75V2h-1v1h-4.5V2h-1v1H2l-.5.5v9.977l.5.5h12l.5-.5V3.5L14 3zM4.75 4v1h1V4h4.5v1h1V4h2.25v1.72h-11V4h2.25zM2.5 12.977v-6.25h11v6.25h-11z"/><path d="M5.25 9.39a.75.75 0 100-1.5.75.75 0 000 1.5zM5.25 11.835a.75.75 0 100-1.5.75.75 0 000 1.5zM10.75 9.39a.75.75 0 100-1.5.75.75 0 000 1.5zM10.75 10.335a.75.75 0 100 1.5.75.75 0 000-1.5zM8 9.39a.75.75 0 100-1.5.75.75 0 000 1.5zM8 11.835a.75.75 0 100-1.5.75.75 0 000 1.5z"/></svg>
   );
 }
 function HomeIcon() {
@@ -548,7 +546,7 @@ export default function App() {
               with the mobile hamburger as its leading slot, actions
               on the right. No tabs (the sidebar handles Overview /
               Events navigation) and no breadcrumbs. ── */}
-          <div className="sticky top-0 z-40 bg-[var(--bg)] border-b border-[var(--border)] -mx-3 px-3 pt-5 pb-4 md:-mx-6 md:px-6 mb-4 print:hidden">
+          <div className="sticky top-0 z-40 bg-[var(--bg)] border-b border-[var(--border)] -mx-3 px-3 md:-mx-6 md:px-6 mb-4 print:hidden h-[58px] flex items-center">
             <PageHeader
               spacing="compact"
               title={view === 'events' ? 'Recent events' : 'Traffic overview'}
@@ -661,7 +659,7 @@ export default function App() {
                   <Button
                     variant="secondary"
                     size="md"
-                    icon={<ClockIcon />}
+                    icon={<CalendarIcon />}
                     className="text-xs rounded-md"
                   >
                     {currentRangeLabel} <ChevronDown />
