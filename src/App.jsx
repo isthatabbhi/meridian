@@ -130,8 +130,8 @@ function MoonIcon() {
    to a labelled sidebar, exactly like the reference: one layout, the
    labels fade and slide in/out while the width animates, instead of
    swapping two separate layouts. 55px rail / 220px expanded over
-   250ms with cubic-bezier(0.16,1,0.3,1), the same smooth easing as
-   the dashboard entrance, set on the SidebarProvider. The labels,
+   200ms with cubic-bezier(0.4,0,0.2,1), Cloudflare's sidebar timing
+   (animation spec 2026-11-10), set on the SidebarProvider. The labels,
    site card and footer all share that easing and duration, so the
    whole expansion moves as one. Permanent on desktop (md+); on
    mobile it is a drawer opened by the hamburger. Only the buttons
@@ -148,7 +148,7 @@ function SidebarNavLabel({ children }) {
   const { open, isPeeking } = useSidebar();
   const shown = open || isPeeking;
   return (
-    <span className={`whitespace-nowrap overflow-hidden transition-opacity duration-250 ease-[cubic-bezier(0.16,1,0.3,1)] ${shown ? 'opacity-100 max-w-[160px]' : 'opacity-0 max-w-0'}`}>
+    <span className={`whitespace-nowrap overflow-hidden transition-opacity duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] ${shown ? 'opacity-100 max-w-[160px]' : 'opacity-0 max-w-0'}`}>
       {children}
     </span>
   );
@@ -166,7 +166,7 @@ function SidebarBrand({ dark }) {
   return (
     <span className="flex items-center gap-2 min-w-0">
       <img src={markSrc} alt="Meridian" className="sidebar-logo w-8 h-8 object-contain shrink-0" />
-      <span className={`whitespace-nowrap overflow-hidden transition-opacity duration-250 ease-[cubic-bezier(0.16,1,0.3,1)] text-[20px] font-semibold text-[var(--text)] ${shown ? 'opacity-100 max-w-[160px]' : 'opacity-0 max-w-0'}`}>
+      <span className={`whitespace-nowrap overflow-hidden transition-opacity duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] text-[20px] font-semibold text-[var(--text)] ${shown ? 'opacity-100 max-w-[160px]' : 'opacity-0 max-w-0'}`}>
         Meridian
       </span>
     </span>
@@ -181,7 +181,7 @@ function SidebarSiteCard() {
   const { open, isPeeking } = useSidebar();
   const shown = open || isPeeking;
   return (
-    <div className={`transition-opacity duration-250 ease-[cubic-bezier(0.16,1,0.3,1)] ${shown ? 'opacity-100' : 'opacity-0'}`}>
+    <div className={`transition-opacity duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] ${shown ? 'opacity-100' : 'opacity-0'}`}>
       <div className="mx-1 mb-3 px-3 py-2.5 rounded-[8px] border border-[var(--border)] bg-[var(--bg)] whitespace-nowrap">
         <p className="text-[13px] text-[var(--text)] font-medium">isthatabbhi.tech</p>
         <p className="text-[11px] text-[var(--muted)]">Portfolio</p>
@@ -202,7 +202,7 @@ function SidebarExpandToggle() {
   );
 }
 
-function MeridianSidebar({ view, onNavigate, dark }) {
+function MeridianSidebar({ view, onNavigate, dark, onPeek }) {
   const { isMobile, setOpen } = useSidebar();
   const handleNavigate = (v) => {
     onNavigate(v);
@@ -210,13 +210,15 @@ function MeridianSidebar({ view, onNavigate, dark }) {
        On desktop this would collapse the rail, so leave it alone. */
     if (isMobile) setOpen(false);
   };
-  /* Hover to expand, like Cloudflare's dashboard sidebar: hovering
+  /* Hover to peek, like Cloudflare's dashboard sidebar: hovering
      the collapsed rail expands it, moving the mouse away collapses
-     it again, no click needed. This drives the real open state, so
-     the labels show exactly as they do on a click toggle. Desktop
-     only; on mobile the sidebar is a drawer, hover does nothing. */
-  const handleMouseEnter = () => { if (!isMobile) setOpen(true); };
-  const handleMouseLeave = () => { if (!isMobile) setOpen(false); };
+     it again, no click needed. This only sets the transient peek
+     state; the pinned open state is separate, so a sidebar that is
+     open by default on desktop does not collapse when the mouse
+     moves away. Desktop only; on mobile the sidebar is a drawer,
+     hover does nothing. */
+  const handleMouseEnter = () => { if (!isMobile) onPeek(true); };
+  const handleMouseLeave = () => { if (!isMobile) onPeek(false); };
   return (
     <Sidebar
       className="print:hidden"
@@ -307,10 +309,15 @@ export default function App() {
   const [liveRefresh, setLiveRefresh] = useState(true);
   const [timeRange, setTimeRange] = useState('24h');
   const [fetching, setFetching] = useState(false);
-  // Icon rail (55px) vs expanded labelled sidebar (220px), toggled by
-  // the small bottom-left button in the sidebar. On phones the same
-  // state opens the sidebar drawer; Kumo manages that internally.
-  const [railExpanded, setRailExpanded] = useState(false);
+  // Sidebar: pinned open by default on desktop (md+, 768px), so the
+  // labels show without hovering; on phones it starts as a closed
+  // drawer. The bottom-left button toggles the pinned state. Hover
+  // only sets a transient peek, so a default-open sidebar does not
+  // collapse when the mouse moves away, and a manually collapsed
+  // rail still expands on hover and collapses on leave.
+  const [sidebarPinned, setSidebarPinned] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 768);
+  const [sidebarPeek, setSidebarPeek] = useState(false);
+  const sidebarOpen = sidebarPinned || sidebarPeek;
   const [view, setView] = useState('overview');
   const [typeFilter, setTypeFilter] = useState('all');
   const [copied, setCopied] = useState(false);
@@ -508,12 +515,38 @@ export default function App() {
   // Top user agents, from the stats endpoint
   const topUserAgents = useMemo(() => data?.topUserAgents || [], [data]);
 
+  // Top HTTP versions, cache statuses and origin status codes, from
+  // the stats endpoint (Worker records request.cf.httpProtocol and
+  // request.cf.cacheStatus on each track; origin status is 200 for
+  // every stored event). Cloudflare's Traffic overview has these
+  // three tables in the third Top N row; old events count as Unknown.
+  const topHttpVersions = useMemo(() => {
+    if (!data?.byHttpVersion) return [];
+    return Object.entries(data.byHttpVersion)
+      .sort((a, b) => b[1] - a[1])
+      .map(([label, count]) => ({ label, count }));
+  }, [data]);
+
+  const topCacheStatuses = useMemo(() => {
+    if (!data?.byCacheStatus) return [];
+    return Object.entries(data.byCacheStatus)
+      .sort((a, b) => b[1] - a[1])
+      .map(([label, count]) => ({ label, count }));
+  }, [data]);
+
+  const topOriginStatusCodes = useMemo(() => {
+    if (!data?.byOriginStatus) return [];
+    return Object.entries(data.byOriginStatus)
+      .sort((a, b) => b[1] - a[1])
+      .map(([label, count]) => ({ label, count }));
+  }, [data]);
+
   return (
     <SidebarProvider
-      open={railExpanded}
-      onOpenChange={setRailExpanded}
+      open={sidebarOpen}
+      onOpenChange={(next) => { setSidebarPinned(next); setSidebarPeek(false); }}
       collapsible="icon"
-      animationDuration={250}
+      animationDuration={200}
       className="bg-[var(--bg)] text-[var(--text)] font-sans"
       /* Sidebar background matches the page colour in each theme:
          #030303 in dark, the light page colour in light mode.
@@ -521,9 +554,9 @@ export default function App() {
          Kumo sets --sidebar-bg to var(--color-kumo-base) on this
          wrapper via a class, so it is set here as an inline style,
          which beats the class. --bg is the theme page colour. */
-      style={{ '--sidebar-width': '220px', '--sidebar-width-icon': '55px', '--sidebar-easing': 'cubic-bezier(0.16, 1, 0.3, 1)', '--sidebar-bg': 'var(--bg)' }}
+      style={{ '--sidebar-width': '220px', '--sidebar-width-icon': '55px', '--sidebar-easing': 'cubic-bezier(0.4, 0, 0.2, 1)', '--sidebar-bg': 'var(--bg)' }}
     >
-      <MeridianSidebar view={view} onNavigate={(v) => setView(v)} dark={dark} />
+      <MeridianSidebar view={view} onNavigate={(v) => setView(v)} dark={dark} onPeek={setSidebarPeek} />
 
       {/* Main content, flexed beside the sidebar (55px rail / 220px expanded) */}
       <main className="flex-1 min-w-0 min-h-screen">
@@ -721,11 +754,18 @@ export default function App() {
                 <KpiCards data={data} timeRange={timeRange} />
               </div>
 
-              {/* Requests by country + device type: side by side on
-                  wide screens, stacked below the xl breakpoint */}
-              <div className="animate-enter grid grid-cols-1 gap-4 xl:grid-cols-2" style={{ animationDelay: '80ms' }}>
-                <CountryGlobe data={data} dark={dark} />
-                <DeviceTypeChart data={data} dark={dark} />
+              {/* Requests by country + device type: Cloudflare's
+                  dashboard config (user-supplied 2026-11-10) puts the
+                  globe at width 7 and the donut at width 5 of 12, so
+                  the globe is wider. Side by side on wide screens,
+                  stacked below the xl breakpoint. */}
+              <div className="animate-enter grid grid-cols-1 gap-4 xl:grid-cols-12" style={{ animationDelay: '80ms' }}>
+                <div className="xl:col-span-7">
+                  <CountryGlobe data={data} dark={dark} />
+                </div>
+                <div className="xl:col-span-5">
+                  <DeviceTypeChart data={data} dark={dark} />
+                </div>
               </div>
 
               {/* Requests over time */}
@@ -734,7 +774,10 @@ export default function App() {
               </div>
 
               {/* Bottom tables: 3 columns on wide screens, 2 at lg,
-                  stacked below */}
+                  stacked below. Cloudflare's Traffic overview order:
+                  row 1 paths / client IPs / hosts, row 2 OS /
+                  browsers / user agents, row 3 HTTP versions / cache
+                  statuses / origin status codes. */}
               <div className="animate-enter grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3" style={{ animationDelay: '160ms' }}>
                 <TopList title="Top paths" items={topPaths} />
                 <TopList title="Top client IPs" items={topClientIps} />
@@ -742,23 +785,18 @@ export default function App() {
                 <TopList title="Top operating systems" items={topOS} />
                 <TopList title="Top browsers" items={topBrowsers} />
                 <TopList title="Top user agents" items={topUserAgents} />
+                <TopList title="Top HTTP versions" items={topHttpVersions} />
+                <TopList title="Top cache statuses" items={topCacheStatuses} />
+                <TopList title="Top origin status codes" items={topOriginStatusCodes} />
               </div>
             </div>
           )}
         </div>
 
         {/* Footer, like the FinGuard site */}
-        <footer className={`fixed bottom-0 right-0 z-40 print:hidden border-t border-[var(--border)] bg-[var(--surface)] px-4 h-12 flex items-center justify-between gap-2 text-xs text-[var(--muted)] transition-[left] duration-250 ease-[cubic-bezier(0.16,1,0.3,1)] left-0 ${railExpanded ? 'md:left-[220px]' : 'md:left-[55px]'}`}>
+        <footer className={`fixed bottom-0 right-0 z-40 print:hidden border-t border-[var(--border)] bg-[var(--bg)] px-4 h-12 flex items-center justify-between gap-2 text-xs text-[var(--muted)] transition-[left] duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] left-0 ${sidebarOpen ? 'md:left-[220px]' : 'md:left-[55px]'}`}>
           <span className="flex items-center gap-1.5">
-            <svg width="18" height="12" viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="India">
-              <rect width="900" height="200" fill="#FF9933" />
-              <rect y="200" width="900" height="200" fill="#FFFFFF" />
-              <rect y="400" width="900" height="200" fill="#138808" />
-              <g stroke="#000080" strokeWidth="8">
-                <circle cx="450" cy="300" r="60" fill="none" />
-                <circle cx="450" cy="300" r="12" fill="#000080" stroke="none" />
-              </g>
-            </svg>
+            <img src="/india-flag.png" alt="India" width="17" height="11" className="shrink-0 rounded-[2px] shadow-[0_0_1px_rgba(255,255,255,0.35)] object-cover" />
             Bengaluru
           </span>
           <span>&copy; 2026 Abhishek Kumar</span>

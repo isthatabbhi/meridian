@@ -84,14 +84,11 @@ export default function StatusCodesBar({ data, dark }) {
           : i === visible.length - 1 ? [0, 6, 6, 0]
           : [0, 0, 0, 0],
       },
-      /* Hovering a segment highlights it and fades the others, like
-         Cloudflare's status codes bar: the hovered segment stays full
-         colour, the rest dim hard. focus 'series' emphasizes the
-         hovered segment's series and blurs the other three; blur
-         opacity 0.12 fades the others almost to the track, matching
-         the strong dim in the reference video. */
-      emphasis: { focus: 'series' },
-      blur: { itemStyle: { opacity: 0.12 } },
+      /* Hover shows the tooltip only. Cloudflare's status bar does NOT
+         dim the other segments on hover (verified live 2026-11-10:
+         the hovered segment stays full colour, the rest stay full
+         colour too). So no focus/blur emphasis here. */
+      emphasis: { focus: 'none' },
     })),
   }), [visible, dark]);
 

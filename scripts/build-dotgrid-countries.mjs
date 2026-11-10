@@ -78,7 +78,86 @@ const indexed = features.map((f) => {
   return { f, name: f.properties.name, minLon: b[0][0], minLat: b[0][1], maxLon: b[1][0], maxLat: b[1][1] };
 });
 
+// India border correction (user order 2026-11-09): Natural Earth
+// draws Jammu & Kashmir and Arunachal Pradesh with the Line of
+// Control / McMahon Line, so dots there get tagged CN or PK. The
+// official Indian map shows the full state of Jammu & Kashmir
+// (including PoK and Gilgit-Baltistan) and the full state of
+// Arunachal Pradesh as India. Retag dots in those claimed regions
+// as IN after the geoContains pass. The boxes are tight to the
+// claimed territory so Nepal, Bhutan and Bangladesh are untouched.
+//
+// Jammu & Kashmir shape (strictly from the user's reference image
+// IMG_4814.jpeg, 2026-11-09): NOT a rectangle. The top is narrow
+// and western, the middle is widest. Per-latitude lon ranges
+// extracted from the reference dots:
+//   lat 37: lon 73-76
+//   lat 36: lon 72-80
+//   lat 35: lon 73-80
+//   lat 34: lon 73-79
+//   lat 33: lon 73-79
+const KASHMIR_BY_LAT = {
+  37: [73, 76],
+  36: [72, 80],
+  35: [73, 80],
+  34: [73, 79],
+  33: [73, 79],
+};
+
+// Eastern side and the Seven Sisters (Arunachal Pradesh, Assam,
+// Meghalaya, Manipur, Mizoram, Nagaland, Tripura, plus Sikkim,
+// strictly from the user's reference image IMG_4814.jpeg,
+// 2026-11-10, "fix the border dot by dot for the seven sisters").
+// NOT a rectangle. Per-latitude lon sets extracted from the
+// reference dots, dot by dot:
+//   lat 29: lon 94, 96 (Arunachal north)
+//   lat 28: lon 93-97 (Arunachal)
+//   lat 27: lon 89, 92-97 (89 is Sikkim/corridor; 90-91 gap is Bhutan)
+//   lat 26: lon 89-95 (corridor and Assam)
+//   lat 25: lon 89-94 (Assam, Meghalaya)
+//   lat 24: lon 92-94 (Manipur, Mizoram, Nagaland)
+//   lat 23: lon 91-93 (Tripura, Mizoram)
+const EASTERN_BY_LAT = {
+  29: [94, 96],
+  28: [93, 94, 95, 96, 97],
+  27: [89, 92, 93, 94, 95, 96, 97],
+  26: [89, 90, 91, 92, 93, 94, 95],
+  25: [89, 90, 91, 92, 93, 94],
+  24: [92, 93, 94],
+  23: [91, 92, 93],
+};
+
+// Blocklist: dots the reference does NOT have, even though
+// Natural Earth's India polygon includes them. The reference has a
+// gap at lat 29 lon 95 (between the two Arunachal clusters), so
+// that dot must not be tagged IN. Lon 88 at lat 23-27 is outside
+// the reference border (Nepal/Bangladesh/Bhutan side), so those
+// dots must not be tagged IN either.
+const NOT_INDIA = new Set(['29,95', '23,88', '24,88', '25,88', '26,88', '27,88']);
+
+const INDIA_OVERRIDES = [
+  // (Siliguri Corridor is covered by the per-latitude northeast
+  // sets above: lon 89 at lat 26-27. No rectangle override here,
+  // the rectangle was too wide and tagged lon 88, which the
+  // reference does not have.)
+];
+
 function codeFor(lat, lon) {
+  // Jammu & Kashmir: exact shape from the reference, per latitude.
+  const kRange = KASHMIR_BY_LAT[lat];
+  if (kRange && lon >= kRange[0] && lon <= kRange[1]) {
+    return 'IN';
+  }
+  // Eastern side: exact dots from the reference, per latitude.
+  const eSet = EASTERN_BY_LAT[lat];
+  if (eSet && eSet.includes(lon)) {
+    return 'IN';
+  }
+  for (const o of INDIA_OVERRIDES) {
+    if (lat >= o.minLat && lat <= o.maxLat && lon >= o.minLon && lon <= o.maxLon) {
+      return 'IN';
+    }
+  }
   for (const { f, name, minLon, minLat, maxLon, maxLat } of indexed) {
     // Russia crosses the antimeridian, so geoBounds wraps: minLon
     // (19.66) > maxLon (-169.9). A point is in the lon range when it is
@@ -88,7 +167,12 @@ function codeFor(lat, lon) {
       : (lon < minLon && lon > maxLon);
     if (lonOutside || lat < minLat || lat > maxLat) continue;
     if (geoContains(f, [lon, lat])) {
-      return NAME_TO_CODE[name] || null;
+      const code = NAME_TO_CODE[name] || null;
+      // Blocklist: dots the reference does not have as India, even
+      // though Natural Earth includes them. Return null (untagged)
+      // instead of IN for these.
+      if (code === 'IN' && NOT_INDIA.has(`${lat},${lon}`)) return null;
+      return code;
     }
   }
   for (const p of PROXIMITY) {

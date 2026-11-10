@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { geoOrthographic } from 'd3-geo';
 import { Meter } from "@cloudflare/kumo/components/meter";
 import dotGrid from '../lib/dot-grid-countries.json';
@@ -38,8 +38,12 @@ const COUNTRY_NAMES = {
 
 const SIZE = 280;
 const ROT_SPEED_DEG = 0.23; // 0.004 rad/frame, the old globe's speed
-const DOT_R = 1.3;
-const TOP_R = 2.3;
+/* 1-degree dot grid (2026-11-09, user order: India border must match
+   the reference exactly). Dots are ~1.55px apart on the 280px globe,
+   so the radii are smaller than the old 2-degree grid (DOT_R was 1.3,
+   TOP_R was 2.3) to keep the dot-grid look instead of a solid mass. */
+const DOT_R = 0.7;
+const TOP_R = 1.2;
 const HOVER_R = 14;
 
 /* ─────────────────────────────────────────────────────────
@@ -78,16 +82,24 @@ export default function CountryGlobe({ data, dark }) {
 
   const canvasRef = useRef(null);
   const tipRef = useRef(null);
-  /* Rotation as [lambda, phi] degrees. Starts centred on the US
-     (lon -98.5), the current top country, so the highlight is
-     visible on load. */
-  const rotRef = useRef([98.5, -25]);
+  /* Rotation as [lambda, phi] degrees. Starts centred on India
+     (lon 78.9, lat 20.6), user order 2026-11-09: the globe should
+     always start rotating right from India. */
+  const rotRef = useRef([-78.9, -20.6]);
   const pausedRef = useRef(false);
   const draggingRef = useRef(false);
   const dragStartRef = useRef(null);
   const mouseRef = useRef(null);
   const countriesRef = useRef(countries);
   const trafficCodesRef = useRef(trafficCodes);
+  /* Country hovered in the list (Cloudflare behavior, user order
+     2026-11-10): hovering a list row highlights that country on the
+     globe and shows its tooltip there, same as hovering the globe
+     itself. Kept in a ref so the draw loop reads it without
+     re-creating the animation effect. */
+  const [hoveredCode, setHoveredCode] = useState(null);
+  const hoveredCodeRef = useRef(null);
+  useEffect(() => { hoveredCodeRef.current = hoveredCode; }, [hoveredCode]);
 
   useEffect(() => { countriesRef.current = countries; }, [JSON.stringify(countries)]);
   useEffect(() => { trafficCodesRef.current = trafficCodes; }, [trafficCodes]);
@@ -111,29 +123,27 @@ export default function CountryGlobe({ data, dark }) {
     const updateTip = () => {
       const tip = tipRef.current;
       if (!tip) return;
-      const mouse = mouseRef.current;
-      if (!mouse) { tip.style.opacity = '0'; return; }
-      /* Nearest projected land dot to the cursor. */
-      let best = null;
-      let bestD = HOVER_R * HOVER_R;
-      for (const [lat, lon, code] of dotGrid) {
-        const p = projection([lon, lat]);
-        if (!p) continue;
-        const dx = p[0] - mouse.x;
-        const dy = p[1] - mouse.y;
-        const d2 = dx * dx + dy * dy;
-        if (d2 < bestD) { bestD = d2; best = code; }
-      }
+      /* List hover only (Cloudflare behavior, verified live 2026-11-10:
+         the globe itself is inert on direct hover, no tooltip and no
+         pause. The tooltip appears only when a country row in the
+         list is hovered, sitting on that country on the globe, at
+         its centre coordinates. Rotation pauses while a list row is
+         hovered, via hoveredCodeRef in the draw loop. */
+      const hovered = hoveredCodeRef.current;
       const live = countriesRef.current;
-      if (best && live[best] !== undefined) {
-        const name = COUNTRY_NAMES[best] || best;
-        tip.textContent = `${name} · ${live[best]}`;
-        tip.style.left = `${mouse.x + 12}px`;
-        tip.style.top = `${mouse.y - 10}px`;
-        tip.style.opacity = '1';
-      } else {
-        tip.style.opacity = '0';
+      if (hovered && hovered !== 'Unknown' && live[hovered] !== undefined && COUNTRY_COORDS[hovered]) {
+        const [clat, clon] = COUNTRY_COORDS[hovered];
+        const p = projection([clon, clat]);
+        if (p) {
+          const name = COUNTRY_NAMES[hovered] || hovered;
+          tip.textContent = `${name} · ${live[hovered]}`;
+          tip.style.left = `${p[0] + 12}px`;
+          tip.style.top = `${p[1] - 10}px`;
+          tip.style.opacity = '1';
+          return;
+        }
       }
+      tip.style.opacity = '0';
     };
 
     const draw = () => {
@@ -150,6 +160,7 @@ export default function CountryGlobe({ data, dark }) {
       ctx.fill();
 
       const traffic = trafficCodesRef.current;
+      const hovered = hoveredCodeRef.current;
       for (const [lat, lon, code] of dotGrid) {
         const p = projection([lon, lat]);
         if (!p) continue;
@@ -161,14 +172,16 @@ export default function CountryGlobe({ data, dark }) {
           /* Traffic country: solid blue, larger dots so the region
              reads as a solid mass, like Cloudflare's dashboard.
              Every country with traffic is highlighted, not just
-             the top one. */
+             the top one. The list-hovered country draws larger
+             still, so it stands out from the other traffic
+             countries. */
           ctx.globalAlpha = 0.55 + 0.45 * depth;
           ctx.fillStyle = '#2f7cf6';
           ctx.beginPath();
-          ctx.arc(x, y, TOP_R, 0, Math.PI * 2);
+          ctx.arc(x, y, code === hovered ? TOP_R * 1.6 : TOP_R, 0, Math.PI * 2);
           ctx.fill();
         } else {
-          const a = 0.35 + 0.5 * depth;
+          const a = 0.5 + 0.45 * depth;
           ctx.globalAlpha = 1;
           ctx.fillStyle = dark
             ? `rgba(47,124,246,${a})`
@@ -182,7 +195,10 @@ export default function CountryGlobe({ data, dark }) {
 
       updateTip();
 
-      if (!pausedRef.current && !draggingRef.current) {
+      /* Pause while the globe is hovered, dragged, or a list row is
+         hovered (Cloudflare behavior: the globe holds still while
+         you read a country). */
+      if (!pausedRef.current && !draggingRef.current && !hoveredCodeRef.current) {
         rotRef.current = [lambda + ROT_SPEED_DEG, phi];
       }
       raf = requestAnimationFrame(draw);
@@ -233,8 +249,7 @@ export default function CountryGlobe({ data, dark }) {
             onPointerDown={onPointerDown}
             onPointerMove={onPointerMove}
             onPointerUp={onPointerUp}
-            onPointerLeave={() => { mouseRef.current = null; pausedRef.current = false; onPointerUp(); }}
-            onPointerEnter={() => { pausedRef.current = true; }}
+            onPointerLeave={() => { mouseRef.current = null; onPointerUp(); }}
             aria-label="Requests by country globe"
           />
           {/* Hover tooltip, updated imperatively in the draw loop. */}
@@ -253,7 +268,12 @@ export default function CountryGlobe({ data, dark }) {
             const isUnknown = code === 'Unknown';
             const barPct = (count / maxCount) * 100;
             return (
-              <div key={code} className="flex items-center gap-3 rounded-[6px] px-2 py-1 hover:bg-[var(--surface-2)] transition-colors">
+              <div
+                key={code}
+                className="flex items-center gap-3 rounded-[6px] px-2 py-1 hover:bg-[var(--surface-2)] transition-colors"
+                onMouseEnter={() => setHoveredCode(code)}
+                onMouseLeave={() => setHoveredCode(null)}
+              >
                 <span className="text-[12px] text-[var(--text-2)] w-[100px] shrink-0 truncate">{name}</span>
                 {/* Kumo Meter as the bar. The row carries its own
                     label and count, so the Meter's label/value

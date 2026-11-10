@@ -1,4 +1,4 @@
-const API_URL = 'https://portfolio-tracker-141.azurewebsites.net/api/stats';
+const API_URL = 'https://tracker.isthatabbhi.tech/api/stats';
 
 export async function fetchStats() {
   const res = await fetch(API_URL);

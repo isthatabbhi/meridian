@@ -1,3 +1,22 @@
+/* Cloudflare fonts (from the dash.cloudflare.com resources the user
+   supplied 2026-11-10): Inter Variable and Paper Mono, served from
+   public/fonts/. Must come before the Kumo import so the font
+   family is available when the tokens resolve. */
+@font-face {
+  font-family: "Inter Variable";
+  src: url("/fonts/inter-variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Paper Mono";
+  src: url("/fonts/paper-mono-variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* Kumo UI (Cloudflare's component library): Tailwind v4 does not scan
    node_modules by default, so @source tells it to discover the utility
    classes Kumo's components use. The Kumo styles import must come
@@ -64,9 +83,13 @@
   --cf-globe-glow: rgba(47, 124, 246, 0.9);
   --cf-globe-marker: rgba(140, 200, 255, 0.95);
 
-  /* Typography Stacks */
-  --cf-font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --cf-font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  /* Typography Stacks (Cloudflare's exact stacks, from the
+     dash.cloudflare.com resources the user supplied 2026-11-10:
+     Inter Variable for sans, Paper Mono for mono). The woff2 files
+     live in public/fonts/ and are declared with @font-face at the
+     top of this file. */
+  --cf-font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --cf-font-mono: "Paper Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 
   /* Radii */
   --cf-radius-panel: 12px;
@@ -224,6 +247,15 @@ body {
 
 /* The Meridian mark is blue, so it reads on both dark and light
    sidebars without a tile behind it. */
+
+/* Sidebar nav items keep an arrow cursor on hover, like Cloudflare's
+   dashboard sidebar (verified live 2026-11-10: the Domains row
+   lightens but the cursor stays a plain arrow, not a hand). Kumo's
+   SidebarMenuButton defaults to a pointer cursor, so this overrides
+   it. Toolbar buttons keep the hand cursor. */
+aside[data-sidebar="sidebar"] button {
+  cursor: default;
+}
 
 /* (The old custom .skeleton shimmer was removed: loading placeholders
    are now Kumo SkeletonLine, so nothing uses this rule anymore.) */

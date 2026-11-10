@@ -46,8 +46,10 @@ export function formatHourKeyIndian(hourKey) {
   return `${d}-${m}-${y} ${pad(h24 % 12 || 12)}:${mm} ${ampm}`;
 }
 
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
 // Hour key to hour-only label: "04 AM" (mobile axis, no date)
-// A bare day key ("2026-11-06") formats as "06-11"
+// A bare day key ("2026-11-06") formats as "06 Nov"
 export function formatHourOnly(hourKey) {
   const parts = hourKey.split(' ');
   if (parts.length < 2) return formatDayKeyShort(hourKey);
@@ -56,19 +58,19 @@ export function formatHourOnly(hourKey) {
   return `${h24 % 12 || 12} ${ampm}`;
 }
 
-// Hour key to short axis label: "06-11 04 AM"
-// A bare day key ("2026-11-06") formats as "06-11"
+// Hour key to short axis label: "06 Nov, 04 AM"
+// A bare day key ("2026-11-06") formats as "06 Nov"
 export function formatHourKeyShort(hourKey) {
   const parts = hourKey.split(' ');
   if (parts.length < 2) return formatDayKeyShort(hourKey);
   const [y, m, d] = parts[0].split('-');
   const h24 = parseInt(parts[1].split(':')[0], 10);
   const ampm = h24 >= 12 ? 'PM' : 'AM';
-  return `${d}-${m} ${pad(h24 % 12 || 12)} ${ampm}`;
+  return `${d} ${MONTHS[parseInt(m, 10) - 1]}, ${pad(h24 % 12 || 12)} ${ampm}`;
 }
 
-// 15-minute key to short axis label: "06-11 04:15 PM"
-// A bare day key ("2026-11-06") formats as "06-11"
+// 15-minute key to short axis label: "06 Nov, 04:15 PM"
+// A bare day key ("2026-11-06") formats as "06 Nov"
 export function formatMinuteKeyShort(minKey) {
   const parts = minKey.split(' ');
   if (parts.length < 2) return formatDayKeyShort(minKey);
@@ -76,7 +78,7 @@ export function formatMinuteKeyShort(minKey) {
   const [hh, mm] = parts[1].split(':');
   const h24 = parseInt(hh, 10);
   const ampm = h24 >= 12 ? 'PM' : 'AM';
-  return `${d}-${m} ${pad(h24 % 12 || 12)}:${mm} ${ampm}`;
+  return `${d} ${MONTHS[parseInt(m, 10) - 1]}, ${pad(h24 % 12 || 12)}:${mm} ${ampm}`;
 }
 
 // IST wall-clock key to epoch ms: "2026-11-08 13:45" or "2026-11-08"
@@ -120,8 +122,8 @@ export function formatDayKeyIndian(dayKey) {
   return y && m && d ? `${d}-${m}-${y}` : dayKey;
 }
 
-// Day key to short axis label: "06-11"
+// Day key to short axis label: "06 Nov"
 export function formatDayKeyShort(dayKey) {
   const [y, m, d] = dayKey.split('-');
-  return y && m && d ? `${d}-${m}` : dayKey;
+  return y && m && d ? `${d} ${MONTHS[parseInt(m, 10) - 1]}` : dayKey;
 }

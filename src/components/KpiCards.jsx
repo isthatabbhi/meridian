@@ -15,10 +15,10 @@ const CARDS = [
   { label: 'Resume downloads', seriesKey: 'resumeDownloads', prevKey: 'resumeDownloads', color: '#8D58EE' },
 ];
 
-/* Kumo semantic colours for the delta (from the Kumo chart-colours
-   page): success green for a rise, attention red for a fall. */
-const DELTA_UP = '#00A63E';
-const DELTA_DOWN = '#FC574A';
+/* Delta colour (user order 2026-11-10): greyed #A1A1A1 for all cards,
+   up and down alike. The arrow direction still shows up/down. */
+const DELTA_UP = '#A1A1A1';
+const DELTA_DOWN = '#A1A1A1';
 
 /* Compact value, Cloudflare style: 1150 -> "1.15k", 139 -> "139". */
 function formatCompact(v) {
@@ -36,13 +36,17 @@ function formatCompact(v) {
    area at this height. The custom Chart with axes and tooltip hidden
    draws the same spiky gradient line and is still a Kumo chart. One
    series, the card's metric colour, gradient fading to transparent.
-   No axes, no legend, no tooltip, no animation (it would re-animate
-   on every 10s poll). An empty series draws a flat empty strip. */
+   No axes, no legend, no tooltip. Animates 500ms ease-in-out on
+   mount, like Cloudflare's sparkline; data updates are instant
+   (animationDurationUpdate 0) so the 10s live poll does not replay
+   the draw. An empty series draws a flat empty strip. */
 function Sparkline({ rows, seriesKey, color }) {
   const options = useMemo(() => {
     const points = rows.map((r) => [istKeyToMs(r.time), r[seriesKey] || 0]);
     return {
-      animation: false,
+      animationDuration: 500,
+      animationEasing: 'cubicInOut',
+      animationDurationUpdate: 0,
       backgroundColor: 'transparent',
       grid: { left: 0, right: 0, top: 2, bottom: 0 },
       xAxis: { type: 'time', show: false },
