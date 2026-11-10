@@ -330,17 +330,28 @@ export default function CountryGlobe({ data, dark }) {
       }
       ctx.globalAlpha = 1;
 
-      /* Thin glow ring around the globe: a soft diffused halo,
-         not a bright sharp ring. The user's Light-turquoise
-         #5BC6FD for the ring and Sky blue #B0F2FF for the glow,
-         low alpha and a wide blur so it fades out gently. */
+      /* Atmospheric halo like Cloudflare's (user order 2026-11-10):
+         a soft blurry glow around the globe, like a real earth's
+         atmosphere. A radial-gradient ring fading outward from the
+         globe edge over ~45px, plus the thin ring stroke with a
+         wide blur. The gradient ring is filled with evenodd so it
+         never tints the globe itself, only the space outside it. */
       ctx.save();
+      const glow = ctx.createRadialGradient(SIZE / 2, SIZE / 2, R, SIZE / 2, SIZE / 2, R + 45);
+      glow.addColorStop(0, 'rgba(91,198,253,0.28)');
+      glow.addColorStop(0.4, 'rgba(91,198,253,0.12)');
+      glow.addColorStop(1, 'rgba(91,198,253,0)');
+      ctx.beginPath();
+      ctx.arc(SIZE / 2, SIZE / 2, R + 45, 0, Math.PI * 2);
+      ctx.arc(SIZE / 2, SIZE / 2, R, 0, Math.PI * 2, true);
+      ctx.fillStyle = glow;
+      ctx.fill('evenodd');
       ctx.beginPath();
       ctx.arc(SIZE / 2, SIZE / 2, R, 0, Math.PI * 2);
-      ctx.strokeStyle = 'rgba(91,198,253,0.18)';
-      ctx.lineWidth = 1;
-      ctx.shadowColor = 'rgba(176,242,255,0.20)';
-      ctx.shadowBlur = 30;
+      ctx.strokeStyle = 'rgba(91,198,253,0.28)';
+      ctx.lineWidth = 1.5;
+      ctx.shadowColor = 'rgba(176,242,255,0.35)';
+      ctx.shadowBlur = 50;
       ctx.stroke();
       ctx.restore();
 
