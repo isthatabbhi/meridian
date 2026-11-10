@@ -56,7 +56,7 @@ export default function TopList({ title, items }) {
   return (
     <LayerCard className="rounded-[12px] flex flex-col h-full">
       <div className="px-5 py-4 border-b border-[var(--border)] flex items-center justify-between gap-2">
-        <p className="text-[12px] text-[var(--muted)]">{title}</p>
+        <p className="text-[12px] font-medium text-[var(--muted)]">{title}</p>
         {filterLabel && (
           <button
             onClick={() => setFilterLabel(null)}
@@ -113,7 +113,7 @@ export default function TopList({ title, items }) {
                     trackClassName="bg-[var(--surface-2)]"
                     indicatorClassName="from-[#2f7cf6] via-[#2f7cf6] to-[#2f7cf6]"
                   />
-                  <span className="text-[12px] leading-4 text-[var(--text)] tabular-nums w-[40px] text-right shrink-0">
+                  <span className="text-[12px] leading-4 font-medium text-[var(--text)] tabular-nums w-[40px] text-right shrink-0">
                     {item.count}
                   </span>
                   {/* Row hover actions, like Cloudflare's Top N tables:

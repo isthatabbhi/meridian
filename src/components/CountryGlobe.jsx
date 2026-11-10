@@ -365,7 +365,7 @@ export default function CountryGlobe({ data, dark }) {
   return (
     <div className="rounded-[12px] border border-[var(--border)] bg-[var(--surface)] h-full flex flex-col">
       <div className="px-5 py-4">
-        <p className="text-[12px] text-[var(--muted)]">
+        <p className="text-[12px] font-medium text-[var(--muted)]">
           Requests by country
         </p>
       </div>
@@ -419,7 +419,7 @@ export default function CountryGlobe({ data, dark }) {
                     ? 'from-[#6b7280] via-[#6b7280] to-[#6b7280]'
                     : 'from-[#2f7cf6] via-[#2f7cf6] to-[#2f7cf6]'}
                 />
-                <span className="text-[12px] text-[var(--text)] tabular-nums w-[40px] text-right shrink-0">{count}</span>
+                <span className="text-[12px] font-medium text-[var(--text)] tabular-nums w-[40px] text-right shrink-0">{count}</span>
               </div>
             );
           })}

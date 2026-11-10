@@ -212,7 +212,7 @@ const deltaEl = (delta) => {
             className="rounded-[12px] flex flex-col min-h-[136px]"
           >
             <div className="px-4 pt-2 pb-0 flex-1">
-              <p className="text-[11px] leading-none text-[var(--muted)] truncate mb-1">{c.label}</p>
+              <p className="text-[11px] leading-none font-medium text-[var(--muted)] truncate mb-1">{c.label}</p>
               <div className="flex items-baseline gap-2">
                 <span className="text-[25px] font-bold text-[var(--text)] leading-none tabular-nums">
                   {formatCompact(value)}

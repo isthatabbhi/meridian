@@ -278,7 +278,7 @@ export default function RequestsChart({ data, since, timeRange, dark }) {
   return (
     <div className="rounded-[12px] border border-[var(--border)] bg-[var(--surface)]">
       <div className="px-5 py-4">
-        <p className="text-[12px] text-[var(--muted)] mb-3">
+        <p className="text-[12px] font-medium text-[var(--muted)] mb-3">
           Requests over time
         </p>
         {/* Legend: country names (never raw codes) with totals */}

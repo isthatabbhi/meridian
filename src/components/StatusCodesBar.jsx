@@ -95,7 +95,7 @@ export default function StatusCodesBar({ data, dark }) {
   return (
     <div className="rounded-[12px] border border-[var(--border)] bg-[var(--surface)]">
       <div className="px-5 py-4">
-        <p className="text-[12px] text-[var(--muted)] mb-3">Event distribution</p>
+        <p className="text-[12px] font-medium text-[var(--muted)] mb-3">Event distribution</p>
         {/* Legend */}
         <div className="flex flex-wrap gap-x-5 gap-y-1 mb-3">
           {segments.map((s) => (

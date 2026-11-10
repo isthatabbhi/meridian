@@ -101,7 +101,7 @@ export default function DeviceTypeChart({ data, dark }) {
   return (
     <div className="rounded-[12px] border border-[var(--border)] bg-[var(--surface)] h-full flex flex-col">
       <div className="px-5 py-4">
-        <p className="text-[12px] text-[var(--muted)] mb-3">
+        <p className="text-[12px] font-medium text-[var(--muted)] mb-3">
           Requests by device type
         </p>
         {/* Legend: only devices that actually have data */}
