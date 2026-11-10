@@ -38,6 +38,12 @@ const COUNTRY_NAMES = {
 
 const SIZE = 280;
 const ROT_SPEED_DEG = 0.23; // 0.004 rad/frame, the old globe's speed
+/* Cloudflare's globe only moves horizontally (verified by the user,
+   2026-11-10): the rotation is around the vertical axis only, the
+   latitude never changes. FIXED_PHI is the initial tilt that centres
+   India (lat 20.6); it stays fixed for drag, auto-rotation and the
+   list-hover swing. */
+const FIXED_PHI = -20.6;
 /* 1-degree dot grid (2026-11-09, user order: India border must match
    the reference exactly). Dots are ~1.55px apart on the 280px globe,
    so the radii are smaller than the old 2-degree grid (DOT_R was 1.3,
@@ -80,6 +86,22 @@ export default function CountryGlobe({ data, dark }) {
     );
   }, [JSON.stringify(countries)]);
 
+  /* Precomputed per-dot trig values for the far-side cull. A dot is
+     on the visible hemisphere when cos(c) > 0, where c is its angular
+     distance from the view centre. d3's projection() does NOT clip
+     far-side points when called directly (it returns a position
+     inside the disc), so without this check the far-side countries
+     draw on top of the near side and the globe looks transparent. */
+  const dotData = useMemo(() => dotGrid.map(([lat, lon, code]) => {
+    const latRad = (lat * Math.PI) / 180;
+    return {
+      lat, lon, code,
+      sinLat: Math.sin(latRad),
+      cosLat: Math.cos(latRad),
+      lonRad: (lon * Math.PI) / 180,
+    };
+  }), []);
+
   const canvasRef = useRef(null);
   const tipRef = useRef(null);
   const projectionRef = useRef(null);
@@ -112,10 +134,12 @@ export default function CountryGlobe({ data, dark }) {
     hoveredCodeRef.current = hoveredCode;
     /* Swing the globe to face the list-hovered country, hold it
        there while hovered; resume auto-rotation when the hover
-       ends. Target rotation centres the country: [-lon, -lat]. */
+       ends. Target rotation centres the country horizontally only:
+       [-lon, FIXED_PHI]. The latitude never changes, Cloudflare's
+       globe only moves horizontally. */
     if (hoveredCode && hoveredCode !== 'Unknown' && COUNTRY_COORDS[hoveredCode]) {
-      const [clat, clon] = COUNTRY_COORDS[hoveredCode];
-      swingTargetRef.current = [-clon, -clat];
+      const [, clon] = COUNTRY_COORDS[hoveredCode];
+      swingTargetRef.current = [-clon, FIXED_PHI];
     } else {
       swingTargetRef.current = null;
     }
@@ -212,13 +236,26 @@ export default function CountryGlobe({ data, dark }) {
       ctx.fill();
 
       const traffic = trafficCodesRef.current;
-      for (const [lat, lon, code] of dotGrid) {
-        const p = projection([lon, lat]);
+      /* View centre in radians, for the far-side cull. The centre
+         of the visible disc is at lon -lambda, lat -phi. */
+      const [curLambda, curPhi] = rotRef.current;
+      const centerLatRad = (-curPhi * Math.PI) / 180;
+      const centerLonRad = (-curLambda * Math.PI) / 180;
+      const sinCenterLat = Math.sin(centerLatRad);
+      const cosCenterLat = Math.cos(centerLatRad);
+      for (const d of dotData) {
+        /* Far-side cull: skip dots on the hemisphere facing away,
+           so the globe is fully opaque and the other side never
+           shows through. */
+        const cosC = sinCenterLat * d.sinLat + cosCenterLat * d.cosLat * Math.cos(d.lonRad - centerLonRad);
+        if (cosC <= 0) continue;
+        const p = projection([d.lon, d.lat]);
         if (!p) continue;
         const [x, y] = p;
         const dx = x - SIZE / 2;
         const dy = y - SIZE / 2;
         const depth = Math.max(0, 1 - Math.sqrt(dx * dx + dy * dy) / R);
+        const code = d.code;
         if (code && traffic.has(code)) {
           /* Traffic country: solid blue, larger dots so the region
              reads as a solid mass, like Cloudflare's dashboard.
@@ -245,6 +282,18 @@ export default function CountryGlobe({ data, dark }) {
       }
       ctx.globalAlpha = 1;
 
+      /* Thin glow ring around the globe, like Cloudflare's: a 1px
+         ring at the disc edge with a soft blue halo. */
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(SIZE / 2, SIZE / 2, R, 0, Math.PI * 2);
+      ctx.strokeStyle = dark ? 'rgba(47,124,246,0.55)' : 'rgba(9,105,218,0.55)';
+      ctx.lineWidth = 1;
+      ctx.shadowColor = dark ? 'rgba(47,124,246,0.7)' : 'rgba(9,105,218,0.7)';
+      ctx.shadowBlur = 14;
+      ctx.stroke();
+      ctx.restore();
+
       updateTip();
 
       raf = requestAnimationFrame(draw);
@@ -260,18 +309,27 @@ export default function CountryGlobe({ data, dark }) {
   const findCountryAt = (mx, my) => {
     const proj = projectionRef.current;
     if (!proj) return null;
+    /* Far-side cull, same as the draw loop: only countries on the
+       visible hemisphere can be hovered. */
+    const [curLambda, curPhi] = rotRef.current;
+    const centerLatRad = (-curPhi * Math.PI) / 180;
+    const centerLonRad = (-curLambda * Math.PI) / 180;
+    const sinCenterLat = Math.sin(centerLatRad);
+    const cosCenterLat = Math.cos(centerLatRad);
     let best = null;
     let bestD = HOVER_R;
-    for (const [lat, lon, code] of dotGrid) {
-      if (!code) continue;
-      const p = proj([lon, lat]);
+    for (const d of dotData) {
+      if (!d.code) continue;
+      const cosC = sinCenterLat * d.sinLat + cosCenterLat * d.cosLat * Math.cos(d.lonRad - centerLonRad);
+      if (cosC <= 0) continue;
+      const p = proj([d.lon, d.lat]);
       if (!p) continue;
       const dx = p[0] - mx;
       const dy = p[1] - my;
-      const d = Math.sqrt(dx * dx + dy * dy);
-      if (d < bestD) {
-        bestD = d;
-        best = code;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < bestD) {
+        bestD = dist;
+        best = d.code;
       }
     }
     return best;
@@ -291,10 +349,11 @@ export default function CountryGlobe({ data, dark }) {
     mouseRef.current = { x: e.clientX - rect.left, y: e.clientY - rect.top };
     mouseCountryRef.current = findCountryAt(mouseRef.current.x, mouseRef.current.y);
     if (draggingRef.current && dragStartRef.current) {
+      /* Horizontal drag only (Cloudflare behavior): the globe spins
+         left-right, the latitude never changes. */
       const s = dragStartRef.current;
       const lambda = s.lambda + (e.clientX - s.x) * 0.25;
-      const phi = Math.max(-80, Math.min(80, s.phi - (e.clientY - s.y) * 0.25));
-      rotRef.current = [lambda, phi];
+      rotRef.current = [lambda, FIXED_PHI];
     }
   };
   const onPointerUp = () => {
