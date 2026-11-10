@@ -25,9 +25,8 @@ export default function DeviceTypeChart({ data, dark }) {
   const hasData = total > 0;
 
   /* ECharts pie option. Same donut as before: inner radius 60,
-     outer 110, starting at the top and sweeping clockwise. Animates
-     600ms on mount; data updates are instant (animationDurationUpdate
-     0) so live refreshes do not replay the sweep. */
+     outer 110, starting at the top and sweeping clockwise. No load
+     animation: it appears fully drawn at once, like Cloudflare's. */
   const options = useMemo(() => {
     const tooltip = {
       trigger: 'item',
@@ -64,9 +63,12 @@ export default function DeviceTypeChart({ data, dark }) {
       };
     }
     return {
-      animationDuration: 600,
-      animationEasing: 'cubicOut',
-      animationDurationUpdate: 0,
+      /* No load animation (Cloudflare behavior, verified live
+         2026-11-10): the donut appears fully drawn at once when the
+         data arrives, no slow clockwise sweep and no growing from
+         the centre. The old 600ms cubicOut sweep was visibly
+         different. */
+      animation: false,
       tooltip,
       series: [{
         type: 'pie',

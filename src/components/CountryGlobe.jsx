@@ -82,6 +82,7 @@ export default function CountryGlobe({ data, dark }) {
 
   const canvasRef = useRef(null);
   const tipRef = useRef(null);
+  const projectionRef = useRef(null);
   /* Rotation as [lambda, phi] degrees. Starts centred on India
      (lon 78.9, lat 20.6), user order 2026-11-09: the globe should
      always start rotating right from India. */
@@ -90,16 +91,35 @@ export default function CountryGlobe({ data, dark }) {
   const draggingRef = useRef(false);
   const dragStartRef = useRef(null);
   const mouseRef = useRef(null);
+  /* Country code under the mouse on the globe itself (direct hover),
+     or null. Cloudflare shows a name-only tooltip there and freezes
+     rotation while the pointer stays on the map. */
+  const mouseCountryRef = useRef(null);
+  /* List-hover swing target: [lambda, phi] the globe rotates to
+     face the hovered country, or null. Cloudflare swings the globe
+     to face the list-hovered country and holds it there. */
+  const swingTargetRef = useRef(null);
   const countriesRef = useRef(countries);
   const trafficCodesRef = useRef(trafficCodes);
   /* Country hovered in the list (Cloudflare behavior, user order
-     2026-11-10): hovering a list row highlights that country on the
-     globe and shows its tooltip there, same as hovering the globe
-     itself. Kept in a ref so the draw loop reads it without
-     re-creating the animation effect. */
+     2026-11-10): hovering a list row makes the globe swing to face
+     that country and shows a "Name · count" tooltip on the globe.
+     Kept in a ref so the draw loop reads it without re-creating
+     the animation effect. */
   const [hoveredCode, setHoveredCode] = useState(null);
   const hoveredCodeRef = useRef(null);
-  useEffect(() => { hoveredCodeRef.current = hoveredCode; }, [hoveredCode]);
+  useEffect(() => {
+    hoveredCodeRef.current = hoveredCode;
+    /* Swing the globe to face the list-hovered country, hold it
+       there while hovered; resume auto-rotation when the hover
+       ends. Target rotation centres the country: [-lon, -lat]. */
+    if (hoveredCode && hoveredCode !== 'Unknown' && COUNTRY_COORDS[hoveredCode]) {
+      const [clat, clon] = COUNTRY_COORDS[hoveredCode];
+      swingTargetRef.current = [-clon, -clat];
+    } else {
+      swingTargetRef.current = null;
+    }
+  }, [hoveredCode]);
 
   useEffect(() => { countriesRef.current = countries; }, [JSON.stringify(countries)]);
   useEffect(() => { trafficCodesRef.current = trafficCodes; }, [trafficCodes]);
@@ -116,6 +136,7 @@ export default function CountryGlobe({ data, dark }) {
       .scale(SIZE / 2 - 6)
       .translate([SIZE / 2, SIZE / 2])
       .clipAngle(90);
+    projectionRef.current = projection;
 
     const R = SIZE / 2 - 6;
     let raf;
@@ -123,14 +144,12 @@ export default function CountryGlobe({ data, dark }) {
     const updateTip = () => {
       const tip = tipRef.current;
       if (!tip) return;
-      /* List hover only (Cloudflare behavior, verified live 2026-11-10:
-         the globe itself is inert on direct hover, no tooltip and no
-         pause. The tooltip appears only when a country row in the
-         list is hovered, sitting on that country on the globe, at
-         its centre coordinates. Rotation pauses while a list row is
-         hovered, via hoveredCodeRef in the draw loop. */
-      const hovered = hoveredCodeRef.current;
       const live = countriesRef.current;
+      /* List hover first (Cloudflare behavior, verified live
+         2026-11-10): the tooltip shows "Name · count" on the globe
+         at the hovered country's centre coordinates, and the globe
+         has swung to face it. */
+      const hovered = hoveredCodeRef.current;
       if (hovered && hovered !== 'Unknown' && live[hovered] !== undefined && COUNTRY_COORDS[hovered]) {
         const [clat, clon] = COUNTRY_COORDS[hovered];
         const p = projection([clon, clat]);
@@ -143,12 +162,45 @@ export default function CountryGlobe({ data, dark }) {
           return;
         }
       }
+      /* Direct globe hover (Cloudflare behavior, verified live
+         2026-11-10): a small dark tooltip next to the mouse pointer
+         showing ONLY the country name, no count. The country does
+         not highlight or change colour. */
+      const mouseCountry = mouseCountryRef.current;
+      const mouse = mouseRef.current;
+      if (mouseCountry && mouse) {
+        const name = COUNTRY_NAMES[mouseCountry] || mouseCountry;
+        tip.textContent = name;
+        tip.style.left = `${mouse.x + 12}px`;
+        tip.style.top = `${mouse.y - 10}px`;
+        tip.style.opacity = '1';
+        return;
+      }
       tip.style.opacity = '0';
     };
 
     const draw = () => {
-      const [lambda, phi] = rotRef.current;
-      projection.rotate([lambda, phi]);
+      let [lambda, phi] = rotRef.current;
+      /* List-hover swing: ease the globe toward the target rotation
+         (shortest path on longitude, wraparound handled) and hold
+         it there while hovered. Otherwise auto-rotate, unless the
+         pointer is on the globe, dragging, or a list row is
+         hovered. */
+      const target = swingTargetRef.current;
+      if (target) {
+        const dLambda = ((target[0] - lambda + 540) % 360) - 180;
+        const dPhi = target[1] - phi;
+        lambda += dLambda * 0.12;
+        phi += dPhi * 0.12;
+        if (Math.abs(dLambda) < 0.1 && Math.abs(dPhi) < 0.1) {
+          lambda = target[0];
+          phi = target[1];
+        }
+        rotRef.current = [lambda, phi];
+      } else if (!pausedRef.current && !draggingRef.current && !hoveredCodeRef.current) {
+        rotRef.current = [lambda + ROT_SPEED_DEG, phi];
+      }
+      projection.rotate(rotRef.current);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, SIZE, SIZE);
 
@@ -160,7 +212,6 @@ export default function CountryGlobe({ data, dark }) {
       ctx.fill();
 
       const traffic = trafficCodesRef.current;
-      const hovered = hoveredCodeRef.current;
       for (const [lat, lon, code] of dotGrid) {
         const p = projection([lon, lat]);
         if (!p) continue;
@@ -172,13 +223,14 @@ export default function CountryGlobe({ data, dark }) {
           /* Traffic country: solid blue, larger dots so the region
              reads as a solid mass, like Cloudflare's dashboard.
              Every country with traffic is highlighted, not just
-             the top one. The list-hovered country draws larger
-             still, so it stands out from the other traffic
-             countries. */
+             the top one. Cloudflare does not enlarge the hovered
+             country, so all traffic countries draw at the same
+             size; the list-hovered country is shown by the globe
+             facing it and the tooltip, not by bigger dots. */
           ctx.globalAlpha = 0.55 + 0.45 * depth;
           ctx.fillStyle = '#2f7cf6';
           ctx.beginPath();
-          ctx.arc(x, y, code === hovered ? TOP_R * 1.6 : TOP_R, 0, Math.PI * 2);
+          ctx.arc(x, y, TOP_R, 0, Math.PI * 2);
           ctx.fill();
         } else {
           const a = 0.5 + 0.45 * depth;
@@ -195,19 +247,35 @@ export default function CountryGlobe({ data, dark }) {
 
       updateTip();
 
-      /* Pause while the globe is hovered, dragged, or a list row is
-         hovered (Cloudflare behavior: the globe holds still while
-         you read a country). */
-      if (!pausedRef.current && !draggingRef.current && !hoveredCodeRef.current) {
-        rotRef.current = [lambda + ROT_SPEED_DEG, phi];
-      }
       raf = requestAnimationFrame(draw);
     };
     raf = requestAnimationFrame(draw);
     return () => cancelAnimationFrame(raf);
   }, [dark]);
 
-  /* Pointer handlers: drag rotates, hover pauses. */
+  /* Pointer handlers: drag rotates, hover pauses. Direct globe hover
+     (Cloudflare behavior, verified live 2026-11-10): the pointer
+     freezing the rotation while it stays on the map, and a name-only
+     tooltip over the country under the pointer. */
+  const findCountryAt = (mx, my) => {
+    const proj = projectionRef.current;
+    if (!proj) return null;
+    let best = null;
+    let bestD = HOVER_R;
+    for (const [lat, lon, code] of dotGrid) {
+      if (!code) continue;
+      const p = proj([lon, lat]);
+      if (!p) continue;
+      const dx = p[0] - mx;
+      const dy = p[1] - my;
+      const d = Math.sqrt(dx * dx + dy * dy);
+      if (d < bestD) {
+        bestD = d;
+        best = code;
+      }
+    }
+    return best;
+  };
   const onPointerDown = (e) => {
     draggingRef.current = true;
     dragStartRef.current = {
@@ -221,6 +289,7 @@ export default function CountryGlobe({ data, dark }) {
   const onPointerMove = (e) => {
     const rect = e.currentTarget.getBoundingClientRect();
     mouseRef.current = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    mouseCountryRef.current = findCountryAt(mouseRef.current.x, mouseRef.current.y);
     if (draggingRef.current && dragStartRef.current) {
       const s = dragStartRef.current;
       const lambda = s.lambda + (e.clientX - s.x) * 0.25;
@@ -249,7 +318,8 @@ export default function CountryGlobe({ data, dark }) {
             onPointerDown={onPointerDown}
             onPointerMove={onPointerMove}
             onPointerUp={onPointerUp}
-            onPointerLeave={() => { mouseRef.current = null; onPointerUp(); }}
+            onPointerEnter={() => { pausedRef.current = true; }}
+            onPointerLeave={() => { mouseRef.current = null; mouseCountryRef.current = null; pausedRef.current = false; onPointerUp(); }}
             aria-label="Requests by country globe"
           />
           {/* Hover tooltip, updated imperatively in the draw loop. */}
