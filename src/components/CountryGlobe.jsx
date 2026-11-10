@@ -339,27 +339,27 @@ export default function CountryGlobe({ data, dark }) {
 
       /* Atmospheric halo like Cloudflare's (user order 2026-11-10):
          a soft blurry glow around the globe, like a real earth's
-         atmosphere. Reduced to 50% (user order 2026-11-10): the
-         gradient fades over ~22px instead of 45px, alphas halved,
-         blur halved. The gradient ring is filled with evenodd so
-         it never tints the globe itself, only the space outside
-         it. */
+         atmosphere. Reduced to 25% of the original (halved again
+         2026-11-10): the gradient fades over ~11px, alphas
+         halved again, blur halved again. The gradient ring is
+         filled with evenodd so it never tints the globe itself,
+         only the space outside it. */
       ctx.save();
-      const glow = ctx.createRadialGradient(SIZE / 2, SIZE / 2, R, SIZE / 2, SIZE / 2, R + 22);
-      glow.addColorStop(0, 'rgba(91,198,253,0.14)');
-      glow.addColorStop(0.4, 'rgba(91,198,253,0.06)');
+      const glow = ctx.createRadialGradient(SIZE / 2, SIZE / 2, R, SIZE / 2, SIZE / 2, R + 11);
+      glow.addColorStop(0, 'rgba(91,198,253,0.07)');
+      glow.addColorStop(0.4, 'rgba(91,198,253,0.03)');
       glow.addColorStop(1, 'rgba(91,198,253,0)');
       ctx.beginPath();
-      ctx.arc(SIZE / 2, SIZE / 2, R + 22, 0, Math.PI * 2);
+      ctx.arc(SIZE / 2, SIZE / 2, R + 11, 0, Math.PI * 2);
       ctx.arc(SIZE / 2, SIZE / 2, R, 0, Math.PI * 2, true);
       ctx.fillStyle = glow;
       ctx.fill('evenodd');
       ctx.beginPath();
       ctx.arc(SIZE / 2, SIZE / 2, R, 0, Math.PI * 2);
-      ctx.strokeStyle = 'rgba(91,198,253,0.14)';
+      ctx.strokeStyle = 'rgba(91,198,253,0.07)';
       ctx.lineWidth = 1.5;
-      ctx.shadowColor = 'rgba(176,242,255,0.175)';
-      ctx.shadowBlur = 25;
+      ctx.shadowColor = 'rgba(176,242,255,0.09)';
+      ctx.shadowBlur = 12;
       ctx.stroke();
       ctx.restore();
 

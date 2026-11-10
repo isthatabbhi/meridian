@@ -50,7 +50,7 @@ export default function TopList({ title, items }) {
   };
 
   return (
-    <LayerCard className="rounded-[12px] flex flex-col h-[220px]">
+    <LayerCard className="rounded-[12px] flex flex-col h-[250px]">
       <div className="px-5 py-4 border-b border-[var(--cf-border-chrome)] flex items-center justify-between gap-2">
         <Text variant="secondary" size="xs" bold>{title}</Text>
         {filterLabel && (
@@ -82,7 +82,7 @@ export default function TopList({ title, items }) {
               const barPct = (item.count / maxCount) * 100;
               const isFiltered = filterLabel === item.label;
               return (
-                <div key={i} className="group flex items-center gap-3 rounded-[6px] px-2 py-1.5 -mx-2 hover:bg-[var(--surface-2)] transition-colors">
+                <div key={i} className="group flex items-center gap-3 rounded-[6px] px-2 py-1.5 -mx-2 h-[28px] hover:bg-[var(--surface-2)] transition-colors">
                   {/* Label left-justified, meter on the right. The outer
                       div is the flex child so the label always stretches
                       full width and left-aligns; the tooltip only shows
