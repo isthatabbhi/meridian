@@ -338,6 +338,19 @@ export default function App() {
       return sw > 0 ? sw / 2 : 1024;
     };
     const applyAuto = () => {
+      /* Mobile browsers: the sidebar is a drawer and must never
+         auto-open (user order 2026-11-10). On a phone
+         window.innerWidth equals window.screen.width, so it is
+         never narrower than half the screen and the old logic
+         pinned it open on load. Force it closed on mobile and
+         leave it to the hamburger button. */
+      if (window.innerWidth < 768) {
+        if (narrowRef.current !== true) {
+          narrowRef.current = true;
+          setSidebarPinned(false);
+        }
+        return;
+      }
       const narrow = window.innerWidth < halfScreen();
       if (narrowRef.current === narrow) return;
       narrowRef.current = narrow;

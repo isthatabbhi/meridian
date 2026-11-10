@@ -63,7 +63,7 @@ export default function TopList({ title, items }) {
           </button>
         )}
       </div>
-      <div className="px-5 pt-3 pb-5 flex-1 overflow-y-auto thin-scroll">
+      <div className="px-5 pt-3 pb-5 flex-1 overflow-y-auto thin-scroll" style={{ maskImage: 'linear-gradient(to bottom, black calc(100% - 28px), transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black calc(100% - 28px), transparent 100%)' }}>
         {items.length === 0 ? (
           <p className="text-[12px] leading-4 text-[var(--faint)] py-6 text-center">No data</p>
         ) : visible.length === 0 ? (
