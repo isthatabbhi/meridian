@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { LayerCard } from "@cloudflare/kumo/components/layer-card";
 import { Tooltip } from "@cloudflare/kumo/components/tooltip";
 import { Meter } from "@cloudflare/kumo/components/meter";
@@ -41,6 +41,23 @@ export default function TopList({ title, items }) {
     return true;
   });
 
+  /* Scroll capture only when the list actually overflows the card
+     (user order 2026-11-10): a card whose rows all fit has no
+     scrollbar, so the wheel should scroll the page normally.
+     Measure the real scrollHeight vs clientHeight, so filter /
+     exclude changes that shrink the list release the capture. */
+  const listRef = useRef(null);
+  const [needsScroll, setNeedsScroll] = useState(false);
+  useEffect(() => {
+    const el = listRef.current;
+    if (!el) return;
+    const check = () => setNeedsScroll(el.scrollHeight > el.clientHeight + 1);
+    check();
+    const ro = new ResizeObserver(check);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [visible.length, items.length]);
+
   const copyLabel = async (label) => {
     try {
       await navigator.clipboard.writeText(label);
@@ -50,7 +67,7 @@ export default function TopList({ title, items }) {
   };
 
   return (
-    <LayerCard className="rounded-[12px] flex flex-col h-[250px]">
+    <LayerCard className="rounded-[12px] flex flex-col h-[250px] pb-4">
       <div className="px-5 py-4 border-b border-[var(--cf-border-chrome)] flex items-center justify-between gap-2">
         <Text variant="secondary" size="xs" bold>{title}</Text>
         {filterLabel && (
@@ -63,7 +80,7 @@ export default function TopList({ title, items }) {
           </button>
         )}
       </div>
-      <div data-lenis-prevent className="px-5 pt-3 pb-5 flex-1 overflow-y-auto overscroll-contain thin-scroll" style={{ maskImage: 'linear-gradient(to bottom, black calc(100% - 28px), transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black calc(100% - 28px), transparent 100%)' }}>
+      <div ref={listRef} {...(needsScroll ? { 'data-lenis-prevent': true } : {})} className={`px-5 pt-3 pb-5 flex-1 overflow-y-auto thin-scroll${needsScroll ? ' overscroll-contain' : ''}`} style={needsScroll ? { maskImage: 'linear-gradient(to bottom, black calc(100% - 28px), transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black calc(100% - 28px), transparent 100%)' } : undefined}>
         {items.length === 0 ? (
           <p className="text-[12px] leading-4 text-[var(--faint)] py-6 text-center">No data</p>
         ) : visible.length === 0 ? (
