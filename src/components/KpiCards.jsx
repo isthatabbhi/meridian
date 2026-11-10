@@ -181,23 +181,23 @@ function DeltaArrow({ up }) {
 
 const deltaEl = (delta) => {
     if (delta == null) {
-      return <span className="text-[12px] font-bold text-[var(--faint)]">-</span>;
+      return <span className="text-[12px] font-medium text-[var(--faint)]">-</span>;
     }
     if (delta > 0) {
       return (
-        <span className="text-[12px] font-bold tabular-nums inline-flex items-center gap-1" style={{ color: DELTA_UP }}>
+        <span className="text-[12px] font-medium tabular-nums inline-flex items-center gap-1" style={{ color: DELTA_UP }}>
           <DeltaArrow up /> {delta.toFixed(1)}%
         </span>
       );
     }
     if (delta < 0) {
       return (
-        <span className="text-[12px] font-bold tabular-nums inline-flex items-center gap-1" style={{ color: DELTA_DOWN }}>
+        <span className="text-[12px] font-medium tabular-nums inline-flex items-center gap-1" style={{ color: DELTA_DOWN }}>
           <DeltaArrow up={false} /> {Math.abs(delta).toFixed(1)}%
         </span>
       );
     }
-    return <span className="text-[12px] font-bold text-[var(--muted)] tabular-nums">0.0%</span>;
+    return <span className="text-[12px] font-medium text-[var(--muted)] tabular-nums">0.0%</span>;
   };
 
   return (

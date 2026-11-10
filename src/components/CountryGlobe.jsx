@@ -282,15 +282,16 @@ export default function CountryGlobe({ data, dark }) {
       }
       ctx.globalAlpha = 1;
 
-      /* Thin glow ring around the globe, like Cloudflare's: a 1px
-         ring at the disc edge with a soft blue halo. */
+      /* Thin glow ring around the globe, like Cloudflare's: a soft
+         diffused halo, not a bright sharp ring. Low alpha and a
+         wide Gaussian blur (shadowBlur) so it fades out gently. */
       ctx.save();
       ctx.beginPath();
       ctx.arc(SIZE / 2, SIZE / 2, R, 0, Math.PI * 2);
-      ctx.strokeStyle = dark ? 'rgba(47,124,246,0.55)' : 'rgba(9,105,218,0.55)';
+      ctx.strokeStyle = dark ? 'rgba(47,124,246,0.28)' : 'rgba(9,105,218,0.28)';
       ctx.lineWidth = 1;
-      ctx.shadowColor = dark ? 'rgba(47,124,246,0.7)' : 'rgba(9,105,218,0.7)';
-      ctx.shadowBlur = 14;
+      ctx.shadowColor = dark ? 'rgba(47,124,246,0.30)' : 'rgba(9,105,218,0.30)';
+      ctx.shadowBlur = 22;
       ctx.stroke();
       ctx.restore();
 

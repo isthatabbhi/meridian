@@ -25,8 +25,9 @@ export default function DeviceTypeChart({ data, dark }) {
   const hasData = total > 0;
 
   /* ECharts pie option. Same donut as before: inner radius 60,
-     outer 110, starting at the top and sweeping clockwise. No load
-     animation: it appears fully drawn at once, like Cloudflare's. */
+     outer 110, starting at the top and sweeping clockwise. Animates
+     600ms on mount; data updates are instant (animationDurationUpdate
+     0) so live refreshes do not replay the sweep. */
   const options = useMemo(() => {
     const tooltip = {
       trigger: 'item',
@@ -63,12 +64,13 @@ export default function DeviceTypeChart({ data, dark }) {
       };
     }
     return {
-      /* No load animation (Cloudflare behavior, verified live
-         2026-11-10): the donut appears fully drawn at once when the
-         data arrives, no slow clockwise sweep and no growing from
-         the centre. The old 600ms cubicOut sweep was visibly
-         different. */
-      animation: false,
+      /* Load animation restored (user order 2026-11-10): the donut
+         sweeps in over 600ms ease-out on mount, like before.
+         Data updates are instant (animationDurationUpdate 0) so
+         live refreshes do not replay the sweep. */
+      animationDuration: 600,
+      animationEasing: 'cubicOut',
+      animationDurationUpdate: 0,
       tooltip,
       series: [{
         type: 'pie',
@@ -108,7 +110,7 @@ export default function DeviceTypeChart({ data, dark }) {
             <div key={name} className="flex items-center gap-1.5">
               <span className="inline-block w-[8px] h-[8px] rounded-full" style={{ backgroundColor: DEVICE_COLORS[name] }} />
               <span className="text-[12px] text-[var(--text-2)]">{name}</span>
-              <span className="text-[12px] text-[var(--text)] font-semibold tabular-nums">
+              <span className="text-[12px] text-[var(--text)] font-medium tabular-nums">
                 {(data?.requestsByDevice || {})[name] || 0}
               </span>
             </div>
