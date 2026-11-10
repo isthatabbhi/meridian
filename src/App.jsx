@@ -143,8 +143,8 @@ function SidebarBrand({ dark }) {
   const markSrc = dark ? '/meridian-mark-light.png' : '/meridian-mark.png';
   return (
     <span className="flex items-center gap-2 min-w-0">
-      <img src={markSrc} alt="Meridian" className="sidebar-logo w-8 h-8 object-contain shrink-0" />
-      <span className={`whitespace-nowrap overflow-hidden transition-opacity duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] text-[20px] leading-7 tracking-[-0.015em] font-semibold text-[var(--text)] ${shown ? 'opacity-100 max-w-[160px]' : 'opacity-0 max-w-0'}`}>
+      <img src={markSrc} alt="Meridian" className="sidebar-logo w-10 h-10 object-contain shrink-0" />
+      <span className={`whitespace-nowrap overflow-hidden transition-opacity duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] text-[24px] leading-8 tracking-[-0.015em] font-semibold text-[var(--text)] ${shown ? 'opacity-100 max-w-[160px]' : 'opacity-0 max-w-0'}`}>
         Meridian
       </span>
     </span>
@@ -315,6 +315,16 @@ export default function App() {
   const [sidebarPinned, setSidebarPinned] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 768);
   const [sidebarPeek, setSidebarPeek] = useState(false);
   const sidebarOpen = sidebarPinned || sidebarPeek;
+  /* Auto-fit charts when the sidebar opens/closes (user order
+     2026-11-10): collapsing the sidebar widens the content area,
+     but that is a layout change, not a window resize, so ECharts
+     does not always re-fit and space is left at the right. After
+     the 200ms sidebar slide finishes, dispatch a window resize
+     so every chart re-measures its container and fills it. */
+  useEffect(() => {
+    const t = setTimeout(() => window.dispatchEvent(new Event('resize')), 250);
+    return () => clearTimeout(t);
+  }, [sidebarOpen]);
   /* Auto-collapse / auto-expand on window resize (user order
      2026-11-10): when the window is forced below half the screen
      width the side panel collapses to the rail, and when it goes
@@ -798,7 +808,7 @@ export default function App() {
                   row 1 paths / client IPs / hosts, row 2 OS /
                   browsers / user agents, row 3 HTTP versions / cache
                   statuses / origin status codes. */}
-              <div className="animate-enter grid grid-cols-1 gap-3 lg:grid-cols-2 xl:grid-cols-3 xl:gap-4" style={{ animationDelay: '160ms' }}>
+              <div className="animate-enter grid grid-cols-1 gap-3 lg:grid-cols-2 xl:grid-cols-3 xl:gap-4 items-start" style={{ animationDelay: '160ms' }}>
                 <TopList title="Top paths" items={topPaths} />
                 <TopList title="Top client IPs" items={topClientIps} />
                 <TopList title="Top hosts" items={topHosts} />

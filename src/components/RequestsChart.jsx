@@ -175,7 +175,12 @@ export default function RequestsChart({ data, since, timeRange, dark }) {
      a time axis ticking once per day. */
   const options = useMemo(() => {
     const axisColor = dark ? '#808080' : '#6e7781';
-    const gridColor = dark ? '#121212' : '#e5e7eb';
+    /* Grid lines must be visible against the card bg (#0F0F0F dark)
+       so data points can be traced to their values, like CF's
+       dashboard. The old #121212 was nearly the same as the card
+       bg, so the horizontal split lines were invisible. #262626
+       is the track grey, clearly visible but still subtle. */
+    const gridColor = dark ? '#262626' : '#e5e7eb';
     const tooltipBg = dark ? '#161b22' : '#ffffff';
     const tooltipBorder = dark ? '#121212' : '#d0d7de';
     const tooltipText = dark ? '#ffffff' : '#1f2328';

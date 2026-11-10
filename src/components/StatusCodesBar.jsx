@@ -63,20 +63,24 @@ export default function StatusCodesBar({ data, dark }) {
       transitionDuration: 0.1,
       textStyle: { color: dark ? '#ffffff' : '#1f2328', fontSize: 12, fontFamily: 'Inter Variable, system-ui, sans-serif' },
       extraCssText: 'border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.35);',
-      /* Plain-text tooltip; labels are fixed strings, encoded anyway.
-         Count in semibold tabular-nums, like Cloudflare. */
+      /* Cloudflare's tooltip (verified live 2026-11-10): "2xx:
+         5.77k (91.23%)" — label regular, count bold white,
+         percent in grey with 2 decimals. Count is compact
+         (5.77k), percent grey. */
       dangerousHtmlFormatter: (params) => {
         const d = params.data || {};
         const label = echarts.format.encodeHTML(d.label || params.seriesName || '');
-        const pct = typeof d.pct === 'number' ? d.pct.toFixed(1) : '';
-        return `${label} <span style="font-weight:600;font-variant-numeric:tabular-nums">${d.count ?? params.value}</span> (${pct}%)`;
+        const pct = typeof d.pct === 'number' ? d.pct.toFixed(2) : '';
+        const pctColor = dark ? '#808080' : '#6e7781';
+        const count = formatCompact(d.count ?? params.value ?? 0);
+        return `${label} <span style="font-weight:600;font-variant-numeric:tabular-nums">${count}</span> <span style="color:${pctColor}">(${pct}%)</span>`;
       },
     },
     series: visible.map((s, i) => ({
       name: s.label,
       type: 'bar',
       stack: 'total',
-      barWidth: 28,
+      barWidth: 32,
       barMinWidth: 4,
       data: [{ value: s.pct, count: s.count, label: s.label, pct: s.pct }],
       itemStyle: {
@@ -92,7 +96,12 @@ export default function StatusCodesBar({ data, dark }) {
          dim the other segments on hover (verified live 2026-11-10:
          the hovered segment stays full colour, the rest stay full
          colour too). So no focus/blur emphasis here. */
-      emphasis: { focus: 'none' },
+      /* Cloudflare's status bar dims the other segments while one
+         is hovered (verified live 2026-11-10: the hovered segment
+         stays full colour, the rest drop to about half brightness).
+         emphasis focus 'series' plus a blur opacity does that. */
+      emphasis: { focus: 'series' },
+      blur: { itemStyle: { opacity: 0.45 } },
     })),
   }), [visible, dark]);
 
@@ -110,10 +119,12 @@ export default function StatusCodesBar({ data, dark }) {
             </div>
           ))}
         </div>
-        {/* Segmented bar: the container is the track, the chart is
-            transparent inside it. Track is 28px total, like CF. */}
-        <div className="h-[28px] rounded-[6px] overflow-hidden bg-[var(--cf-bg-track)]">
-          <Chart echarts={echarts} options={options} height={28} isDarkMode={dark} />
+        {/* Segmented bar: Cloudflare has NO visible track behind
+            the bar, it sits directly on the card background
+            (verified live 2026-11-10). The bar is 32px tall, like
+            CF. The container is transparent; the chart fills it. */}
+        <div className="h-[32px] rounded-[6px] overflow-hidden">
+          <Chart echarts={echarts} options={options} height={32} isDarkMode={dark} />
         </div>
       </div>
     </div>

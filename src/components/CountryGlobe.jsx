@@ -38,11 +38,11 @@ const COUNTRY_NAMES = {
 };
 
 const SIZE = 280;
-/* Rotation speed matched to Cloudflare's dashboard (user video
-   2026-11-10): the old 0.23 deg/frame (0.004 rad/frame) spun
-   visibly faster than CF's globe. 0.12 deg/frame is the calmer
-   Cloudflare pace. */
-const ROT_SPEED_DEG = 0.12;
+/* Rotation speed (user order 2026-11-10): raised from 0.12 to
+   0.20 deg/frame. 0.12 matched Cloudflare's calmer pace, but the
+   user wants it faster. 0.20 is a clear step up while staying
+   below the original 0.23. */
+const ROT_SPEED_DEG = 0.20;
 /* Cloudflare's exact globe dot colours, read from their GlobeView
    bundle (cf-GlobeView.7e024a4a.js, 2026-11-10). The land texture
    is rgb(100, 140, 190) at alpha 0.45. Each traffic country's
