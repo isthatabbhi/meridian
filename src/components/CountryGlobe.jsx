@@ -38,11 +38,11 @@ const COUNTRY_NAMES = {
 };
 
 const SIZE = 280;
-/* Rotation speed (user order 2026-11-10): raised from 0.12 to
-   0.20 deg/frame. 0.12 matched Cloudflare's calmer pace, but the
-   user wants it faster. 0.20 is a clear step up while staying
-   below the original 0.23. */
-const ROT_SPEED_DEG = 0.20;
+/* Rotation speed in degrees per second (user-supplied loop,
+   2026-11-10). Delta-time based, so the speed is the same on
+   any frame rate: 18 deg/sec. The old fixed 0.20 deg/frame was
+   ~12 deg/sec at 60fps but slowed on low frame rates. */
+const ROTATION_SPEED = 18;
 /* Cloudflare's exact globe dot colours, read from their GlobeView
    bundle (cf-GlobeView.7e024a4a.js, 2026-11-10). The land texture
    is rgb(100, 140, 190) at alpha 0.45. Each traffic country's
@@ -194,6 +194,10 @@ export default function CountryGlobe({ data, dark }) {
 
     const R = SIZE / 2 - 6;
     let raf;
+    /* Previous frame timestamp for the delta-time rotation loop
+       (user-supplied pattern). 0 on the first frame so the first
+       delta is 0 and the globe does not jump. */
+    let previousTime = 0;
 
     const updateTip = () => {
       const tip = tipRef.current;
@@ -233,7 +237,13 @@ export default function CountryGlobe({ data, dark }) {
       tip.style.opacity = '0';
     };
 
-    const draw = () => {
+    const draw = (timestamp) => {
+      /* Delta-time rotation (user-supplied loop): the time since
+         the last frame, in seconds, so the globe turns at a steady
+         ROTATION_SPEED deg/sec on any frame rate. First frame has
+         no previous time, so delta is 0. */
+      const deltaTime = previousTime ? (timestamp - previousTime) / 1000 : 0;
+      previousTime = timestamp;
       let [lambda, phi] = rotRef.current;
       /* List-hover swing: ease the globe toward the target rotation
          (shortest path on longitude, wraparound handled) and hold
@@ -252,7 +262,7 @@ export default function CountryGlobe({ data, dark }) {
         }
         rotRef.current = [lambda, phi];
       } else if (!pausedRef.current && !draggingRef.current && !hoveredCodeRef.current) {
-        rotRef.current = [lambda + ROT_SPEED_DEG, phi];
+        rotRef.current = [lambda + ROTATION_SPEED * deltaTime, phi];
       }
       projection.rotate(rotRef.current);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
