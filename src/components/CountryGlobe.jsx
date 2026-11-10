@@ -234,11 +234,10 @@ export default function CountryGlobe({ data, dark }) {
       ctx.clearRect(0, 0, SIZE, SIZE);
 
       /* Ocean disc, solid fill so the sphere reads as a filled globe,
-         not hollow. Dark uses Cloudflare's page colour #0a0a0a, one
-         step darker than the card #0b0b0b it sits on. */
+         not hollow. Dark uses the user's Black #020204. */
       ctx.beginPath();
       ctx.arc(SIZE / 2, SIZE / 2, R, 0, Math.PI * 2);
-      ctx.fillStyle = dark ? '#0a0a0a' : '#e5e7eb';
+      ctx.fillStyle = dark ? '#020204' : '#e5e7eb';
       ctx.fill();
 
       const traffic = trafficCodesRef.current;
@@ -263,35 +262,26 @@ export default function CountryGlobe({ data, dark }) {
         const depth = Math.max(0, 1 - Math.sqrt(dx * dx + dy * dy) / R);
         const code = d.code;
         if (code && traffic.has(code)) {
-          /* Traffic country: muted slate blue, not the vivid
-             accent. Cloudflare's traffic countries render as a
-             desaturated slate blue (#3f5573-#49617e sampled from
-             their dashboard video, 2026-11-10), much dimmer than
-             Meridian's old vivid #2b7fff. Alpha 0.30-0.60 with a
-             strong limb fade so the region reads as a soft mass,
-             not a bright solid. Every country with traffic is
-             highlighted, not just the top one. Cloudflare does
-             not enlarge the hovered country, so all traffic
-             countries draw at the same size; the list-hovered
-             country is shown by the globe facing it and the
-             tooltip, not by bigger dots. */
+          /* Traffic country: the user's Blue #0095FF. Alpha
+             0.30-0.60 with a strong limb fade so the region reads
+             as a soft mass, not a bright solid. Every country with
+             traffic is highlighted, not just the top one.
+             Cloudflare does not enlarge the hovered country, so
+             all traffic countries draw at the same size; the
+             list-hovered country is shown by the globe facing it
+             and the tooltip, not by bigger dots. */
           ctx.globalAlpha = 0.30 + 0.30 * depth;
-          ctx.fillStyle = dark ? '#6b8cae' : '#4a6a8a';
+          ctx.fillStyle = '#0095FF';
           ctx.beginPath();
           ctx.arc(x, y, TOP_R, 0, Math.PI * 2);
           ctx.fill();
         } else {
-          /* Non-traffic land: very dim desaturated slate
-             blue-grey. Cloudflare's land renders around
-             #0f1823-#2d3641 (sampled 2026-11-10), a quiet
-             dark blue-grey, not Meridian's old vivid blue.
+          /* Non-traffic land: the user's Blue-grey #233146.
              Alpha 0.15-0.55 with a strong limb fade (dots near
              the edge fade to near-transparent). */
           const a = 0.15 + 0.40 * depth;
           ctx.globalAlpha = 1;
-          ctx.fillStyle = dark
-            ? `rgba(74,98,116,${a})`
-            : `rgba(52,72,92,${a})`;
+          ctx.fillStyle = `rgba(35,49,70,${a})`;
           ctx.beginPath();
           ctx.arc(x, y, DOT_R, 0, Math.PI * 2);
           ctx.fill();
@@ -299,17 +289,16 @@ export default function CountryGlobe({ data, dark }) {
       }
       ctx.globalAlpha = 1;
 
-      /* Thin glow ring around the globe, like Cloudflare's: a soft
-         diffused halo, not a bright sharp ring. Cloudflare's halo
-         is very faint and wide (sampled 2026-11-10: barely above
-         the page background), so the stroke alpha is low and the
-         blur is wide, in the same muted slate blue as the dots. */
+      /* Thin glow ring around the globe: a soft diffused halo,
+         not a bright sharp ring. The user's Light-turquoise
+         #5BC6FD for the ring and Sky blue #B0F2FF for the glow,
+         low alpha and a wide blur so it fades out gently. */
       ctx.save();
       ctx.beginPath();
       ctx.arc(SIZE / 2, SIZE / 2, R, 0, Math.PI * 2);
-      ctx.strokeStyle = dark ? 'rgba(107,140,174,0.18)' : 'rgba(74,106,138,0.20)';
+      ctx.strokeStyle = 'rgba(91,198,253,0.18)';
       ctx.lineWidth = 1;
-      ctx.shadowColor = dark ? 'rgba(107,140,174,0.20)' : 'rgba(74,106,138,0.22)';
+      ctx.shadowColor = 'rgba(176,242,255,0.20)';
       ctx.shadowBlur = 30;
       ctx.stroke();
       ctx.restore();

@@ -99,15 +99,16 @@ export default function TopList({ title, items }) {
                       label and count, so the Meter's label/value
                       header is hidden by .meter-bar-only in index.css
                       and only the 8px track shows. The indicator
-                      gradient stops are overridden to the exact
-                      Meridian blue so the bar matches the old div. */}
+                      gradient stops use the user's dark blue
+                      --meter-fill (#005AEB), distinct from the
+                      accent, per his exact HEX palette. */}
                   <Meter
                     label={item.label}
                     showValue={false}
                     value={barPct}
                     className="meter-bar-only flex-1 min-w-0"
                     trackClassName="bg-[var(--cf-bg-track)]"
-                    indicatorClassName="from-[var(--accent)] via-[var(--accent)] to-[var(--accent)]"
+                    indicatorClassName="from-[var(--meter-fill)] via-[var(--meter-fill)] to-[var(--meter-fill)]"
                   />
                   <span className="text-[12px] leading-4 font-medium text-[var(--text)] tabular-nums w-[40px] text-right shrink-0">
                     {item.count}

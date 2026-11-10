@@ -37,11 +37,11 @@
      from the live dashboard's own tokens (OKLCH in the CF CSS) and
      the rendered pixels, user order 2026-11-10: the old #030303 /
      #0f0f0f / #30363d / #2f7cf6 were the user's own earlier picks,
-     not Cloudflare's. Page #0a0a0a, sidebar #020202, panel #0b0b0b,
-     border #121212, text #f5f5f5, muted #a1a1a1, accent #2b7fff. */
-  --cf-bg-page: #0a0a0a;
-  --cf-bg-sidebar: #020202;
-  --cf-bg-panel: #0b0b0b;
+     not Cloudflare's. Page #030303, sidebar #030303, panel #0F0F0F,
+     border #121212, text #f5f5f5, muted #808080, accent #4290F0. */
+  --cf-bg-page: #030303;
+  --cf-bg-sidebar: #030303;
+  --cf-bg-panel: #0F0F0F;
   --cf-bg-subtle: #171717;
   --cf-bg-hover: #262626;
   --cf-bg-track: #262626;
@@ -51,42 +51,45 @@
 
   --cf-text-primary: #f5f5f5;
   --cf-text-secondary: #d4d4d4;
-  --cf-text-muted: #a1a1a1;
-  --cf-text-faint: #737373;
+  --cf-text-muted: #808080;
+  --cf-text-faint: #555555;
 
   /* Accent & Brand Colors */
-  --cf-accent-blue: #2b7fff;
-  --cf-accent-blue-hover: #086fff;
+  --cf-accent-blue: #4290F0;
+  --cf-accent-blue-hover: #005AEB;
+  /* Meter bar fill (user's exact HEX, 2026-11-10): the dark blue
+     inside the Top N table meters, distinct from the accent. */
+  --meter-fill: #005AEB;
   --cf-brand-orange: #f6821f;
 
   /* HTTP Status Code Colors */
-  --cf-status-2xx: #2b7fff;
+  --cf-status-2xx: #4290F0;
   --cf-status-3xx: #009966;
   --cf-status-4xx: #fb2c36;
-  --cf-status-5xx: #ec4899;
+  --cf-status-5xx: #E8649D;
 
   /* KPI Deltas & Indicators */
   --cf-delta-up: #009966;
   --cf-delta-down: #fb2c36;
-  --cf-delta-neutral: #a1a1a1;
-  --cf-delta-spike: #ec4899;
+  --cf-delta-neutral: #808080;
+  --cf-delta-spike: #E8649D;
 
   /* Chart 10-Color Series */
-  --cf-chart-1: #2b7fff;
-  --cf-chart-2: #f59e0b;
+  --cf-chart-1: #4290F0;
+  --cf-chart-2: #EEB720;
   --cf-chart-3: #009966;
-  --cf-chart-4: #8b5cf6;
-  --cf-chart-5: #ec4899;
-  --cf-chart-6: #06b6d4;
+  --cf-chart-4: #8D58EE;
+  --cf-chart-5: #E8649D;
+  --cf-chart-6: #50C3B6;
   --cf-chart-7: #fb2c36;
   --cf-chart-8: #84cc16;
   --cf-chart-9: #f97316;
   --cf-chart-10: #6366f1;
 
   /* Globe Colors */
-  --cf-globe-land: rgba(43, 127, 255, 0.75);
+  --cf-globe-land: rgba(66, 144, 240, 0.75);
   --cf-globe-ocean: rgba(100, 130, 170, 0.15);
-  --cf-globe-glow: rgba(43, 127, 255, 0.9);
+  --cf-globe-glow: rgba(66, 144, 240, 0.9);
   --cf-globe-marker: rgba(140, 200, 255, 0.95);
 
   /* Typography Stacks (Cloudflare's exact stacks, from the
@@ -195,21 +198,21 @@ html.light {
 /* ── Kumo UI token overrides ──
    Kumo's own dark tokens are lighter than Meridian's Cloudflare theme,
    so these unlayered rules remap them to Cloudflare's exact colours:
-   page #0a0a0a, panels #0b0b0b, accent #2b7fff, border #121212.
+   page #030303, panels #0F0F0F, accent #4290F0, border #121212.
    Unlayered beats Kumo's @layer base values, and html.light (higher
    specificity) beats this :root block, so both themes stay correct. */
 :root {
-  --color-kumo-canvas: #0a0a0a;
-  --color-kumo-base: #0b0b0b;
+  --color-kumo-canvas: #030303;
+  --color-kumo-base: #0F0F0F;
   --color-kumo-elevated: #171717;
-  --color-kumo-recessed: #020202;
+  --color-kumo-recessed: #030303;
   --color-kumo-tint: #262626;
   --color-kumo-line: #121212;
   --color-kumo-hairline: #121212;
-  --color-kumo-brand: #2b7fff;
-  --color-kumo-brand-hover: #086fff;
-  --color-kumo-focus: #2b7fff;
-  --color-kumo-control: #0b0b0b;
+  --color-kumo-brand: #4290F0;
+  --color-kumo-brand-hover: #005AEB;
+  --color-kumo-focus: #4290F0;
+  --color-kumo-control: #0F0F0F;
   --color-kumo-interact: #121212;
   --color-kumo-fill: #262626;
   --color-kumo-fill-hover: #404040;
@@ -217,12 +220,12 @@ html.light {
   --color-kumo-contrast: #f5f5f5;
   --text-color-kumo-default: #f5f5f5;
   --text-color-kumo-strong: #f5f5f5;
-  --text-color-kumo-subtle: #a1a1a1;
-  --text-color-kumo-inactive: #737373;
-  --text-color-kumo-placeholder: #a1a1a1;
-  --text-color-kumo-brand: #2b7fff;
-  --text-color-kumo-link: #2b7fff;
-  --text-color-kumo-info: #2b7fff;
+  --text-color-kumo-subtle: #808080;
+  --text-color-kumo-inactive: #555555;
+  --text-color-kumo-placeholder: #808080;
+  --text-color-kumo-brand: #4290F0;
+  --text-color-kumo-link: #4290F0;
+  --text-color-kumo-info: #4290F0;
 }
 
 html.light {
@@ -258,8 +261,8 @@ html.light {
    beats Kumo's layered ring/background utilities. */
 .live-refresh-on {
   --tw-ring-color: var(--accent);
-  background-color: rgba(43, 127, 255, 0.12);
-  box-shadow: 0 0 0 1px rgba(43, 127, 255, 0.35), 0 0 10px rgba(43, 127, 255, 0.25);
+  background-color: rgba(66, 144, 240, 0.12);
+  box-shadow: 0 0 0 1px rgba(66, 144, 240, 0.35), 0 0 10px rgba(66, 144, 240, 0.25);
   color: var(--accent);
 }
 

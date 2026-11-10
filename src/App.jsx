@@ -355,7 +355,7 @@ export default function App() {
     document.documentElement.dataset.mode = dark ? 'dark' : 'light';
     try { localStorage.setItem('meridian-theme', dark ? 'dark' : 'light'); } catch {}
     const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute('content', dark ? '#0a0a0a' : '#f6f8fa');
+    if (meta) meta.setAttribute('content', dark ? '#030303' : '#f6f8fa');
   }, [dark]);
 
   /* Lenis smooth inertia scroll for mouse wheel only. Touch stays

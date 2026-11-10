@@ -1,33 +1,34 @@
-/* Cloudflare 10-color categorical series (spec section 2.1), in rank
-   order: the top series gets #2b7fff, the next #f59e0b, and so on,
-   cycling with modulo past 10. Exact CF values, user order 2026-11-10. */
+/* 10-color categorical series, in rank order: the top series gets
+   the user's Blue, the next Gold, and so on, cycling with modulo
+   past 10. User's exact HEX palette, 2026-11-10 (replaces the
+   Cloudflare values). */
 export const CF_SERIES = [
-  '#2b7fff', '#f59e0b', '#009966', '#8b5cf6', '#ec4899',
-  '#06b6d4', '#fb2c36', '#84cc16', '#f97316', '#6366f1',
+  '#4290F0', '#EEB720', '#009966', '#8D58EE', '#E8649D',
+  '#50C3B6', '#fb2c36', '#84cc16', '#f97316', '#6366f1',
 ];
 
-/* Device colors follow the series order: Desktop #2b7fff,
-   Mobile #f59e0b, Tablet #ec4899, Unknown #8b5cf6. */
+/* Device colors follow the series order: Desktop Blue,
+   Mobile Gold, Tablet Pink, Unknown Lavender. */
 export const DEVICE_COLORS = {
-  Desktop: '#2b7fff',
-  Mobile: '#f59e0b',
-  Tablet: '#ec4899',
-  Unknown: '#8b5cf6',
+  Desktop: '#4290F0',
+  Mobile: '#EEB720',
+  Tablet: '#E8649D',
+  Unknown: '#8D58EE',
 };
 
 /* Event-type colors, shared by the status bar, the events table
-   badges, and the status strip: pageview blue, project click amber,
-   resume download green, contact purple. */
+   badges, and the status strip: pageview Blue, project click Gold,
+   resume download green, contact Lavender. */
 export const EVENT_COLORS = {
-  pageview: '#2b7fff',
-  project_click: '#f59e0b',
+  pageview: '#4290F0',
+  project_click: '#EEB720',
   resume_download: '#009966',
-  contact: '#8b5cf6',
+  contact: '#8D58EE',
 };
 
-/* Accent blue per theme (dark #2b7fff, light #0969da). Use in canvas
+/* Accent blue per theme (dark #4290F0, light #0969da). Use in canvas
    code where CSS var(--accent) cannot reach. */
-export const accentFor = (dark) => (dark ? '#2b7fff' : '#0969da');
+export const accentFor = (dark) => (dark ? '#4290F0' : '#0969da');
 
 /* Compact number format (1150 -> "1.15k"), shared by KPI values,
    chart legends, and status bar legends. */

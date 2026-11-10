@@ -16,10 +16,10 @@ const CARDS = [
   { label: 'Resume downloads', seriesKey: 'resumeDownloads', prevKey: 'resumeDownloads', color: CF_SERIES[3] },
 ];
 
-/* Delta colour (user order 2026-11-10): greyed #A1A1A1 for all cards,
+/* Delta colour (user order 2026-11-10): greyed #808080 for all cards,
    up and down alike. The arrow direction still shows up/down. */
-const DELTA_UP = '#A1A1A1';
-const DELTA_DOWN = '#A1A1A1';
+const DELTA_UP = '#808080';
+const DELTA_DOWN = '#808080';
 
 /* Sparkline on Kumo's custom Chart (ECharts). The TimeseriesChart
    cannot be a 50px sparkline: it has no axis-hide props and its grid

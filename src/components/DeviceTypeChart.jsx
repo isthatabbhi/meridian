@@ -4,7 +4,7 @@ import { Text } from "@cloudflare/kumo/components/text";
 import echarts from '../lib/echarts';
 
 /* Device colors follow Cloudflare's categorical series order:
-   Desktop #2b7fff, Mobile #f59e0b, Tablet #ec4899, Unknown #8b5cf6.
+   Desktop #4290F0, Mobile #EEB720, Tablet #E8649D, Unknown #8D58EE.
    Assigned by device name so the pie slice and the legend dot always
    match, even when a device has no data. */
 import { DEVICE_COLORS } from '../lib/palette';
@@ -81,7 +81,7 @@ export default function DeviceTypeChart({ data, dark }) {
            the card bg colour separates the segments so they do not
            merge, and borderRadius rounds each segment's ends. */
         itemStyle: {
-          borderColor: dark ? '#0b0b0b' : '#ffffff',
+          borderColor: dark ? '#0F0F0F' : '#ffffff',
           borderWidth: 3,
           borderRadius: 6,
         },
