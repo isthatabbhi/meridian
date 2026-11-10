@@ -90,7 +90,7 @@ export default function TopList({ title, items }) {
                       (py-2 + 16px line). */}
                   <div className="w-1/2 shrink-0 min-w-0 text-left">
                     <Tooltip content={item.label} side="top" className="block w-full text-left">
-                      <span className="block text-left text-[12px] leading-4 text-[var(--text-2)] truncate hover:text-[var(--text)] transition-colors">
+                      <span className="block text-left text-[12px] leading-4 font-bold text-[var(--text-2)] truncate hover:text-[var(--text)] transition-colors">
                         {item.label}
                       </span>
                     </Tooltip>
@@ -110,7 +110,7 @@ export default function TopList({ title, items }) {
                     trackClassName="bg-[var(--cf-bg-track)]"
                     indicatorClassName="from-[var(--meter-fill)] via-[var(--meter-fill)] to-[var(--meter-fill)]"
                   />
-                  <span className="text-[12px] leading-4 font-medium text-[var(--text)] tabular-nums w-[40px] text-right shrink-0">
+                  <span className="text-[12px] leading-4 font-bold text-[var(--text)] tabular-nums w-[40px] text-right shrink-0">
                     {item.count}
                   </span>
                   {/* Row hover actions, like Cloudflare's Top N tables:
