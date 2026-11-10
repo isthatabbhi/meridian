@@ -4,7 +4,7 @@ import { Text } from "@cloudflare/kumo/components/text";
 import echarts from '../lib/echarts';
 
 /* Device colors follow Cloudflare's categorical series order:
-   Desktop #2f7cf6, Mobile #f59e0b, Tablet #ec4899, Unknown #8b5cf6.
+   Desktop #2b7fff, Mobile #f59e0b, Tablet #ec4899, Unknown #8b5cf6.
    Assigned by device name so the pie slice and the legend dot always
    match, even when a device has no data. */
 import { DEVICE_COLORS } from '../lib/palette';
@@ -28,7 +28,7 @@ export default function DeviceTypeChart({ data, dark }) {
     const tooltip = {
       trigger: 'item',
       backgroundColor: dark ? '#161b22' : '#ffffff',
-      borderColor: dark ? '#30363d' : '#d0d7de',
+      borderColor: dark ? '#121212' : '#d0d7de',
       borderWidth: 1,
       padding: [8, 12],
       transitionDuration: 0.1,
@@ -56,7 +56,7 @@ export default function DeviceTypeChart({ data, dark }) {
           labelLine: { show: false },
           itemStyle: { borderColor: 'transparent', borderWidth: 0 },
           emphasis: { scale: false },
-          data: [{ name: 'empty', value: 1, itemStyle: { color: dark ? '#21262d' : '#e5e7eb' } }],
+          data: [{ name: 'empty', value: 1, itemStyle: { color: dark ? '#262626' : '#e5e7eb' } }],
         }],
       };
     }
@@ -81,7 +81,7 @@ export default function DeviceTypeChart({ data, dark }) {
            the card bg colour separates the segments so they do not
            merge, and borderRadius rounds each segment's ends. */
         itemStyle: {
-          borderColor: dark ? '#0f0f0f' : '#ffffff',
+          borderColor: dark ? '#0b0b0b' : '#ffffff',
           borderWidth: 3,
           borderRadius: 6,
         },

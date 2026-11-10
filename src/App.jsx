@@ -4,6 +4,7 @@ import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarMenu, S
 import { DropdownMenu } from "@cloudflare/kumo/components/dropdown";
 import { SkeletonLine } from "@cloudflare/kumo/components/loader";
 import { Text } from "@cloudflare/kumo/components/text";
+import { Tooltip } from "@cloudflare/kumo/components/tooltip";
 import { PageHeader } from "./components/kumo/page-header/page-header";
 import { fetchStats } from './lib/api';
 import StatusCodesBar from './components/StatusCodesBar';
@@ -164,14 +165,19 @@ function SidebarSiteCard() {
 }
 
 /* Bottom-left expand / collapse button. Kumo's SidebarTrigger.
-   The panel icon stays static, no rotation, on the user's order. */
+   The panel icon stays static, no rotation, like Cloudflare's:
+   the sidebar slides over 200ms and the icon does not rotate,
+   only the tooltip label flips between Collapse and Expand. */
 function SidebarExpandToggle() {
+  const { open } = useSidebar();
   return (
-    <SidebarTrigger>
-      <span className="inline-flex">
-        <PanelLeftIcon />
-      </span>
-    </SidebarTrigger>
+    <Tooltip content={open ? 'Collapse sidebar' : 'Expand sidebar'} side="top">
+      <SidebarTrigger>
+        <span className="inline-flex">
+          <PanelLeftIcon />
+        </span>
+      </SidebarTrigger>
+    </Tooltip>
   );
 }
 
@@ -183,14 +189,25 @@ function MeridianSidebar({ view, onNavigate, dark, onPeek }) {
        On desktop this would collapse the rail, so leave it alone. */
     if (isMobile) setOpen(false);
   };
-  /* Hover to peek, like Cloudflare's dashboard sidebar: hovering
-     the collapsed rail expands it, moving the mouse away collapses
-     it again, no click needed. This only sets the transient peek
-     state; the pinned open state is separate, so a sidebar that is
-     open by default on desktop does not collapse when the mouse
-     moves away. Desktop only; on mobile the sidebar is a drawer,
-     hover does nothing. */
-  const handleMouseEnter = () => { if (!isMobile) onPeek(true); };
+  /* Hover to peek: hovering the collapsed rail expands it,
+     moving the mouse away collapses it again, no click needed.
+     This only sets the transient peek state; the pinned open
+     state is separate, so a sidebar that is open by default on
+     desktop does not collapse when the mouse moves away. The
+     footer is excluded: hovering the collapse-button area does
+     not expand the rail, only the button itself works there.
+     Desktop only; on mobile the sidebar is a drawer, hover
+     does nothing. */
+  const handleMouseEnter = (e) => {
+    if (isMobile) return;
+    /* The footer (collapse button) does not trigger the hover
+       expand: only the button itself works there, like
+       Cloudflare, where hovering the collapsed rail does nothing
+       until you click. Entering via the footer leaves the rail
+       collapsed. */
+    if (e.target && e.target.closest && e.target.closest('[data-sidebar="footer"]')) return;
+    onPeek(true);
+  };
   const handleMouseLeave = () => { if (!isMobile) onPeek(false); };
   return (
     <Sidebar
@@ -316,7 +333,7 @@ export default function App() {
     document.documentElement.dataset.mode = dark ? 'dark' : 'light';
     try { localStorage.setItem('meridian-theme', dark ? 'dark' : 'light'); } catch {}
     const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute('content', dark ? '#030303' : '#f6f8fa');
+    if (meta) meta.setAttribute('content', dark ? '#0a0a0a' : '#f6f8fa');
   }, [dark]);
 
   /* Lenis smooth inertia scroll for mouse wheel only. Touch stays
@@ -524,13 +541,13 @@ export default function App() {
       collapsible="icon"
       animationDuration={200}
       className="bg-[var(--bg)] text-[var(--text)] font-sans"
-      /* Sidebar background matches the page colour in each theme:
-         #030303 in dark, the light page colour in light mode.
-         A fixed #030303 here made the sidebar black in light mode.
-         Kumo sets --sidebar-bg to var(--color-kumo-base) on this
-         wrapper via a class, so it is set here as an inline style,
-         which beats the class. --bg is the theme page colour. */
-      style={{ '--sidebar-width': '220px', '--sidebar-width-icon': '55px', '--sidebar-easing': 'cubic-bezier(0.4, 0, 0.2, 1)', '--sidebar-bg': 'var(--bg)' }}
+      /* Sidebar background is Cloudflare's sidebar colour, NOT the
+         page colour: #020202 in dark (page is #0a0a0a), white in
+         light mode. A fixed #030303 here made the sidebar black in
+         light mode. Kumo sets --sidebar-bg to var(--color-kumo-base)
+         on this wrapper via a class, so it is set here as an inline
+         style, which beats the class. */
+      style={{ '--sidebar-width': '220px', '--sidebar-width-icon': '55px', '--sidebar-easing': 'cubic-bezier(0.4, 0, 0.2, 1)', '--sidebar-bg': 'var(--cf-bg-sidebar)' }}
     >
       <MeridianSidebar view={view} onNavigate={(v) => setView(v)} dark={dark} onPeek={setSidebarPeek} />
 
@@ -546,7 +563,7 @@ export default function App() {
               with the mobile hamburger as its leading slot, actions
               on the right. No tabs (the sidebar handles Overview /
               Events navigation) and no breadcrumbs. ── */}
-          <div className="sticky top-0 z-40 bg-[var(--bg)] border-b border-[var(--border)] -mx-3 px-3 md:-mx-6 md:px-6 mb-4 print:hidden h-[58px] flex items-center">
+          <div className="sticky top-0 z-40 bg-[var(--bg)] border-b border-[var(--border)] -mx-3 px-3 pt-[15px] pb-[14px] md:-mx-6 md:px-6 mb-4 print:hidden">
             <PageHeader
               spacing="compact"
               title={view === 'events' ? 'Recent events' : 'Traffic overview'}

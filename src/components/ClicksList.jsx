@@ -41,7 +41,7 @@ export default function ClicksList({ data, loading }) {
                   target="_blank"
                   rel="noopener noreferrer"
                   title={url}
-                  className="text-xs text-[#2f7cf6] hover:underline truncate max-w-[85%]"
+                  className="text-xs text-[#2b7fff] hover:underline truncate max-w-[85%]"
                 >
                   {shorten(url)}
                 </a>
@@ -51,7 +51,7 @@ export default function ClicksList({ data, loading }) {
               </div>
               <div className="h-2 rounded-full bg-[var(--surface-2)] overflow-hidden">
                 <div
-                  className="h-full rounded-full bg-[#2f7cf6] transition-all duration-500"
+                  className="h-full rounded-full bg-[#2b7fff] transition-all duration-500"
                   style={{ width: `${(count / max) * 100}%` }}
                 />
               </div>

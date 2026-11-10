@@ -88,7 +88,7 @@ export default function TopList({ title, items }) {
                       full width and left-aligns; the tooltip only shows
                       the full label on hover. Row keeps its 28px pitch
                       (py-2 + 16px line). */}
-                  <div className="flex-1 min-w-0 text-left">
+                  <div className="w-1/2 shrink-0 min-w-0 text-left">
                     <Tooltip content={item.label} side="top" className="block w-full text-left">
                       <span className="block text-left text-[12px] leading-4 text-[var(--text-2)] truncate hover:text-[var(--text)] transition-colors">
                         {item.label}
@@ -105,7 +105,7 @@ export default function TopList({ title, items }) {
                     label={item.label}
                     showValue={false}
                     value={barPct}
-                    className="meter-bar-only w-[80px] shrink-0"
+                    className="meter-bar-only flex-1 min-w-0"
                     trackClassName="bg-[var(--cf-bg-track)]"
                     indicatorClassName="from-[var(--accent)] via-[var(--accent)] to-[var(--accent)]"
                   />

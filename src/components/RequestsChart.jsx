@@ -21,7 +21,7 @@ const COUNTRY_NAMES = {
 };
 
 /* Cloudflare 10-color categorical series, in rank order (top country
-   gets #2f7cf6). Cycles with modulo past 10 countries. */
+   gets #2b7fff). Cycles with modulo past 10 countries. */
 import { CF_SERIES as CHART_COLORS, formatCompact } from '../lib/palette';
 
 import { istDayKey, istKeyToMs, msToIstKey, formatMsIndian, formatHourKeyShort, formatHourOnly, formatDayKeyShort } from '../lib/dates';
@@ -174,10 +174,10 @@ export default function RequestsChart({ data, since, timeRange, dark }) {
      cluttered and slanted (user order 2026-11-09). Daily ranges use
      a time axis ticking once per day. */
   const options = useMemo(() => {
-    const axisColor = dark ? '#8b949e' : '#6e7781';
-    const gridColor = dark ? '#30363d' : '#e5e7eb';
+    const axisColor = dark ? '#a1a1a1' : '#6e7781';
+    const gridColor = dark ? '#121212' : '#e5e7eb';
     const tooltipBg = dark ? '#161b22' : '#ffffff';
-    const tooltipBorder = dark ? '#30363d' : '#d0d7de';
+    const tooltipBorder = dark ? '#121212' : '#d0d7de';
     const tooltipText = dark ? '#ffffff' : '#1f2328';
     const is24h = timeRange === '24h';
     return {
@@ -204,7 +204,7 @@ export default function RequestsChart({ data, since, timeRange, dark }) {
           const header = is24h
             ? echarts.format.encodeHTML(params[0].name)
             : echarts.format.encodeHTML(formatTooltipTime(params[0].value[0]));
-          const headerColor = dark ? '#8b949e' : '#6e7781';
+          const headerColor = dark ? '#a1a1a1' : '#6e7781';
           const lines = [`<div style="margin-bottom:4px;font-size:11px;color:${headerColor}">${header}</div>`];
           for (const p of params) {
             const name = echarts.format.encodeHTML(p.seriesName);

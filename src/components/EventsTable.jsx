@@ -70,7 +70,7 @@ function TypeBadge({ type }) {
     );
   }
   /* Pageview uses var(--accent) so the badge follows the theme
-     (dark #2f7cf6, light #0969da); the other event colors are the
+     (dark #2b7fff, light #0969da); the other event colors are the
      same in both themes. */
   const style = type === 'pageview'
     ? { color: 'var(--accent)', backgroundColor: 'color-mix(in srgb, var(--accent) 15%, transparent)' }

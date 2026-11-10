@@ -10,7 +10,7 @@ export default function StatusStrip({ data, loading }) {
   if (!data) return null;
 
   const segments = [
-    { label: 'Pageviews',         count: data.pageviews        ?? 0, color: '#2f7cf6' },
+    { label: 'Pageviews',         count: data.pageviews        ?? 0, color: '#2b7fff' },
     { label: 'Project clicks',    count: data.projectClicks    ?? 0, color: '#8b5cf6' },
     { label: 'Resume downloads',  count: data.resumeDownloads  ?? 0, color: '#f59e0b' },
     { label: 'Contact events',    count: data.contactEvents    ?? 0, color: '#10b981' },

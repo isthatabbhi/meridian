@@ -1,15 +1,15 @@
 /* Cloudflare 10-color categorical series (spec section 2.1), in rank
-   order: the top series gets #2f7cf6, the next #f59e0b, and so on,
-   cycling with modulo past 10. */
+   order: the top series gets #2b7fff, the next #f59e0b, and so on,
+   cycling with modulo past 10. Exact CF values, user order 2026-11-10. */
 export const CF_SERIES = [
-  '#2f7cf6', '#f59e0b', '#22c55e', '#8b5cf6', '#ec4899',
-  '#06b6d4', '#ef4444', '#84cc16', '#f97316', '#6366f1',
+  '#2b7fff', '#f59e0b', '#009966', '#8b5cf6', '#ec4899',
+  '#06b6d4', '#fb2c36', '#84cc16', '#f97316', '#6366f1',
 ];
 
-/* Device colors follow the series order: Desktop #2f7cf6,
+/* Device colors follow the series order: Desktop #2b7fff,
    Mobile #f59e0b, Tablet #ec4899, Unknown #8b5cf6. */
 export const DEVICE_COLORS = {
-  Desktop: '#2f7cf6',
+  Desktop: '#2b7fff',
   Mobile: '#f59e0b',
   Tablet: '#ec4899',
   Unknown: '#8b5cf6',
@@ -19,15 +19,15 @@ export const DEVICE_COLORS = {
    badges, and the status strip: pageview blue, project click amber,
    resume download green, contact purple. */
 export const EVENT_COLORS = {
-  pageview: '#2f7cf6',
+  pageview: '#2b7fff',
   project_click: '#f59e0b',
-  resume_download: '#22c55e',
+  resume_download: '#009966',
   contact: '#8b5cf6',
 };
 
-/* Accent blue per theme (dark #2f7cf6, light #0969da). Use in canvas
+/* Accent blue per theme (dark #2b7fff, light #0969da). Use in canvas
    code where CSS var(--accent) cannot reach. */
-export const accentFor = (dark) => (dark ? '#2f7cf6' : '#0969da');
+export const accentFor = (dark) => (dark ? '#2b7fff' : '#0969da');
 
 /* Compact number format (1150 -> "1.15k"), shared by KPI values,
    chart legends, and status bar legends. */

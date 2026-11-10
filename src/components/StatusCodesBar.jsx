@@ -57,7 +57,7 @@ export default function StatusCodesBar({ data, dark }) {
          above the card. */
       appendToBody: true,
       backgroundColor: dark ? '#161b22' : '#ffffff',
-      borderColor: dark ? '#30363d' : '#d0d7de',
+      borderColor: dark ? '#121212' : '#d0d7de',
       borderWidth: 1,
       padding: [8, 12],
       transitionDuration: 0.1,

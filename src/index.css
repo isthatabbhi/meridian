@@ -33,54 +33,60 @@
    (#030303 / #0f0f0f), overriding the file's #0d1117 / #161b22.
    Every other token is Cloudflare's exact value. */
 :root {
-  /* Color Tokens (Dark Theme - Default) */
-  --cf-bg-page: #030303;
-  --cf-bg-panel: #0f0f0f;
-  --cf-bg-subtle: #21262d;
-  --cf-bg-hover: #21262d;
-  --cf-bg-track: #21262d;
+  /* Color Tokens (Dark Theme - Default). Exact Cloudflare values,
+     from the live dashboard's own tokens (OKLCH in the CF CSS) and
+     the rendered pixels, user order 2026-11-10: the old #030303 /
+     #0f0f0f / #30363d / #2f7cf6 were the user's own earlier picks,
+     not Cloudflare's. Page #0a0a0a, sidebar #020202, panel #0b0b0b,
+     border #121212, text #f5f5f5, muted #a1a1a1, accent #2b7fff. */
+  --cf-bg-page: #0a0a0a;
+  --cf-bg-sidebar: #020202;
+  --cf-bg-panel: #0b0b0b;
+  --cf-bg-subtle: #171717;
+  --cf-bg-hover: #262626;
+  --cf-bg-track: #262626;
 
-  --cf-border-panel: #30363d;
-  --cf-border-hover: #8b949e;
+  --cf-border-panel: #121212;
+  --cf-border-hover: #404040;
 
-  --cf-text-primary: #ffffff;
-  --cf-text-secondary: #c9d1d9;
-  --cf-text-muted: #8b949e;
-  --cf-text-faint: #484f58;
+  --cf-text-primary: #f5f5f5;
+  --cf-text-secondary: #d4d4d4;
+  --cf-text-muted: #a1a1a1;
+  --cf-text-faint: #737373;
 
   /* Accent & Brand Colors */
-  --cf-accent-blue: #2f7cf6;
-  --cf-accent-blue-hover: #2868d8;
-  --cf-brand-orange: #f38020;
+  --cf-accent-blue: #2b7fff;
+  --cf-accent-blue-hover: #086fff;
+  --cf-brand-orange: #f6821f;
 
   /* HTTP Status Code Colors */
-  --cf-status-2xx: #2f7cf6;
-  --cf-status-3xx: #22c55e;
-  --cf-status-4xx: #ef4444;
+  --cf-status-2xx: #2b7fff;
+  --cf-status-3xx: #009966;
+  --cf-status-4xx: #fb2c36;
   --cf-status-5xx: #ec4899;
 
   /* KPI Deltas & Indicators */
-  --cf-delta-up: #22c55e;
-  --cf-delta-down: #ef4444;
-  --cf-delta-neutral: #8b949e;
+  --cf-delta-up: #009966;
+  --cf-delta-down: #fb2c36;
+  --cf-delta-neutral: #a1a1a1;
   --cf-delta-spike: #ec4899;
 
   /* Chart 10-Color Series */
-  --cf-chart-1: #2f7cf6;
+  --cf-chart-1: #2b7fff;
   --cf-chart-2: #f59e0b;
-  --cf-chart-3: #22c55e;
+  --cf-chart-3: #009966;
   --cf-chart-4: #8b5cf6;
   --cf-chart-5: #ec4899;
   --cf-chart-6: #06b6d4;
-  --cf-chart-7: #ef4444;
+  --cf-chart-7: #fb2c36;
   --cf-chart-8: #84cc16;
   --cf-chart-9: #f97316;
   --cf-chart-10: #6366f1;
 
   /* Globe Colors */
-  --cf-globe-land: rgba(47, 124, 246, 0.75);
+  --cf-globe-land: rgba(43, 127, 255, 0.75);
   --cf-globe-ocean: rgba(100, 130, 170, 0.15);
-  --cf-globe-glow: rgba(47, 124, 246, 0.9);
+  --cf-globe-glow: rgba(43, 127, 255, 0.9);
   --cf-globe-marker: rgba(140, 200, 255, 0.95);
 
   /* Typography Stacks (Cloudflare's exact stacks, from the
@@ -145,6 +151,7 @@
 
 html.light {
   --cf-bg-page: #f6f8fa;
+  --cf-bg-sidebar: #ffffff;
   --cf-bg-panel: #ffffff;
   --cf-bg-subtle: #f3f4f6;
   --cf-bg-hover: #f3f4f6;
@@ -186,37 +193,36 @@ html.light {
 }
 
 /* ── Kumo UI token overrides ──
-   Kumo's own dark tokens are lighter than Meridian's Cloudflare theme
-   (its base is #232323, Meridian's panels are #0f0f0f), so these
-   unlayered rules remap them to Meridian's exact colours: page
-   #030303, panels #0f0f0f, accent #2f7cf6. Unlayered beats Kumo's
-   @layer base values, and html.light (higher specificity) beats this
-   :root block, so both themes stay correct. */
+   Kumo's own dark tokens are lighter than Meridian's Cloudflare theme,
+   so these unlayered rules remap them to Cloudflare's exact colours:
+   page #0a0a0a, panels #0b0b0b, accent #2b7fff, border #121212.
+   Unlayered beats Kumo's @layer base values, and html.light (higher
+   specificity) beats this :root block, so both themes stay correct. */
 :root {
-  --color-kumo-canvas: #030303;
-  --color-kumo-base: #0f0f0f;
-  --color-kumo-elevated: #161616;
-  --color-kumo-recessed: #030303;
-  --color-kumo-tint: #21262d;
-  --color-kumo-line: #30363d;
-  --color-kumo-hairline: #30363d;
-  --color-kumo-brand: #2f7cf6;
-  --color-kumo-brand-hover: #2868d8;
-  --color-kumo-focus: #2f7cf6;
-  --color-kumo-control: #0f0f0f;
-  --color-kumo-interact: #30363d;
-  --color-kumo-fill: #21262d;
-  --color-kumo-fill-hover: #30363d;
-  --color-kumo-overlay: #21262d;
-  --color-kumo-contrast: #ffffff;
-  --text-color-kumo-default: #ffffff;
-  --text-color-kumo-strong: #ffffff;
-  --text-color-kumo-subtle: #8b949e;
-  --text-color-kumo-inactive: #484f58;
-  --text-color-kumo-placeholder: #8b949e;
-  --text-color-kumo-brand: #2f7cf6;
-  --text-color-kumo-link: #2f7cf6;
-  --text-color-kumo-info: #2f7cf6;
+  --color-kumo-canvas: #0a0a0a;
+  --color-kumo-base: #0b0b0b;
+  --color-kumo-elevated: #171717;
+  --color-kumo-recessed: #020202;
+  --color-kumo-tint: #262626;
+  --color-kumo-line: #121212;
+  --color-kumo-hairline: #121212;
+  --color-kumo-brand: #2b7fff;
+  --color-kumo-brand-hover: #086fff;
+  --color-kumo-focus: #2b7fff;
+  --color-kumo-control: #0b0b0b;
+  --color-kumo-interact: #121212;
+  --color-kumo-fill: #262626;
+  --color-kumo-fill-hover: #404040;
+  --color-kumo-overlay: #262626;
+  --color-kumo-contrast: #f5f5f5;
+  --text-color-kumo-default: #f5f5f5;
+  --text-color-kumo-strong: #f5f5f5;
+  --text-color-kumo-subtle: #a1a1a1;
+  --text-color-kumo-inactive: #737373;
+  --text-color-kumo-placeholder: #a1a1a1;
+  --text-color-kumo-brand: #2b7fff;
+  --text-color-kumo-link: #2b7fff;
+  --text-color-kumo-info: #2b7fff;
 }
 
 html.light {
@@ -252,8 +258,8 @@ html.light {
    beats Kumo's layered ring/background utilities. */
 .live-refresh-on {
   --tw-ring-color: var(--accent);
-  background-color: rgba(47, 124, 246, 0.12);
-  box-shadow: 0 0 0 1px rgba(47, 124, 246, 0.35), 0 0 10px rgba(47, 124, 246, 0.25);
+  background-color: rgba(43, 127, 255, 0.12);
+  box-shadow: 0 0 0 1px rgba(43, 127, 255, 0.35), 0 0 10px rgba(43, 127, 255, 0.25);
   color: var(--accent);
 }
 
