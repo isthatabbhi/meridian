@@ -38,7 +38,11 @@ const COUNTRY_NAMES = {
 };
 
 const SIZE = 280;
-const ROT_SPEED_DEG = 0.23; // 0.004 rad/frame, the old globe's speed
+/* Rotation speed matched to Cloudflare's dashboard (user video
+   2026-11-10): the old 0.23 deg/frame (0.004 rad/frame) spun
+   visibly faster than CF's globe. 0.12 deg/frame is the calmer
+   Cloudflare pace. */
+const ROT_SPEED_DEG = 0.12;
 /* Cloudflare's globe only moves horizontally (verified by the user,
    2026-11-10): the rotation is around the vertical axis only, the
    latitude never changes. FIXED_PHI is the initial tilt that centres
@@ -259,24 +263,35 @@ export default function CountryGlobe({ data, dark }) {
         const depth = Math.max(0, 1 - Math.sqrt(dx * dx + dy * dy) / R);
         const code = d.code;
         if (code && traffic.has(code)) {
-          /* Traffic country: solid blue, larger dots so the region
-             reads as a solid mass, like Cloudflare's dashboard.
-             Every country with traffic is highlighted, not just
-             the top one. Cloudflare does not enlarge the hovered
-             country, so all traffic countries draw at the same
-             size; the list-hovered country is shown by the globe
-             facing it and the tooltip, not by bigger dots. */
-          ctx.globalAlpha = 0.55 + 0.45 * depth;
-          ctx.fillStyle = dark ? '#2b7fff' : '#0969da';
+          /* Traffic country: muted slate blue, not the vivid
+             accent. Cloudflare's traffic countries render as a
+             desaturated slate blue (#3f5573-#49617e sampled from
+             their dashboard video, 2026-11-10), much dimmer than
+             Meridian's old vivid #2b7fff. Alpha 0.30-0.60 with a
+             strong limb fade so the region reads as a soft mass,
+             not a bright solid. Every country with traffic is
+             highlighted, not just the top one. Cloudflare does
+             not enlarge the hovered country, so all traffic
+             countries draw at the same size; the list-hovered
+             country is shown by the globe facing it and the
+             tooltip, not by bigger dots. */
+          ctx.globalAlpha = 0.30 + 0.30 * depth;
+          ctx.fillStyle = dark ? '#6b8cae' : '#4a6a8a';
           ctx.beginPath();
           ctx.arc(x, y, TOP_R, 0, Math.PI * 2);
           ctx.fill();
         } else {
-          const a = 0.5 + 0.45 * depth;
+          /* Non-traffic land: very dim desaturated slate
+             blue-grey. Cloudflare's land renders around
+             #0f1823-#2d3641 (sampled 2026-11-10), a quiet
+             dark blue-grey, not Meridian's old vivid blue.
+             Alpha 0.15-0.55 with a strong limb fade (dots near
+             the edge fade to near-transparent). */
+          const a = 0.15 + 0.40 * depth;
           ctx.globalAlpha = 1;
           ctx.fillStyle = dark
-            ? `rgba(43,127,255,${a})`
-            : `rgba(9,105,218,${a})`;
+            ? `rgba(74,98,116,${a})`
+            : `rgba(52,72,92,${a})`;
           ctx.beginPath();
           ctx.arc(x, y, DOT_R, 0, Math.PI * 2);
           ctx.fill();
@@ -285,15 +300,17 @@ export default function CountryGlobe({ data, dark }) {
       ctx.globalAlpha = 1;
 
       /* Thin glow ring around the globe, like Cloudflare's: a soft
-         diffused halo, not a bright sharp ring. Low alpha and a
-         wide Gaussian blur (shadowBlur) so it fades out gently. */
+         diffused halo, not a bright sharp ring. Cloudflare's halo
+         is very faint and wide (sampled 2026-11-10: barely above
+         the page background), so the stroke alpha is low and the
+         blur is wide, in the same muted slate blue as the dots. */
       ctx.save();
       ctx.beginPath();
       ctx.arc(SIZE / 2, SIZE / 2, R, 0, Math.PI * 2);
-      ctx.strokeStyle = dark ? 'rgba(43,127,255,0.28)' : 'rgba(9,105,218,0.28)';
+      ctx.strokeStyle = dark ? 'rgba(107,140,174,0.18)' : 'rgba(74,106,138,0.20)';
       ctx.lineWidth = 1;
-      ctx.shadowColor = dark ? 'rgba(43,127,255,0.30)' : 'rgba(9,105,218,0.30)';
-      ctx.shadowBlur = 22;
+      ctx.shadowColor = dark ? 'rgba(107,140,174,0.20)' : 'rgba(74,106,138,0.22)';
+      ctx.shadowBlur = 30;
       ctx.stroke();
       ctx.restore();
 
