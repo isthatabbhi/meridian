@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Chart } from "@cloudflare/kumo/components/chart";
 import { Text } from "@cloudflare/kumo/components/text";
 import echarts from '../lib/echarts';
@@ -19,6 +19,14 @@ const TYPES = [
    Hovering a segment shows "Label count (pct%)", like before. */
 export default function StatusCodesBar({ data, dark }) {
   const total = data ? data.totalEvents : 0;
+  /* Hovered segment label (user order 2026-11-10): ECharts'
+     built-in emphasis focus 'series' did not dim the others
+     when the FIRST segment (Pageview) was hovered first; it only
+     started working after another segment had been hovered.
+     So the dimming is done manually here: the hovered segment
+     stays at full opacity, the rest drop to 0.45, driven by
+     the chart's mouseover/mouseout events. */
+  const [hovered, setHovered] = useState(null);
 
   const segments = useMemo(() => {
     if (!data || total === 0) return TYPES.map((t) => ({ ...t, count: 0, pct: 0 }));
@@ -85,6 +93,12 @@ export default function StatusCodesBar({ data, dark }) {
       data: [{ value: s.pct, count: s.count, label: s.label, pct: s.pct }],
       itemStyle: {
         color: s.color,
+        /* Manual hover dimming: the hovered segment stays full
+           colour, the rest drop to 0.45, like Cloudflare's status
+           bar (verified live 2026-11-10). No emphasis/blur here;
+           the built-in focus 'series' failed on the first segment
+           on first hover, so opacity is set directly. */
+        opacity: hovered === null || hovered === s.label ? 1 : 0.45,
         /* Round the outer ends of the bar, like the old divs. */
         borderRadius:
           visible.length === 1 ? [6, 6, 6, 6]
@@ -92,18 +106,8 @@ export default function StatusCodesBar({ data, dark }) {
           : i === visible.length - 1 ? [0, 6, 6, 0]
           : [0, 0, 0, 0],
       },
-      /* Hover shows the tooltip only. Cloudflare's status bar does NOT
-         dim the other segments on hover (verified live 2026-11-10:
-         the hovered segment stays full colour, the rest stay full
-         colour too). So no focus/blur emphasis here. */
-      /* Cloudflare's status bar dims the other segments while one
-         is hovered (verified live 2026-11-10: the hovered segment
-         stays full colour, the rest drop to about half brightness).
-         emphasis focus 'series' plus a blur opacity does that. */
-      emphasis: { focus: 'series' },
-      blur: { itemStyle: { opacity: 0.45 } },
     })),
-  }), [visible, dark]);
+  }), [visible, dark, hovered]);
 
   return (
     <div className="rounded-[12px] border border-[var(--border)] bg-[var(--surface)] w-full">
@@ -124,7 +128,17 @@ export default function StatusCodesBar({ data, dark }) {
             (verified live 2026-11-10). The bar is 32px tall, like
             CF. The container is transparent; the chart fills it. */}
         <div className="h-[32px] w-full rounded-[6px] overflow-hidden">
-          <Chart echarts={echarts} options={options} height={32} isDarkMode={dark} />
+          <Chart
+            echarts={echarts}
+            options={options}
+            height={32}
+            isDarkMode={dark}
+            onEvents={{
+              mouseover: (p) => { if (p && p.seriesName) setHovered(p.seriesName); },
+              mouseout: () => setHovered(null),
+              globalout: () => setHovered(null),
+            }}
+          />
         </div>
       </div>
     </div>

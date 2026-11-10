@@ -72,6 +72,27 @@ function lerpColor(lo, hi, t) {
    India (lat 20.6); it stays fixed for drag, auto-rotation and the
    list-hover swing. */
 const FIXED_PHI = -20.6;
+/* Shortest signed angular difference, degrees, in [-180, 180].
+   Works for any magnitude of current/target, unlike the old
+   ((target - lambda + 540) % 360) - 180, which broke once the
+   auto-rotation lambda grew large: JS % is a remainder, not a
+   true modulo, so for a large lambda it returned a delta far
+   outside [-180, 180] and the globe spun multiple turns to
+   reach a hovered country. This always takes the nearest side. */
+const shortestDelta = (target, current) => {
+  let d = (target - current) % 360;
+  if (d > 180) d -= 360;
+  else if (d < -180) d += 360;
+  return d;
+};
+/* Keep a longitude in [-180, 180] so it never grows without
+   bound from auto-rotation. */
+const normLambda = (l) => {
+  let n = l % 360;
+  if (n > 180) n -= 360;
+  else if (n < -180) n += 360;
+  return n;
+};
 /* 1-degree dot grid (2026-11-09, user order: India border must match
    the reference exactly). Dots are ~1.55px apart on the 280px globe,
    so the radii are smaller than the old 2-degree grid (DOT_R was 1.3,
@@ -259,9 +280,13 @@ export default function CountryGlobe({ data, dark }) {
          hovered. */
       const target = swingTargetRef.current;
       if (target) {
-        const dLambda = ((target[0] - lambda + 540) % 360) - 180;
+        /* Swing to the hovered country from the nearest side:
+           shortestDelta always picks the short way around, so
+           the globe never spins multiple turns. Lambda is kept
+           normalised so the delta stays meaningful. */
+        const dLambda = shortestDelta(target[0], lambda);
         const dPhi = target[1] - phi;
-        lambda += dLambda * 0.12;
+        lambda = normLambda(lambda + dLambda * 0.12);
         phi += dPhi * 0.12;
         if (Math.abs(dLambda) < 0.1 && Math.abs(dPhi) < 0.1) {
           lambda = target[0];
@@ -269,7 +294,7 @@ export default function CountryGlobe({ data, dark }) {
         }
         rotRef.current = [lambda, phi];
       } else if (!pausedRef.current && !draggingRef.current && !hoveredCodeRef.current) {
-        rotRef.current = [lambda + ROTATION_SPEED * deltaTime, phi];
+        rotRef.current = [normLambda(lambda + ROTATION_SPEED * deltaTime), phi];
       }
       projection.rotate(rotRef.current);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -421,7 +446,7 @@ export default function CountryGlobe({ data, dark }) {
          left-right, the latitude never changes. */
       const s = dragStartRef.current;
       const lambda = s.lambda + (e.clientX - s.x) * 0.25;
-      rotRef.current = [lambda, FIXED_PHI];
+      rotRef.current = [normLambda(lambda), FIXED_PHI];
     }
   };
   const onPointerUp = () => {
@@ -455,8 +480,11 @@ export default function CountryGlobe({ data, dark }) {
             className={`absolute pointer-events-none whitespace-nowrap rounded-[8px] border border-[var(--border)] px-3 py-2 text-[12px] leading-4 opacity-0 transition-opacity duration-100 z-10 shadow-[0_4px_12px_rgba(0,0,0,0.35)] ${dark ? 'bg-[#161b22] text-white' : 'bg-white text-[#1f2328]'}`}
           />
         </div>
-        {/* Thin vertical divider between globe and list, md+ only. */}
-        <div className="hidden md:block w-px self-stretch bg-[var(--border)] shrink-0" />
+        {/* Thin vertical divider between globe and list, md+ only.
+            Brighter than the card border (user order 2026-11-10):
+            uses the chrome divider colour #333333, same as the
+            header, sidebar and Top N heading dividers. */}
+        <div className="hidden md:block w-px self-stretch bg-[var(--cf-border-chrome)] shrink-0" />
         {/* Country list: plain scrollable column, NO bordered box.
             data-lenis-prevent keeps this inner scroll area native. */}
         <div data-lenis-prevent className="thin-scroll flex-1 min-w-0 w-full overflow-y-auto overflow-x-hidden max-h-[340px] space-y-0.5">

@@ -48,6 +48,11 @@ export default function TopList({ title, items }) {
      exclude changes that shrink the list release the capture. */
   const listRef = useRef(null);
   const [needsScroll, setNeedsScroll] = useState(false);
+  /* Whether the list is scrolled down (user order 2026-11-10):
+     when scrolling, the top row must not hard-touch the top line,
+     so a top fade is shown only while scrollTop > 0. At rest the
+     first row sits on its own top padding, fully visible. */
+  const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
     const el = listRef.current;
     if (!el) return;
@@ -67,7 +72,7 @@ export default function TopList({ title, items }) {
   };
 
   return (
-    <LayerCard className="rounded-[12px] flex flex-col h-[250px] pt-[10px] pb-4">
+    <LayerCard className="rounded-[12px] flex flex-col h-[250px] pb-4">
       <div className="px-5 py-4 border-b border-[var(--cf-border-chrome)] flex items-center justify-between gap-2">
         <Text variant="secondary" size="xs" bold>{title}</Text>
         {filterLabel && (
@@ -80,7 +85,7 @@ export default function TopList({ title, items }) {
           </button>
         )}
       </div>
-      <div ref={listRef} {...(needsScroll ? { 'data-lenis-prevent': true } : {})} className={`px-5 pt-3 pb-5 flex-1 overflow-y-auto thin-scroll${needsScroll ? ' overscroll-contain' : ''}`} style={needsScroll ? { maskImage: 'linear-gradient(to bottom, black calc(100% - 28px), transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black calc(100% - 28px), transparent 100%)' } : undefined}>
+      <div ref={listRef} {...(needsScroll ? { 'data-lenis-prevent': true } : {})} onScroll={(e) => setScrolled(e.currentTarget.scrollTop > 0)} className={`px-5 pt-5 pb-5 flex-1 overflow-y-auto thin-scroll${needsScroll ? ' overscroll-contain' : ''}`} style={needsScroll ? { maskImage: scrolled ? 'linear-gradient(to bottom, transparent 0, black 28px, black calc(100% - 28px), transparent 100%)' : 'linear-gradient(to bottom, black calc(100% - 28px), transparent 100%)', WebkitMaskImage: scrolled ? 'linear-gradient(to bottom, transparent 0, black 28px, black calc(100% - 28px), transparent 100%)' : 'linear-gradient(to bottom, black calc(100% - 28px), transparent 100%)' } : undefined}>
         {items.length === 0 ? (
           <p className="text-[12px] leading-4 text-[var(--faint)] py-6 text-center">No data</p>
         ) : visible.length === 0 ? (
