@@ -37,7 +37,14 @@ const COUNTRY_NAMES = {
   RO: 'Romania', CZ: 'Czech Republic', AT: 'Austria', CH: 'Switzerland',
 };
 
-const SIZE = 280;
+/* Canvas size 320 (was 280). The globe sphere stays radius 134,
+   the same as before, but the canvas now has 20px of transparent
+   room on each side so the halo (which reaches radius 156) is
+   not clipped by the square canvas edge. The clip made the halo
+   look like a square shadow around the globe (user order
+   2026-11-10). */
+const SIZE = 320;
+const GLOBE_R = 134;
 /* Rotation speed in degrees per second (user-supplied loop,
    2026-11-10). Delta-time based, so the speed is the same on
    any frame rate: 18 deg/sec. The old fixed 0.20 deg/frame was
@@ -187,12 +194,12 @@ export default function CountryGlobe({ data, dark }) {
     canvas.height = SIZE * dpr;
 
     const projection = geoOrthographic()
-      .scale(SIZE / 2 - 6)
+      .scale(GLOBE_R)
       .translate([SIZE / 2, SIZE / 2])
       .clipAngle(90);
     projectionRef.current = projection;
 
-    const R = SIZE / 2 - 6;
+    const R = GLOBE_R;
     let raf;
     /* Previous frame timestamp for the delta-time rotation loop
        (user-supplied pattern). 0 on the first frame so the first
@@ -431,11 +438,11 @@ export default function CountryGlobe({ data, dark }) {
         </Text>
       </div>
       <div className="px-5 pb-5 flex flex-col md:flex-row gap-5 flex-1 md:items-stretch">
-        {/* Globe column: dot-grid canvas, 280px. */}
+        {/* Globe column: dot-grid canvas, 320px (sphere radius 134). */}
         <div className="relative flex flex-col items-center justify-center shrink-0">
           <canvas
             ref={canvasRef}
-            className="w-[280px] h-[280px] cursor-grab active:cursor-grabbing touch-none"
+            className="w-[320px] h-[320px] cursor-grab active:cursor-grabbing touch-none"
             onPointerDown={onPointerDown}
             onPointerMove={onPointerMove}
             onPointerUp={onPointerUp}
