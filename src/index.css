@@ -166,6 +166,10 @@ html.light {
 
   --cf-border-panel: #d0d7de;
   --cf-border-hover: #afb8c1;
+  /* Chrome dividers (header, sidebar, footer, Top N headings) are
+     #333333 in dark mode, but that reads as a black line on white
+     cards. In light mode they use the light grey panel border. */
+  --cf-border-chrome: #d0d7de;
 
   --cf-delta-up: #1a7f37;
   --cf-delta-down: #cf222e;
