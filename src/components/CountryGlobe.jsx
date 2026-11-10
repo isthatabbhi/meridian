@@ -43,6 +43,22 @@ const SIZE = 280;
    visibly faster than CF's globe. 0.12 deg/frame is the calmer
    Cloudflare pace. */
 const ROT_SPEED_DEG = 0.12;
+/* Cloudflare's exact globe dot colours, read from their GlobeView
+   bundle (cf-GlobeView.7e024a4a.js, 2026-11-10). The land texture
+   is rgb(100, 140, 190) at alpha 0.45. Each traffic country's
+   colour is interpolated from #82b6ff (lowest) to #0051C3
+   (highest) by its share of the max traffic value, at alpha
+   0.7 + 0.3 * share. Countries with no traffic get #82b6ff at
+   alpha 0.25 (the land base underneath still shows). */
+const CF_LAND_RGB = [100, 140, 190];
+const CF_SCALE_LO = [130, 182, 255]; /* #82b6ff */
+const CF_SCALE_HI = [0, 81, 195]; /* #0051C3 */
+function lerpColor(lo, hi, t) {
+  const r = Math.round(lo[0] + (hi[0] - lo[0]) * t);
+  const g = Math.round(lo[1] + (hi[1] - lo[1]) * t);
+  const b = Math.round(lo[2] + (hi[2] - lo[2]) * t);
+  return `rgb(${r}, ${g}, ${b})`;
+}
 /* Cloudflare's globe only moves horizontally (verified by the user,
    2026-11-10): the rotation is around the vertical axis only, the
    latitude never changes. FIXED_PHI is the initial tilt that centres
@@ -128,6 +144,11 @@ export default function CountryGlobe({ data, dark }) {
   const swingTargetRef = useRef(null);
   const countriesRef = useRef(countries);
   const trafficCodesRef = useRef(trafficCodes);
+  /* Per-country traffic values and the max, for Cloudflare's exact
+     choropleth scale (see the draw loop): each traffic country's
+     dot colour is interpolated by its share of the max. */
+  const trafficValuesRef = useRef(new Map(Object.entries(countries)));
+  const maxCountRef = useRef(maxCount);
   /* Country hovered in the list (Cloudflare behavior, user order
      2026-11-10): hovering a list row makes the globe swing to face
      that country and shows a "Name · count" tooltip on the globe.
@@ -152,6 +173,10 @@ export default function CountryGlobe({ data, dark }) {
 
   useEffect(() => { countriesRef.current = countries; }, [JSON.stringify(countries)]);
   useEffect(() => { trafficCodesRef.current = trafficCodes; }, [trafficCodes]);
+  useEffect(() => {
+    trafficValuesRef.current = new Map(Object.entries(countries));
+    maxCountRef.current = maxCount;
+  }, [JSON.stringify(countries), maxCount]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -262,26 +287,32 @@ export default function CountryGlobe({ data, dark }) {
         const depth = Math.max(0, 1 - Math.sqrt(dx * dx + dy * dy) / R);
         const code = d.code;
         if (code && traffic.has(code)) {
-          /* Traffic country: the user's Blue #0095FF. Alpha
-             0.30-0.60 with a strong limb fade so the region reads
-             as a soft mass, not a bright solid. Every country with
+          /* Traffic country: Cloudflare's exact choropleth scale.
+             t is this country's share of the max traffic value
+             (top country t=1). Colour interpolates #82b6ff (low)
+             to #0051C3 (high); alpha is 0.7 + 0.3 * t. The depth
+             factor keeps the sphere shading (limb fade) while the
+             centre matches CF's exact values. Every country with
              traffic is highlighted, not just the top one.
              Cloudflare does not enlarge the hovered country, so
              all traffic countries draw at the same size; the
              list-hovered country is shown by the globe facing it
              and the tooltip, not by bigger dots. */
-          ctx.globalAlpha = 0.30 + 0.30 * depth;
-          ctx.fillStyle = '#0095FF';
+          const value = trafficValuesRef.current.get(code) || 0;
+          const max = maxCountRef.current || 1;
+          const t = max > 0 ? value / max : 0;
+          ctx.globalAlpha = (0.7 + 0.3 * t) * (0.35 + 0.65 * depth);
+          ctx.fillStyle = lerpColor(CF_SCALE_LO, CF_SCALE_HI, t);
           ctx.beginPath();
           ctx.arc(x, y, TOP_R, 0, Math.PI * 2);
           ctx.fill();
         } else {
-          /* Non-traffic land: the user's Blue-grey #233146.
-             Alpha 0.15-0.55 with a strong limb fade (dots near
-             the edge fade to near-transparent). */
-          const a = 0.15 + 0.40 * depth;
-          ctx.globalAlpha = 1;
-          ctx.fillStyle = `rgba(35,49,70,${a})`;
+          /* Non-traffic land: Cloudflare's exact land texture
+             colour rgb(100, 140, 190) at alpha 0.45. The depth
+             factor keeps the sphere shading (limb fade) while
+             the centre matches CF's exact value. */
+          ctx.globalAlpha = 0.45 * (0.35 + 0.65 * depth);
+          ctx.fillStyle = `rgb(${CF_LAND_RGB[0]}, ${CF_LAND_RGB[1]}, ${CF_LAND_RGB[2]})`;
           ctx.beginPath();
           ctx.arc(x, y, DOT_R, 0, Math.PI * 2);
           ctx.fill();
