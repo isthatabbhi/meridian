@@ -67,7 +67,7 @@ export default function TopList({ title, items }) {
   };
 
   return (
-    <LayerCard className="rounded-[12px] flex flex-col h-[250px] pb-4">
+    <LayerCard className="rounded-[12px] flex flex-col h-[250px] pt-[10px] pb-4">
       <div className="px-5 py-4 border-b border-[var(--cf-border-chrome)] flex items-center justify-between gap-2">
         <Text variant="secondary" size="xs" bold>{title}</Text>
         {filterLabel && (
