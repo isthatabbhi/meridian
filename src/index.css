@@ -47,6 +47,10 @@
   --cf-bg-track: #262626;
 
   --cf-border-panel: #121212;
+  /* Chrome divider lines (user order 2026-11-10): the header,
+     sidebar and footer lines use #333333, distinct from the
+     #121212 card borders. */
+  --cf-border-chrome: #333333;
   --cf-border-hover: #404040;
 
   --cf-text-primary: #f5f5f5;
@@ -207,8 +211,10 @@ html.light {
   --color-kumo-elevated: #171717;
   --color-kumo-recessed: #030303;
   --color-kumo-tint: #262626;
-  --color-kumo-line: #121212;
-  --color-kumo-hairline: #121212;
+  /* Divider lines (user order 2026-11-10): the sidebar and
+     header lines use #333333. */
+  --color-kumo-line: #333333;
+  --color-kumo-hairline: #333333;
   --color-kumo-brand: #4290F0;
   --color-kumo-brand-hover: #005AEB;
   --color-kumo-focus: #4290F0;

@@ -585,7 +585,7 @@ export default function App() {
               with the mobile hamburger as its leading slot, actions
               on the right. No tabs (the sidebar handles Overview /
               Events navigation) and no breadcrumbs. ── */}
-          <div className="sticky top-0 z-40 bg-[var(--bg)] border-b border-[var(--border)] -mx-3 px-3 pt-[15px] pb-[14px] md:-mx-6 md:px-6 mb-4 print:hidden">
+          <div className="sticky top-0 z-40 bg-[var(--bg)] border-b border-[var(--cf-border-chrome)] -mx-3 px-3 pt-[15px] pb-[14px] md:-mx-6 md:px-6 mb-4 print:hidden">
             <PageHeader
               spacing="compact"
               title={view === 'events' ? 'Recent events' : 'Traffic overview'}
@@ -727,16 +727,7 @@ export default function App() {
             </div>
           )}
 
-          {/* ── Demo data banner: shown when the live /api/stats fetch
-              fails and the dashboard falls back to the last recorded
-              snapshot (KV list quota exhausted until 11 Nov 5:30 AM
-              IST). Live data resumes automatically once the endpoint
-              answers again. ── */}
-          {data?.demo && (
-            <div className="mb-4 px-4 py-2 rounded-[8px] border text-[12px] leading-4" style={{ borderColor: '#EEB720', backgroundColor: 'color-mix(in srgb, #EEB720 10%, transparent)', color: '#EEB720' }}>
-              Demo data, last recorded 10 Nov 2026. Live data resumes 11 Nov 5:30 AM IST.
-            </div>
-          )}
+
 
           {/* ── Loading: Kumo SkeletonLine placeholders shaped like the
               dashboard panels, uniform 1.5s linear shimmer like
@@ -819,7 +810,7 @@ export default function App() {
         </div>
 
         {/* Footer, like the FinGuard site */}
-        <footer className={`fixed bottom-0 right-0 z-40 print:hidden border-t border-[var(--border)] bg-[var(--bg)] px-4 h-12 flex items-center justify-between gap-2 text-xs text-[var(--muted)] transition-[left] duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] left-0 ${sidebarOpen ? 'md:left-[220px]' : 'md:left-[55px]'}`}>
+        <footer className={`fixed bottom-0 right-0 z-40 print:hidden border-t border-[var(--cf-border-chrome)] bg-[var(--bg)] px-4 h-12 flex items-center justify-between gap-2 text-xs text-[var(--muted)] transition-[left] duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] left-0 ${sidebarOpen ? 'md:left-[220px]' : 'md:left-[55px]'}`}>
           <span className="flex items-center gap-1.5">
             <img src="/india-flag.png" alt="India" width="17" height="11" className="shrink-0 rounded-[2px] shadow-[0_0_1px_rgba(255,255,255,0.35)] object-cover" />
             Bengaluru
