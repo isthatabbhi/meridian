@@ -311,6 +311,28 @@ export default function App() {
   const [sidebarPinned, setSidebarPinned] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 768);
   const [sidebarPeek, setSidebarPeek] = useState(false);
   const sidebarOpen = sidebarPinned || sidebarPeek;
+  /* Auto-collapse / auto-expand on window resize (user order
+     2026-11-10): when the window is forced below half the screen
+     width the side panel collapses to the rail, and when it goes
+     back above half it expands again. Only the crossing of the
+     threshold changes the pinned state, so dragging the window
+     around on one side of it does not fight the manual toggle. */
+  const narrowRef = useRef(null);
+  useEffect(() => {
+    const halfScreen = () => {
+      const sw = typeof window !== 'undefined' && window.screen ? window.screen.width : 0;
+      return sw > 0 ? sw / 2 : 1024;
+    };
+    const applyAuto = () => {
+      const narrow = window.innerWidth < halfScreen();
+      if (narrowRef.current === narrow) return;
+      narrowRef.current = narrow;
+      setSidebarPinned(!narrow);
+    };
+    applyAuto();
+    window.addEventListener('resize', applyAuto);
+    return () => window.removeEventListener('resize', applyAuto);
+  }, []);
   const [view, setView] = useState('overview');
   const [typeFilter, setTypeFilter] = useState('all');
   const [copied, setCopied] = useState(false);
@@ -553,7 +575,7 @@ export default function App() {
 
       {/* Main content, flexed beside the sidebar (55px rail / 220px expanded) */}
       <main className="flex-1 min-w-0 min-h-screen">
-        <div className="mx-auto max-w-[1600px] px-3 pb-16 md:px-6 w-full">
+        <div className="px-3 pb-16 md:px-6 w-full">
           {/* ── Header row, locked (sticky) at the top so the
               Traffic overview / Recent events title and actions
               stay visible while scrolling. Same bar in both views,

@@ -37,7 +37,7 @@ const COUNTRY_NAMES = {
   RO: 'Romania', CZ: 'Czech Republic', AT: 'Austria', CH: 'Switzerland',
 };
 
-const BASE_SIZE = 280;
+const SIZE = 280;
 const ROT_SPEED_DEG = 0.23; // 0.004 rad/frame, the old globe's speed
 /* Cloudflare's globe only moves horizontally (verified by the user,
    2026-11-10): the rotation is around the vertical axis only, the
@@ -106,27 +106,6 @@ export default function CountryGlobe({ data, dark }) {
   const canvasRef = useRef(null);
   const tipRef = useRef(null);
   const projectionRef = useRef(null);
-  const colRef = useRef(null);
-  /* Auto-resize to window size (user order 2026-11-10): the globe
-     is no longer a fixed 280px. A ResizeObserver on the globe
-     column measures its width whenever the window (and the card)
-     resizes, and the canvas redraws at that size, capped at 420px
-     so it never crowds the country list, floored at 200px. Dot
-     radii scale with the size so the dot-grid look stays the same.
-     The other charts already resize through Kumo Chart's own
-     ResizeObserver; the globe was the one fixed-size element. */
-  const [size, setSize] = useState(BASE_SIZE);
-  useEffect(() => {
-    const el = colRef.current;
-    if (!el || typeof ResizeObserver === 'undefined') return;
-    const ro = new ResizeObserver((entries) => {
-      const w = entries[0]?.contentRect?.width;
-      if (!w) return;
-      setSize(Math.round(Math.min(Math.max(w, 200), 420)));
-    });
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
   /* Rotation as [lambda, phi] degrees. Starts centred on India
      (lon 78.9, lat 20.6), user order 2026-11-09: the globe should
      always start rotating right from India. */
@@ -175,21 +154,16 @@ export default function CountryGlobe({ data, dark }) {
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     const dpr = window.devicePixelRatio || 1;
-    canvas.width = size * dpr;
-    canvas.height = size * dpr;
+    canvas.width = SIZE * dpr;
+    canvas.height = SIZE * dpr;
 
     const projection = geoOrthographic()
-      .scale(size / 2 - 6)
-      .translate([size / 2, size / 2])
+      .scale(SIZE / 2 - 6)
+      .translate([SIZE / 2, SIZE / 2])
       .clipAngle(90);
     projectionRef.current = projection;
 
-    const R = size / 2 - 6;
-    /* Dot radii scale with the globe so the dot-grid density and
-       the traffic-country mass look the same at any size. */
-    const scale = size / BASE_SIZE;
-    const dotR = DOT_R * scale;
-    const topR = TOP_R * scale;
+    const R = SIZE / 2 - 6;
     let raf;
 
     const updateTip = () => {
@@ -253,13 +227,13 @@ export default function CountryGlobe({ data, dark }) {
       }
       projection.rotate(rotRef.current);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.clearRect(0, 0, size, size);
+      ctx.clearRect(0, 0, SIZE, SIZE);
 
       /* Ocean disc, solid fill so the sphere reads as a filled globe,
          not hollow. Dark uses Cloudflare's page colour #0a0a0a, one
          step darker than the card #0b0b0b it sits on. */
       ctx.beginPath();
-      ctx.arc(size / 2, size / 2, R, 0, Math.PI * 2);
+      ctx.arc(SIZE / 2, SIZE / 2, R, 0, Math.PI * 2);
       ctx.fillStyle = dark ? '#0a0a0a' : '#e5e7eb';
       ctx.fill();
 
@@ -280,8 +254,8 @@ export default function CountryGlobe({ data, dark }) {
         const p = projection([d.lon, d.lat]);
         if (!p) continue;
         const [x, y] = p;
-        const dx = x - size / 2;
-        const dy = y - size / 2;
+        const dx = x - SIZE / 2;
+        const dy = y - SIZE / 2;
         const depth = Math.max(0, 1 - Math.sqrt(dx * dx + dy * dy) / R);
         const code = d.code;
         if (code && traffic.has(code)) {
@@ -295,7 +269,7 @@ export default function CountryGlobe({ data, dark }) {
           ctx.globalAlpha = 0.55 + 0.45 * depth;
           ctx.fillStyle = dark ? '#2b7fff' : '#0969da';
           ctx.beginPath();
-          ctx.arc(x, y, topR, 0, Math.PI * 2);
+          ctx.arc(x, y, TOP_R, 0, Math.PI * 2);
           ctx.fill();
         } else {
           const a = 0.5 + 0.45 * depth;
@@ -304,7 +278,7 @@ export default function CountryGlobe({ data, dark }) {
             ? `rgba(43,127,255,${a})`
             : `rgba(9,105,218,${a})`;
           ctx.beginPath();
-          ctx.arc(x, y, dotR, 0, Math.PI * 2);
+          ctx.arc(x, y, DOT_R, 0, Math.PI * 2);
           ctx.fill();
         }
       }
@@ -315,7 +289,7 @@ export default function CountryGlobe({ data, dark }) {
          wide Gaussian blur (shadowBlur) so it fades out gently. */
       ctx.save();
       ctx.beginPath();
-      ctx.arc(size / 2, size / 2, R, 0, Math.PI * 2);
+      ctx.arc(SIZE / 2, SIZE / 2, R, 0, Math.PI * 2);
       ctx.strokeStyle = dark ? 'rgba(43,127,255,0.28)' : 'rgba(9,105,218,0.28)';
       ctx.lineWidth = 1;
       ctx.shadowColor = dark ? 'rgba(43,127,255,0.30)' : 'rgba(9,105,218,0.30)';
@@ -329,7 +303,7 @@ export default function CountryGlobe({ data, dark }) {
     };
     raf = requestAnimationFrame(draw);
     return () => cancelAnimationFrame(raf);
-  }, [dark, size]);
+  }, [dark]);
 
   /* Pointer handlers: drag rotates, hover pauses. Direct globe hover
      (Cloudflare behavior, verified live 2026-11-10): the pointer
@@ -346,7 +320,7 @@ export default function CountryGlobe({ data, dark }) {
     const sinCenterLat = Math.sin(centerLatRad);
     const cosCenterLat = Math.cos(centerLatRad);
     let best = null;
-    let bestD = HOVER_R * (size / BASE_SIZE);
+    let bestD = HOVER_R;
     for (const d of dotData) {
       if (!d.code) continue;
       const cosC = sinCenterLat * d.sinLat + cosCenterLat * d.cosLat * Math.cos(d.lonRad - centerLonRad);
@@ -398,31 +372,23 @@ export default function CountryGlobe({ data, dark }) {
         </Text>
       </div>
       <div className="px-5 pb-5 flex flex-col md:flex-row gap-5 flex-1 md:items-stretch">
-        {/* Globe column: auto-resizes with the window. The column
-            takes 45% of the row on desktop (full width on mobile)
-            and the ResizeObserver sets the canvas to its width, so
-            the globe grows and shrinks with the window. The canvas
-            and its tooltip sit in a wrapper exactly the canvas
-            size, so tooltip coordinates still line up. */}
-        <div ref={colRef} className="relative flex flex-col items-center justify-center shrink-0 md:basis-[45%]">
-          <div className="relative" style={{ width: size, height: size }}>
-            <canvas
-              ref={canvasRef}
-              className="cursor-grab active:cursor-grabbing touch-none"
-              style={{ width: size, height: size }}
-              onPointerDown={onPointerDown}
-              onPointerMove={onPointerMove}
-              onPointerUp={onPointerUp}
-              onPointerEnter={() => { pausedRef.current = true; }}
-              onPointerLeave={() => { mouseRef.current = null; mouseCountryRef.current = null; pausedRef.current = false; onPointerUp(); }}
-              aria-label="Requests by country globe"
-            />
-            {/* Hover tooltip, updated imperatively in the draw loop. */}
-            <div
-              ref={tipRef}
-              className={`absolute pointer-events-none whitespace-nowrap rounded-[8px] border border-[var(--border)] px-3 py-2 text-[12px] leading-4 opacity-0 transition-opacity duration-100 z-10 shadow-[0_4px_12px_rgba(0,0,0,0.35)] ${dark ? 'bg-[#161b22] text-white' : 'bg-white text-[#1f2328]'}`}
-            />
-          </div>
+        {/* Globe column: dot-grid canvas, 280px. */}
+        <div className="relative flex flex-col items-center justify-center shrink-0">
+          <canvas
+            ref={canvasRef}
+            className="w-[280px] h-[280px] cursor-grab active:cursor-grabbing touch-none"
+            onPointerDown={onPointerDown}
+            onPointerMove={onPointerMove}
+            onPointerUp={onPointerUp}
+            onPointerEnter={() => { pausedRef.current = true; }}
+            onPointerLeave={() => { mouseRef.current = null; mouseCountryRef.current = null; pausedRef.current = false; onPointerUp(); }}
+            aria-label="Requests by country globe"
+          />
+          {/* Hover tooltip, updated imperatively in the draw loop. */}
+          <div
+            ref={tipRef}
+            className={`absolute pointer-events-none whitespace-nowrap rounded-[8px] border border-[var(--border)] px-3 py-2 text-[12px] leading-4 opacity-0 transition-opacity duration-100 z-10 shadow-[0_4px_12px_rgba(0,0,0,0.35)] ${dark ? 'bg-[#161b22] text-white' : 'bg-white text-[#1f2328]'}`}
+          />
         </div>
         {/* Thin vertical divider between globe and list, md+ only. */}
         <div className="hidden md:block w-px self-stretch bg-[var(--border)] shrink-0" />
