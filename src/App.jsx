@@ -43,8 +43,12 @@ function PlayIcon() {
   );
 }
 function PauseIcon() {
+  /* Cloudflare's exact pause icon (cf-icons.pages.dev/pause.svg,
+     2026-11-10): a thin circle ring with two vertical bars inside.
+     Meridian's old hand-drawn two bars with no ring looked odd
+     next to it. Paths copied verbatim from CF. */
   return (
-    <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M5.5 3h2v10h-2zM8.5 3h2v10h-2z" /></svg>
+    <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path fillRule="evenodd" d="M8 1.5A6.5 6.5 0 1014.5 8 6.507 6.507 0 008 1.5zm0 12A5.5 5.5 0 1113.5 8 5.507 5.507 0 018 13.5z" /><path d="M7 5H6v6h1V5zM10 5H9v6h1V5z" /></svg>
   );
 }
 function CalendarIcon() {
