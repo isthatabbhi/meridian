@@ -553,13 +553,6 @@ export default function App() {
               spacing="compact"
               title={view === 'events' ? 'Recent events' : 'Traffic overview'}
               leading={<HamburgerButton />}
-              breadcrumbs={(
-                <nav className="flex items-center gap-1.5 py-2 text-[12px] leading-4 text-[var(--muted)]" aria-label="Breadcrumb">
-                  <span>Meridian</span>
-                  <span aria-hidden="true">/</span>
-                  <span className="text-[var(--text-2)]">{view === 'events' ? 'Recent events' : 'Traffic overview'}</span>
-                </nav>
-              )}
             >
               {/* Icon-only on mobile so the three actions fit beside
                   the title on one row; labels return from the sm
