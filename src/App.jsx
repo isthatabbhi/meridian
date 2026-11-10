@@ -142,12 +142,12 @@ function SidebarBrand({ dark }) {
   const shown = open || isPeeking;
   const markSrc = dark ? '/meridian-mark-light.png' : '/meridian-mark.png';
   return (
-    <span className="flex items-center gap-2 min-w-0">
+    <a href="https://meridian.isthatabbhi.tech/" className="flex items-center gap-2 min-w-0 cursor-pointer">
       <img src={markSrc} alt="Meridian" className="sidebar-logo w-9 h-9 object-contain shrink-0" />
       <span className={`whitespace-nowrap overflow-hidden transition-opacity duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] text-[22px] leading-7 tracking-[-0.015em] font-semibold text-[var(--text)] ${shown ? 'opacity-100 max-w-[160px]' : 'opacity-0 max-w-0'}`}>
         Meridian
       </span>
-    </span>
+    </a>
   );
 }
 
