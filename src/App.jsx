@@ -801,12 +801,18 @@ export default function App() {
                   dashboard config (user-supplied 2026-11-10) puts the
                   globe at width 7 and the donut at width 5 of 12, so
                   the globe is wider. Side by side on wide screens,
-                  stacked below the xl breakpoint. */}
+                  stacked below the xl breakpoint. Globe card is 8 cols
+                  and the donut 4 (user order 2026-11-12): the CF 7/5
+                  ratio left the country list only 367px wide, so the
+                  bar was 130px against a 93px gap and the proportions
+                  did not match CF, where the bar is 2.5x the gap. At
+                  8 cols the list is ~480px, the bar ~245px, and the
+                  gap-to-bar ratio matches CF. */}
               <div className="animate-enter grid grid-cols-1 gap-4 xl:grid-cols-12" style={{ animationDelay: '80ms' }}>
-                <div className="xl:col-span-7">
+                <div className="xl:col-span-8">
                   <CountryGlobe data={data} dark={dark} />
                 </div>
-                <div className="xl:col-span-5">
+                <div className="xl:col-span-4">
                   <DeviceTypeChart data={data} dark={dark} />
                 </div>
               </div>
