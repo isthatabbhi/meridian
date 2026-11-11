@@ -166,8 +166,10 @@ export default function RequestsChart({ data, since, timeRange, dark }) {
 
   /* ECharts option. CF lines, applied 2026-11-11: one thin line
      series per country, straight segments (smooth:false, so spikes
-     are pointed triangles like CF, not rounded domes), NO area fill,
-     no point symbols, 1.5px. All ranges use a time axis: 24h ticks
+     are pointed triangles like CF, not rounded domes), no point
+     symbols, 1.5px, with the colour shading under the lines
+     restored on the user's word the same evening (gradient fill,
+     0.25 fading to 0.02). All ranges use a time axis: 24h ticks
      every 4 hours (splitNumber 6, CF shows "Nov 7, 04:00" style
      ticks), daily ranges tick once per day. Axis, grid and tooltip
      colours are the CF spec values: axis #8b949e, grid/tooltip
@@ -241,11 +243,20 @@ export default function RequestsChart({ data, since, timeRange, dark }) {
         return {
           name: COUNTRY_NAMES[code] || code,
           type: 'line',
-          /* CF: straight segments, no smoothing, no area fill. */
+          /* CF: straight segments, no smoothing. Colour shading
+             under the lines restored 2026-11-11 on the user's word:
+             a vertical gradient in the series colour, 0.25 opacity
+             at the line fading to 0.02 at the axis. */
           smooth: false,
           symbol: 'none',
           lineStyle: { width: 1.5, color },
           itemStyle: { color },
+          areaStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: `${color}40` },
+              { offset: 1, color: `${color}05` },
+            ]),
+          },
           emphasis: { focus: 'series' },
           data: plotData.map((row) => [istKeyToMs(row.time), row[code] || 0]),
         };
