@@ -312,8 +312,29 @@ export default function App() {
   // drawer. The bottom-left button toggles the pinned state. Hover
   // only sets a transient peek, so a default-open sidebar does not
   // collapse when the mouse moves away, and a manually collapsed
-  // rail still expands on hover and collapses on leave.
-  const [sidebarPinned, setSidebarPinned] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 768);
+  // rail still expands on hover and collapses on leave. Persisted
+  // (user order 2026-11-12): collapsing or expanding the sidebar
+  // is saved to localStorage, so a refresh or hard refresh restores
+  // it exactly as left, and vice versa. Mobile is excluded: the
+  // drawer always starts closed there, and a mobile visit must not
+  // overwrite the saved desktop choice.
+  const [sidebarPinned, setSidebarPinned] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    if (window.innerWidth < 768) return false;
+    try {
+      const saved = localStorage.getItem('meridian-sidebar-pinned');
+      if (saved === '1') return true;
+      if (saved === '0') return false;
+    } catch {}
+    return true;
+  });
+  useEffect(() => {
+    try {
+      if (typeof window !== 'undefined' && window.innerWidth >= 768) {
+        localStorage.setItem('meridian-sidebar-pinned', sidebarPinned ? '1' : '0');
+      }
+    } catch {}
+  }, [sidebarPinned]);
   const [sidebarPeek, setSidebarPeek] = useState(false);
   const sidebarOpen = sidebarPinned || sidebarPeek;
   /* Auto-fit charts when the sidebar opens/closes (user order
@@ -357,6 +378,11 @@ export default function App() {
       narrowRef.current = narrow;
       setSidebarPinned(!narrow);
     };
+    /* Seed narrowRef to the current width before the first applyAuto,
+       so the mount pass does not override the persisted sidebar
+       state (user order 2026-11-12). Auto-collapse/expand then only
+       fires on a real resize that crosses the half-screen line. */
+    narrowRef.current = window.innerWidth < 768 ? true : window.innerWidth < halfScreen();
     applyAuto();
     window.addEventListener('resize', applyAuto);
     return () => window.removeEventListener('resize', applyAuto);
