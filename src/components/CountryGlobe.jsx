@@ -506,7 +506,14 @@ export default function CountryGlobe({ data, dark }) {
                 onMouseEnter={() => setHoveredCode(code)}
                 onMouseLeave={() => setHoveredCode(null)}
               >
-                <span className="text-[12px] leading-4 text-[var(--text-2)] w-[100px] shrink-0 truncate">{name}</span>
+                {/* Country name. The label column is wide on purpose
+                    (user order 2026-11-12): CF leaves a large empty
+                    separation between the country text and the bar,
+                    about a quarter of the row. w-[165px] puts the bar
+                    start ~90px past the end of "United States", the
+                    same proportion as CF, instead of the tight ~23px
+                    the old 100px label gave. */}
+                <span className="text-[12px] leading-4 text-[var(--text-2)] w-[165px] shrink-0 truncate">{name}</span>
                 {/* Kumo Meter as the bar. The row carries its own
                     label and count, so the Meter's label/value
                     header is hidden by .meter-bar-only in index.css.
