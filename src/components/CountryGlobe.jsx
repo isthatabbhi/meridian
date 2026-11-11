@@ -494,11 +494,15 @@ export default function CountryGlobe({ data, dark }) {
           {sorted.map(([code, count]) => {
             const name = COUNTRY_NAMES[code] || code;
             const isUnknown = code === 'Unknown';
-            const barPct = (count / maxCount) * 100;
+            /* CF meter bars (user order 2026-11-11): linear to the max,
+               and even the smallest value shows a visible bar, so floor
+               a nonzero count at 3% of the track (about 5px) instead of
+               rendering 0-1px like CF never does. */
+            const barPct = count > 0 ? Math.max((count / maxCount) * 100, 3) : 0;
             return (
               <div
                 key={code}
-                className="flex items-center gap-3 rounded-[6px] px-2 py-1.5 hover:bg-[var(--surface-2)] transition-colors"
+                className="flex items-center gap-2 rounded-[6px] px-2 py-1.5 hover:bg-[var(--surface-2)] transition-colors"
                 onMouseEnter={() => setHoveredCode(code)}
                 onMouseLeave={() => setHoveredCode(null)}
               >

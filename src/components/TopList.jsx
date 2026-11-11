@@ -101,7 +101,15 @@ export default function TopList({ title, items }) {
         ) : (
           <div>
             {visible.map((item, i) => {
-              const barPct = (item.count / maxCount) * 100;
+              /* CF meter bars (user order 2026-11-11): the bar length is
+                 linear to the max, and even the smallest value shows a
+                 visible bar, so floor a nonzero count at 3% of the track
+                 (about 5px) instead of rendering 0-1px like CF never
+                 does. The label is a fixed 150px, not half the row, so
+                 the meter track takes the same large share of the row
+                 as CF's Top N tables instead of being squeezed to
+                 ~50px. */
+              const barPct = item.count > 0 ? Math.max((item.count / maxCount) * 100, 3) : 0;
               const isFiltered = filterLabel === item.label;
               return (
                 <div key={i} className="group flex items-center gap-3 rounded-[6px] px-2 py-1.5 -mx-2 h-[28px] hover:bg-[var(--surface-2)] transition-colors">
@@ -110,7 +118,7 @@ export default function TopList({ title, items }) {
                       full width and left-aligns; the tooltip only shows
                       the full label on hover. Row keeps its 28px pitch
                       (py-2 + 16px line). */}
-                  <div className="w-1/2 shrink-0 min-w-0 text-left">
+                  <div className="w-[150px] shrink-0 min-w-0 text-left">
                     <Tooltip content={item.label} side="top" className="block w-full text-left">
                       <span className="block text-left text-[12px] leading-4 font-bold text-[var(--text-2)] truncate hover:text-[var(--text)] transition-colors">
                         {item.label}
@@ -136,9 +144,11 @@ export default function TopList({ title, items }) {
                     {item.count}
                   </span>
                   {/* Row hover actions, like Cloudflare's Top N tables:
-                      Filter, Exclude, Copy. Hidden until the row is
-                      hovered (opacity-0 group-hover:opacity-100). */}
-                  <span className="flex items-center gap-0.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                      Filter, Exclude, Copy. They take no layout space
+                      until hovered (hidden, not opacity-0), so the
+                      meter track stays long; on hover they appear and
+                      the meter shrinks to make room. */}
+                  <span className="hidden group-hover:flex items-center gap-0.5 shrink-0 transition-opacity">
                     <button
                       onClick={() => setFilterLabel(isFiltered ? null : item.label)}
                       className={`p-1 rounded-[4px] cursor-pointer ${isFiltered ? 'text-[var(--accent)] bg-[var(--surface-2)]' : 'text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--surface-2)]'}`}
