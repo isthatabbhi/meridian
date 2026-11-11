@@ -3,6 +3,7 @@ import { LayerCard } from "@cloudflare/kumo/components/layer-card";
 import { Tooltip } from "@cloudflare/kumo/components/tooltip";
 import { Meter } from "@cloudflare/kumo/components/meter";
 import { Text } from "@cloudflare/kumo/components/text";
+import { useScrollEscape } from '../lib/use-scroll-escape';
 
 /* Small icon buttons that appear on a row when it is hovered, like
    Cloudflare's Top N tables (verified live 2026-11-10): Filter
@@ -48,6 +49,10 @@ export default function TopList({ title, items }) {
      exclude changes that shrink the list release the capture. */
   const listRef = useRef(null);
   const [needsScroll, setNeedsScroll] = useState(false);
+  /* Scroll escape (user order 2026-11-12): only when the user is
+     forcibly pushing past the list, 5 boundary pushes scroll the
+     whole page. Normal list scrolling is untouched. */
+  useScrollEscape(listRef, needsScroll);
   /* Whether the list is scrolled down (user order 2026-11-10):
      when scrolling, the top row must not hard-touch the top line,
      so a top fade is shown only while scrollTop > 0. At rest the

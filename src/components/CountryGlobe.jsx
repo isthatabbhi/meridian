@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { geoOrthographic } from 'd3-geo';
 import { Meter } from "@cloudflare/kumo/components/meter";
 import { Text } from "@cloudflare/kumo/components/text";
+import { useScrollEscape } from '../lib/use-scroll-escape';
 import dotGrid from '../lib/dot-grid-countries.json';
 
 /* ─────────────────────────────────────────────────────────
@@ -153,6 +154,12 @@ export default function CountryGlobe({ data, dark }) {
 
   const canvasRef = useRef(null);
   const tipRef = useRef(null);
+  /* Scroll escape (user order 2026-11-12): only when the user is
+     forcibly pushing past the country list, 5 boundary pushes scroll
+     the whole page. Normal list scrolling is untouched. The hook
+     no-ops when the list does not overflow. */
+  const listRef = useRef(null);
+  useScrollEscape(listRef, true);
   const projectionRef = useRef(null);
   /* Rotation as [lambda, phi] degrees. Starts centred on India
      (lon 78.9, lat 20.6), user order 2026-11-09: the globe should
@@ -487,7 +494,7 @@ export default function CountryGlobe({ data, dark }) {
         <div className="hidden md:block w-px self-stretch bg-[var(--cf-border-chrome)] shrink-0" />
         {/* Country list: plain scrollable column, NO bordered box.
             data-lenis-prevent keeps this inner scroll area native. */}
-        <div data-lenis-prevent className="thin-scroll flex-1 min-w-0 w-full overflow-y-auto overflow-x-hidden max-h-[340px] space-y-0.5">
+        <div ref={listRef} data-lenis-prevent className="thin-scroll flex-1 min-w-0 w-full overflow-y-auto overflow-x-hidden max-h-[340px] space-y-0.5">
           {sorted.length === 0 && (
             <p className="text-[12px] leading-4 text-[var(--muted)] py-6 text-center">No data available for this time range</p>
           )}

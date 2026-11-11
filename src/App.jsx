@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import Lenis from 'lenis';
+import { setLenis } from './lib/lenis-instance';
 import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarFooter, SidebarTrigger, SidebarGroup, SidebarGroupLabel, useSidebar } from "@cloudflare/kumo/components/sidebar";
 import { DropdownMenu } from "@cloudflare/kumo/components/dropdown";
 import { SkeletonLine } from "@cloudflare/kumo/components/loader";
@@ -408,8 +409,12 @@ export default function App() {
       rafId = requestAnimationFrame(raf);
     };
     rafId = requestAnimationFrame(raf);
+    /* Expose the instance so scroll-escape can move the whole page
+       when the user forcibly scrolls past a list. */
+    setLenis(lenis);
     return () => {
       cancelAnimationFrame(rafId);
+      setLenis(null);
       lenis.destroy();
     };
   }, []);
