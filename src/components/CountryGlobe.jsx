@@ -461,13 +461,7 @@ export default function CountryGlobe({ data, dark }) {
           Requests by country
         </Text>
       </div>
-      {/* Globe on top, country list below it at full card width
-          (user order 2026-11-11: CF-length meter bars). CF's own
-          Requests by country list is full width with long bars; the
-          old side-by-side row squeezed the list to ~367px and the
-          US bar to ~195px. Stacked, the list is ~730px wide and the
-          US bar fills ~560px of track, the same proportion as CF. */}
-      <div className="px-5 pb-5 flex flex-col gap-5 flex-1">
+      <div className="px-5 pb-5 flex flex-col md:flex-row gap-5 flex-1 md:items-stretch">
         {/* Globe column: dot-grid canvas, 320px (sphere radius 134). */}
         <div className="relative flex flex-col items-center justify-center shrink-0">
           <canvas
@@ -486,10 +480,11 @@ export default function CountryGlobe({ data, dark }) {
             className={`absolute pointer-events-none whitespace-nowrap rounded-[8px] border border-[var(--border)] px-3 py-2 text-[12px] leading-4 opacity-0 transition-opacity duration-100 z-10 shadow-[0_4px_12px_rgba(0,0,0,0.35)] ${dark ? 'bg-[#161b22] text-white' : 'bg-white text-[#1f2328]'}`}
           />
         </div>
-        {/* Thin horizontal divider between globe and list.
-            Chrome divider colour #333333, same as the header,
-            sidebar and Top N heading dividers. */}
-        <div className="h-px w-full bg-[var(--cf-border-chrome)] shrink-0" />
+        {/* Thin vertical divider between globe and list, md+ only.
+            Brighter than the card border (user order 2026-11-10):
+            uses the chrome divider colour #333333, same as the
+            header, sidebar and Top N heading dividers. */}
+        <div className="hidden md:block w-px self-stretch bg-[var(--cf-border-chrome)] shrink-0" />
         {/* Country list: plain scrollable column, NO bordered box.
             data-lenis-prevent keeps this inner scroll area native. */}
         <div data-lenis-prevent className="thin-scroll flex-1 min-w-0 w-full overflow-y-auto overflow-x-hidden max-h-[340px] space-y-0.5">
