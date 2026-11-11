@@ -507,13 +507,13 @@ export default function CountryGlobe({ data, dark }) {
                 onMouseLeave={() => setHoveredCode(null)}
               >
                 {/* Country name. The label column is wide on purpose
-                    (user order 2026-11-12, red arrow on his CF shot):
-                    CF leaves a large empty distance between the
-                    country text and the bar. On desktop the label is
-                    220px, so the gap past "United States" is ~143px,
-                    a clear CF-style distance. On mobile the label is
+                    (user order 2026-11-12, red arrow on his CF shot,
+                    then "increase more"): CF leaves a large empty
+                    distance between the country text and the bar. On
+                    desktop the label is 260px, so the gap past
+                    "United States" is ~183px. On mobile the label is
                     120px so the bar still has room in a ~350px row. */}
-                <span className="text-[12px] leading-4 text-[var(--text-2)] w-[120px] md:w-[220px] shrink-0 truncate">{name}</span>
+                <span className="text-[12px] leading-4 text-[var(--text-2)] w-[120px] md:w-[260px] shrink-0 truncate">{name}</span>
                 {/* Kumo Meter as the bar. The row carries its own
                     label and count, so the Meter's label/value
                     header is hidden by .meter-bar-only in index.css.
