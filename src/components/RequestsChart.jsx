@@ -133,58 +133,53 @@ export default function RequestsChart({ data, since, timeRange, dark }) {
   /* Tooltip timestamp: full Indian format, "08-11-2026 01:45 PM". */
   const formatTooltipTime = (ms) => formatMsIndian(ms);
 
-  /* 24h two-hour buckets: the ECharts time axis will not hold a
-     2-hour tick interval (it drifts to hourly or 4-hourly), so the
-     24h view aggregates the 15-minute buckets into 12 two-hour
-     buckets and plots them on a category axis. Each bucket label is
-     its start hour ("08 Nov, 06 AM"); the value is the sum of the
-     15-minute buckets inside the window. */
-  const twoHour = useMemo(() => {
-    if (timeRange !== '24h' || chartData.length === 0) return null;
+  /* CF analysis, 2026-11-11, from the Cloudflare Traffic overview
+     reference videos and the ui-spec: CF Requests over time is a
+     timeseries, count grouped by clientCountryName, one line per
+     country, hourly buckets in the 24h view. Its lines are straight
+     segments between points, sharp pointed spikes, NO smoothing and
+     NO area fill under the lines, thin 1.5px, no point symbols, and
+     the values sit at 0 between spikes. Meridian previously did the
+     opposite: smooth:true spline curves with a gradient area fill,
+     and 24h data aggregated into 12 two-hour buckets, so spikes
+     became rounded domes. This memo aggregates the 15-minute
+     buckets into 24 hourly rows, one per hour, so the 24h view
+     plots hourly points on the same time axis as the daily ranges,
+     and the spikes stay sharp like CF. */
+  const hourlyData = useMemo(() => {
+    if (timeRange !== '24h' || chartData.length === 0) return chartData;
     const buckets = new Map();
     for (const row of chartData) {
       const ms = istKeyToMs(row.time);
-      const d = new Date(ms);
-      /* IST hour of this bucket; floor to the even hour. */
       const ist = new Date(ms + (330 * 60 * 1000));
-      const hour = ist.getUTCHours();
-      const evenHour = hour - (hour % 2);
-      const key = `${ist.getUTCFullYear()}-${String(ist.getUTCMonth() + 1).padStart(2, '0')}-${String(ist.getUTCDate()).padStart(2, '0')} ${String(evenHour).padStart(2, '0')}:00`;
+      const key = `${ist.getUTCFullYear()}-${String(ist.getUTCMonth() + 1).padStart(2, '0')}-${String(ist.getUTCDate()).padStart(2, '0')} ${String(ist.getUTCHours()).padStart(2, '0')}:00`;
       if (!buckets.has(key)) {
-        buckets.set(key, { labelMs: Date.UTC(ist.getUTCFullYear(), ist.getUTCMonth(), ist.getUTCDate(), evenHour) - (330 * 60 * 1000), values: {} });
+        const r = { time: key };
+        topCountries.forEach((c) => { r[c] = 0; });
+        buckets.set(key, r);
       }
       const b = buckets.get(key);
-      for (const c of topCountries) {
-        b.values[c] = (b.values[c] || 0) + (row[c] || 0);
-      }
+      for (const c of topCountries) b[c] = (b[c] || 0) + (row[c] || 0);
     }
-    const sorted = [...buckets.entries()].sort((a, b) => a[0].localeCompare(b[0]));
-    return {
-      labels: sorted.map(([key, b]) => (isMobile ? formatHourOnly(msToIstKey(b.labelMs)) : formatHourKeyShort(msToIstKey(b.labelMs)))),
-      values: topCountries.map((c) => sorted.map(([, b]) => b.values[c] || 0)),
-      labelMs: sorted.map(([, b]) => b.labelMs),
-    };
-  }, [chartData, topCountries, timeRange, isMobile]);
+    return [...buckets.values()].sort((a, b) => a.time.localeCompare(b.time));
+  }, [chartData, topCountries, timeRange]);
 
-  /* ECharts option. One line series per top country with gradient
-     fill. The 24h view plots 12 two-hour buckets on a category axis
-     ("09 Nov, 12 AM" ...), horizontal labels, no rotation: the time
-     axis would not hold a 2-hour tick interval, it drifted to hourly
-     or 4-hourly, and 24 hourly labels rotated 45 degrees were too
-     cluttered and slanted (user order 2026-11-09). Daily ranges use
-     a time axis ticking once per day. */
+  /* ECharts option. CF lines, applied 2026-11-11: one thin line
+     series per country, straight segments (smooth:false, so spikes
+     are pointed triangles like CF, not rounded domes), NO area fill,
+     no point symbols, 1.5px. All ranges use a time axis: 24h ticks
+     every 4 hours (splitNumber 6, CF shows "Nov 7, 04:00" style
+     ticks), daily ranges tick once per day. Axis, grid and tooltip
+     colours are the CF spec values: axis #8b949e, grid/tooltip
+     border #30363d, tooltip shadow rgba(0,0,0,0.5). Labels stay in
+     the user's 12-hour Indian format, not CF's 24-hour format. */
   const options = useMemo(() => {
-    const axisColor = dark ? '#808080' : '#6e7781';
-    /* Grid lines must be visible against the card bg (#0F0F0F dark)
-       so data points can be traced to their values, like CF's
-       dashboard. The old #121212 was nearly the same as the card
-       bg, so the horizontal split lines were invisible. #262626
-       is the track grey, clearly visible but still subtle. */
-    const gridColor = dark ? '#262626' : '#e5e7eb';
+    const axisColor = dark ? '#8b949e' : '#6e7781';
+    const gridColor = dark ? '#30363d' : '#d0d7de';
     const tooltipBg = dark ? '#161b22' : '#ffffff';
-    const tooltipBorder = dark ? '#121212' : '#d0d7de';
+    const tooltipBorder = dark ? '#30363d' : '#d0d7de';
     const tooltipText = dark ? '#ffffff' : '#1f2328';
-    const is24h = timeRange === '24h';
+    const plotData = timeRange === '24h' ? hourlyData : chartData;
     return {
       animationDuration: 800,
       animationEasing: 'cubicOut',
@@ -203,42 +198,22 @@ export default function RequestsChart({ data, since, timeRange, dark }) {
         padding: [8, 12],
         transitionDuration: 0.1,
         textStyle: { color: tooltipText, fontSize: 12, fontFamily: 'Inter Variable, system-ui, sans-serif' },
-        extraCssText: 'border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.35);',
+        extraCssText: 'border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);',
         formatter: (params) => {
           if (!params || params.length === 0) return '';
-          const header = is24h
-            ? echarts.format.encodeHTML(params[0].name)
-            : echarts.format.encodeHTML(formatTooltipTime(params[0].value[0]));
-          const headerColor = dark ? '#808080' : '#6e7781';
+          const header = echarts.format.encodeHTML(formatTooltipTime(params[0].value[0]));
+          const headerColor = dark ? '#8b949e' : '#6e7781';
           const lines = [`<div style="margin-bottom:4px;font-size:11px;color:${headerColor}">${header}</div>`];
           for (const p of params) {
             const name = echarts.format.encodeHTML(p.seriesName);
             const color = echarts.format.encodeHTML(String(p.color));
-            const val = is24h ? p.value : p.value[1];
+            const val = p.value[1];
             lines.push(`<div style="font-variant-numeric:tabular-nums"><span style="display:inline-block;width:8px;height:8px;border-radius:9999px;background:${color};margin-right:6px"></span>${name} <span style="font-weight:600">${val}</span></div>`);
           }
           return lines.join('');
         },
       },
-      xAxis: is24h ? {
-        type: 'category',
-        boundaryGap: false,
-        data: twoHour ? twoHour.labels : [],
-        axisLine: { show: true, lineStyle: { color: gridColor } },
-        axisTick: { show: false },
-        splitLine: { show: false },
-        axisLabel: {
-          color: axisColor,
-          fontSize: 11,
-          fontFamily: 'Inter Variable, system-ui, sans-serif',
-          rotate: 0,
-          /* Mobile (2026-11-10, user order): 12-13 two-hour labels
-             overlap and run together on a narrow screen. Show every
-             other label on mobile (every 4 hours, 6-7 labels);
-             desktop keeps all of them. */
-          interval: isMobile ? 1 : 0,
-        },
-      } : {
+      xAxis: {
         type: 'time',
         boundaryGap: false,
         axisLine: { show: true, lineStyle: { color: gridColor } },
@@ -251,7 +226,7 @@ export default function RequestsChart({ data, since, timeRange, dark }) {
           rotate: 0,
           formatter: (value) => formatXAxis(value),
         },
-        splitNumber: timeRange === '7d' ? 7 : 8,
+        splitNumber: timeRange === '24h' ? 6 : timeRange === '7d' ? 7 : 8,
       },
       yAxis: {
         type: 'value',
@@ -266,24 +241,17 @@ export default function RequestsChart({ data, since, timeRange, dark }) {
         return {
           name: COUNTRY_NAMES[code] || code,
           type: 'line',
-          smooth: true,
+          /* CF: straight segments, no smoothing, no area fill. */
+          smooth: false,
           symbol: 'none',
           lineStyle: { width: 1.5, color },
           itemStyle: { color },
-          areaStyle: {
-            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-              { offset: 0, color: color + '40' },
-              { offset: 1, color: color + '05' },
-            ]),
-          },
           emphasis: { focus: 'series' },
-          data: is24h
-            ? (twoHour ? twoHour.values[i] : [])
-            : chartData.map((row) => [istKeyToMs(row.time), row[code] || 0]),
+          data: plotData.map((row) => [istKeyToMs(row.time), row[code] || 0]),
         };
       }),
     };
-  }, [chartData, topCountries, twoHour, timeRange, dark, isMobile]);
+  }, [chartData, hourlyData, topCountries, timeRange, dark, isMobile]);
 
   return (
     <div className="rounded-[12px] border border-[var(--border)] bg-[var(--surface)]">
