@@ -3,17 +3,21 @@ import { LayerCard } from "@cloudflare/kumo/components/layer-card";
 import { Chart } from "@cloudflare/kumo/components/chart";
 import echarts from '../lib/echarts';
 import { istDayKey, istKeyToMs } from '../lib/dates';
-import { CF_SERIES, formatCompact } from '../lib/palette';
+import { formatCompact } from '../lib/palette';
 
 /* The four KPI cards, in Cloudflare's categorical series order, so
    the chart and the cards share one palette. `seriesKey` is the
    bucket field; `prevKey` is the matching field in the backend's
-   prevPeriod object. */
+   prevPeriod object. Sparkline colour (user order 2026-11-12): all
+   four lines are the same blue #3B7FD3, and the fill inside them is
+   the same dark #151E2A, not the per-card series colours. */
+const SPARKLINE_COLOR = '#3B7FD3';
+const SPARKLINE_FILL = '#151E2A';
 const CARDS = [
-  { label: 'Total events', seriesKey: 'events', prevKey: 'events', color: CF_SERIES[0] },
-  { label: 'Unique visitors', seriesKey: 'visitors', prevKey: 'visitors', color: CF_SERIES[1] },
-  { label: 'Project clicks', seriesKey: 'projectClicks', prevKey: 'projectClicks', color: CF_SERIES[2] },
-  { label: 'Resume downloads', seriesKey: 'resumeDownloads', prevKey: 'resumeDownloads', color: CF_SERIES[3] },
+  { label: 'Total events', seriesKey: 'events', prevKey: 'events', color: SPARKLINE_COLOR },
+  { label: 'Unique visitors', seriesKey: 'visitors', prevKey: 'visitors', color: SPARKLINE_COLOR },
+  { label: 'Project clicks', seriesKey: 'projectClicks', prevKey: 'projectClicks', color: SPARKLINE_COLOR },
+  { label: 'Resume downloads', seriesKey: 'resumeDownloads', prevKey: 'resumeDownloads', color: SPARKLINE_COLOR },
 ];
 
 /* Delta colour (user order 2026-11-10): greyed #808080 for all cards,
@@ -25,8 +29,9 @@ const DELTA_DOWN = '#808080';
    cannot be a 50px sparkline: it has no axis-hide props and its grid
    margins are fixed at 24px top and bottom, which leaves no plot
    area at this height. The custom Chart with axes and tooltip hidden
-   draws the same spiky gradient line and is still a Kumo chart. One
-   series, the card's metric colour, gradient fading to transparent.
+   draws the same spiky line and is still a Kumo chart. Line colour
+   is the single blue #3B7FD3 on all four cards and the fill inside
+   is the solid dark #151E2A (user order 2026-11-12), not a gradient.
    No axes, no legend, no tooltip. Animates 500ms ease-in-out on
    mount, like Cloudflare's sparkline; data updates are instant
    (animationDurationUpdate 0) so the 10s live poll does not replay
@@ -48,12 +53,7 @@ function Sparkline({ rows, seriesKey, color }) {
         data: points,
         showSymbol: false,
         lineStyle: { width: 1.5, color },
-        areaStyle: {
-          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            { offset: 0, color: color + '4D' },
-            { offset: 1, color: color + '0D' },
-          ]),
-        },
+        areaStyle: { color: SPARKLINE_FILL },
         emphasis: { disabled: true },
       }],
     };
