@@ -38,18 +38,26 @@ const DELTA_DOWN = '#808080';
    No axes, no legend, no tooltip. Animates 500ms ease-in-out on
    mount, like Cloudflare's sparkline; data updates are instant
    (animationDurationUpdate 0) so the 10s live poll does not replay
-   the draw. An empty series draws a flat empty strip. */
+   the draw. A flat series (no traffic) draws a flat baseline at the
+   bottom, like Cloudflare's, instead of an empty strip: the y-axis
+   max is forced to at least 1 so a zero line is visible, and an
+   empty series falls back to two zero points spanning the last
+   hour. */
 function Sparkline({ rows, seriesKey, color, dark }) {
   const options = useMemo(() => {
-    const points = rows.map((r) => [istKeyToMs(r.time), r[seriesKey] || 0]);
+    let points = (rows || []).map((r) => [istKeyToMs(r.time), r[seriesKey] || 0]);
+    if (points.length < 2) {
+      const now = Date.now();
+      points = [[now - 3600000, 0], [now, 0]];
+    }
     return {
       animationDuration: 500,
       animationEasing: 'cubicInOut',
       animationDurationUpdate: 0,
       backgroundColor: 'transparent',
-      grid: { left: 0, right: 0, top: 2, bottom: 0 },
+      grid: { left: 0, right: 0, top: 2, bottom: 2 },
       xAxis: { type: 'time', show: false },
-      yAxis: { show: false, min: 0 },
+      yAxis: { show: false, min: 0, max: (v) => Math.max(v.max, 1) },
       tooltip: { show: false },
       series: [{
         type: 'line',
@@ -62,7 +70,6 @@ function Sparkline({ rows, seriesKey, color, dark }) {
     };
   }, [rows, seriesKey, color, dark]);
 
-  if (!rows || rows.length < 2) return <div className="h-[52px]" />;
   return (
     <Chart
       echarts={echarts}
