@@ -636,7 +636,7 @@ export default function App() {
 
       {/* Main content, flexed beside the sidebar (55px rail / 220px expanded) */}
       <main className="flex-1 min-w-0 min-h-screen">
-        <div className="px-3 pb-16 md:px-6 w-full">
+        <div className="px-3 pb-12 md:px-6 w-full">
           {/* ── Header row, locked (sticky) at the top so the
               Traffic overview / Recent events title and actions
               stay visible while scrolling. Same bar in both views,
@@ -875,7 +875,7 @@ export default function App() {
         </div>
 
         {/* Footer, like the FinGuard site */}
-        <footer className={`fixed bottom-0 right-0 z-40 print:hidden border-t border-[var(--cf-border-chrome)] bg-[var(--bg)] px-4 h-12 flex items-center justify-between gap-2 text-xs text-[var(--muted)] transition-[left] duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] left-0 ${sidebarOpen ? 'md:left-[220px]' : 'md:left-[55px]'}`}>
+        <footer className={`fixed bottom-0 right-0 z-40 print:hidden border-t border-[var(--cf-border-chrome)] bg-[var(--bg)] px-4 h-8 flex items-center justify-between gap-2 text-xs text-[var(--muted)] transition-[left] duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] left-0 ${sidebarOpen ? 'md:left-[220px]' : 'md:left-[55px]'}`}>
           <span className="flex items-center gap-1.5">
             <img src="/india-flag.png" alt="India" width="17" height="11" className="shrink-0 rounded-[2px] shadow-[0_0_1px_rgba(255,255,255,0.35)] object-cover" />
             Bengaluru
