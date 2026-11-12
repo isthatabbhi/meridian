@@ -281,7 +281,7 @@ function MeridianSidebar({ view, onNavigate, dark, onPeek }) {
       </SidebarContent>
 
       {/* Bottom-left expand / collapse button */}
-      <SidebarFooter>
+      <SidebarFooter className="h-8">
         <SidebarExpandToggle />
       </SidebarFooter>
     </Sidebar>
