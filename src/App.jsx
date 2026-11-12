@@ -117,17 +117,20 @@ function MoonIcon() {
    Meridian actually has: Overview, Events, Portfolio. No "Add a
    chart" anywhere. ── */
 function SidebarNavLabel({ children }) {
-  /* Labels fade with the width, like Cloudflare's rail.
+  /* Labels fade AND slide with the width, like Cloudflare's rail.
      They show when the rail is expanded OR when it is peeking
      (hover-expanded), so a hover peek shows the labels too.
-     Only opacity animates: max-width flips instantly (the sidebar's
-     own width animation plus overflow-hidden reveals the text), so
-     no layout-triggering max-width animation fights the width
+     Opacity and a small -8px to 0 translate animate together over
+     200ms cubic-bezier(0.4,0,0.2,1), the spec timing, so the text
+     glides in instead of just fading. Only opacity and transform
+     animate: max-width flips instantly (the sidebar's own width
+     animation plus overflow-hidden reveals the text), so no
+     layout-triggering max-width animation fights the width
      transition and the expansion stays smooth. */
   const { open, isPeeking } = useSidebar();
   const shown = open || isPeeking;
   return (
-    <span className={`whitespace-nowrap overflow-hidden transition-opacity duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] ${shown ? 'opacity-100 max-w-[160px]' : 'opacity-0 max-w-0'}`}>
+    <span className={`whitespace-nowrap overflow-hidden transition-[opacity,transform] duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] ${shown ? 'opacity-100 translate-x-0 max-w-[160px]' : 'opacity-0 -translate-x-2 max-w-0'}`}>
       {children}
     </span>
   );
@@ -145,7 +148,7 @@ function SidebarBrand({ dark }) {
   return (
     <a href="https://meridian.isthatabbhi.tech/" className="flex items-center gap-2 min-w-0 cursor-pointer">
       <img src={markSrc} alt="Meridian" className="sidebar-logo w-9 h-9 object-contain shrink-0" />
-      <span className={`whitespace-nowrap overflow-hidden transition-opacity duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] text-[22px] leading-7 tracking-[-0.015em] font-semibold text-[var(--text)] ${shown ? 'opacity-100 max-w-[160px]' : 'opacity-0 max-w-0'}`}>
+      <span className={`whitespace-nowrap overflow-hidden transition-[opacity,transform] duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] text-[22px] leading-7 tracking-[-0.015em] font-semibold text-[var(--text)] ${shown ? 'opacity-100 translate-x-0 max-w-[160px]' : 'opacity-0 -translate-x-2 max-w-0'}`}>
         Meridian
       </span>
     </a>
@@ -160,7 +163,7 @@ function SidebarSiteCard() {
   const { open, isPeeking } = useSidebar();
   const shown = open || isPeeking;
   return (
-    <div className={`transition-opacity duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] ${shown ? 'opacity-100' : 'opacity-0'}`}>
+    <div className={`transition-[opacity,transform] duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] ${shown ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-2'}`}>
       <div className="mx-1 mb-3 px-3 py-2.5 rounded-[8px] border border-[var(--border)] bg-[var(--bg)] whitespace-nowrap">
         <p className="text-[14px] leading-[18px] text-[var(--text)] font-bold">isthatabbhi.tech</p>
         <p className="text-[11px] leading-[14px] text-[var(--muted)]">Portfolio</p>
