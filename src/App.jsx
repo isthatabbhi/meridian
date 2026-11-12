@@ -480,7 +480,7 @@ export default function App() {
   useEffect(() => {
     if (intervalRef.current) clearInterval(intervalRef.current);
     if (liveRefresh) {
-      intervalRef.current = setInterval(doFetch, 300000);
+      intervalRef.current = setInterval(doFetch, 120000);
     }
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
   }, [liveRefresh, doFetch]);
