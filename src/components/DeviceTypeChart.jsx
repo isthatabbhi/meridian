@@ -101,7 +101,7 @@ export default function DeviceTypeChart({ data, dark }) {
   }, [deviceData, hasData, dark]);
 
   return (
-    <div className="rounded-[12px] border border-[var(--border)] bg-[var(--surface)] h-full flex flex-col">
+    <div className="rounded-[12px] bg-[var(--surface)] h-full flex flex-col ring ring-kumo-line shadow-xs">
       <div className="px-5 py-4">
         <Text variant="secondary" size="xs" bold DANGEROUS_className="mb-3">
           Requests by device type

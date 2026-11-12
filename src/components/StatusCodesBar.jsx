@@ -110,7 +110,7 @@ export default function StatusCodesBar({ data, dark }) {
   }), [visible, dark, hovered]);
 
   return (
-    <div className="rounded-[12px] border border-[var(--border)] bg-[var(--surface)] w-full">
+    <div className="rounded-[12px] bg-[var(--surface)] w-full ring ring-kumo-line shadow-xs">
       <div className="px-5 py-4">
         <Text variant="secondary" size="xs" bold DANGEROUS_className="mb-3">Event distribution</Text>
         {/* Legend */}

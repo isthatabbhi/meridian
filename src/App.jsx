@@ -809,7 +809,7 @@ export default function App() {
               </div>
             </div>
           ) : view === 'events' ? (
-            <div className="rounded-[12px] border border-[var(--border)] bg-[var(--surface)] px-3 py-4 md:px-5">
+            <div className="rounded-[12px] bg-[var(--surface)] px-3 py-4 md:px-5 ring ring-kumo-line shadow-xs">
               <Text variant="secondary" size="xs" DANGEROUS_className="mb-3">
                 {filteredEvents.length} of {data?.recent?.length || 0} most recent events
                 {typeFilter !== 'all' ? ` · ${currentFilterLabel}` : ''} · {currentRangeLabel}
