@@ -832,17 +832,16 @@ export default function App() {
                   dashboard config (user-supplied 2026-11-10) puts the
                   globe at width 7 and the donut at width 5 of 12, so
                   the globe is wider. Side by side on wide screens,
-                  stacked below the xl breakpoint. Globe card is 9 cols
-                  and the donut 3 (user order 2026-11-12): the 300px
-                  label in the 8-col row shrank the bar to 108px, so
-                  that is reverted. At 9 cols the list is ~650px, the
-                  label is 320px, the gap is ~243px and the bar is
-                  ~262px, so the gap is bigger and the bars stay long. */}
+                  stacked below the xl breakpoint. Globe card is 7 cols
+                  and the donut 5 (user order 2026-11-12, matching the
+                  Cloudflare screenshot ratio). The country label stays
+                  320px, so the gap holds; the bar is shorter than at
+                  9 cols on narrow viewports, longest at 1920px. */}
               <div className="animate-enter grid grid-cols-1 gap-4 xl:grid-cols-12" style={{ animationDelay: '80ms' }}>
-                <div className="xl:col-span-9">
+                <div className="xl:col-span-7">
                   <CountryGlobe data={data} dark={dark} />
                 </div>
-                <div className="xl:col-span-3">
+                <div className="xl:col-span-5">
                   <DeviceTypeChart data={data} dark={dark} />
                 </div>
               </div>

@@ -134,9 +134,11 @@ export default function TopList({ title, items }) {
                       label and count, so the Meter's label/value
                       header is hidden by .meter-bar-only in index.css
                       and only the 8px track shows. The indicator
-                      gradient stops use the user's dark blue
-                      --meter-fill (#005AEB), distinct from the
-                      accent, per his exact HEX palette. */}
+                      fill is forced to --meter-fill (#005AEA) by a
+                      .meter-bar-only rule in index.css, because
+                      Kumo's Meter drops the custom gradient passed
+                      via indicatorClassName and renders the accent
+                      instead. */}
                   <Meter
                     label={item.label}
                     showValue={false}

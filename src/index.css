@@ -467,6 +467,18 @@ html.light .kumo-tooltip-popup {
   display: none;
 }
 
+/* Meter indicator fill (user order 2026-11-12): Kumo's Meter
+   merges indicatorClassName through tailwind-merge and drops the
+   custom from-[var(--meter-fill)] gradient, so the bars render the
+   accent #4290F0 instead of the meter fill. Force the fill here so
+   every counter bar shows the user's #005AEA. Specificity (two
+   classes) beats the Meter's own gradient utilities, and this
+   unlayered rule sits after the imports. */
+.meter-bar-only .absolute.inset-y-0 {
+  background-color: var(--meter-fill);
+  background-image: none;
+}
+
 /* Events table on phones and tablets: Kumo's table cells use p-3 (12px),
    which plus the columns does not fit narrow viewports. Tighten the
    horizontal cell padding below lg so the table fits without a
