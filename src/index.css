@@ -61,9 +61,9 @@
   /* Accent & Brand Colors */
   --cf-accent-blue: #4290F0;
   --cf-accent-blue-hover: #005AEB;
-  /* Meter bar fill (user's exact HEX, 2026-11-10): the dark blue
+  /* Meter bar fill (user's exact HEX, 2026-11-12): the dark blue
      inside the Top N table meters, distinct from the accent. */
-  --meter-fill: #005AEB;
+  --meter-fill: #005AEA;
   --cf-brand-orange: #f6821f;
 
   /* HTTP Status Code Colors */
