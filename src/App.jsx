@@ -828,7 +828,7 @@ export default function App() {
 
               {/* KPI cards */}
               <div className="animate-enter" style={{ animationDelay: '40ms' }}>
-                <KpiCards data={data} timeRange={timeRange} />
+                <KpiCards data={data} timeRange={timeRange} dark={dark} />
               </div>
 
               {/* Requests by country + device type: Cloudflare's

@@ -10,9 +10,12 @@ import { formatCompact } from '../lib/palette';
    bucket field; `prevKey` is the matching field in the backend's
    prevPeriod object. Sparkline colour (user order 2026-11-12): all
    four lines are the same blue #3B7FD3, and the fill inside them is
-   the same dark #151E2A, not the per-card series colours. */
+   the same dark #151E2A in dark mode and pale blue #EAF1FB in light
+   mode (light-mode shading fixed 2026-11-12), not the per-card
+   series colours. */
 const SPARKLINE_COLOR = '#3B7FD3';
-const SPARKLINE_FILL = '#151E2A';
+const SPARKLINE_FILL_DARK = '#151E2A';
+const SPARKLINE_FILL_LIGHT = '#EAF1FB';
 const CARDS = [
   { label: 'Total events', seriesKey: 'events', prevKey: 'events', color: SPARKLINE_COLOR },
   { label: 'Unique visitors', seriesKey: 'visitors', prevKey: 'visitors', color: SPARKLINE_COLOR },
@@ -36,7 +39,7 @@ const DELTA_DOWN = '#808080';
    mount, like Cloudflare's sparkline; data updates are instant
    (animationDurationUpdate 0) so the 10s live poll does not replay
    the draw. An empty series draws a flat empty strip. */
-function Sparkline({ rows, seriesKey, color }) {
+function Sparkline({ rows, seriesKey, color, dark }) {
   const options = useMemo(() => {
     const points = rows.map((r) => [istKeyToMs(r.time), r[seriesKey] || 0]);
     return {
@@ -53,11 +56,11 @@ function Sparkline({ rows, seriesKey, color }) {
         data: points,
         showSymbol: false,
         lineStyle: { width: 1.5, color },
-        areaStyle: { color: SPARKLINE_FILL },
+        areaStyle: { color: dark ? SPARKLINE_FILL_DARK : SPARKLINE_FILL_LIGHT },
         emphasis: { disabled: true },
       }],
     };
-  }, [rows, seriesKey, color]);
+  }, [rows, seriesKey, color, dark]);
 
   if (!rows || rows.length < 2) return <div className="h-[52px]" />;
   return (
@@ -71,7 +74,7 @@ function Sparkline({ rows, seriesKey, color }) {
   );
 }
 
-export default function KpiCards({ data, timeRange }) {
+export default function KpiCards({ data, timeRange, dark }) {
   /* Range start, same formula as App.jsx's rangeSince. */
   const since = useMemo(() => {
     const now = Date.now();
@@ -211,7 +214,7 @@ const deltaEl = (delta) => {
                 {deltaEl(delta)}
               </div>
             </div>
-            <Sparkline rows={rows} seriesKey={c.seriesKey} color={c.color} />
+            <Sparkline rows={rows} seriesKey={c.seriesKey} color={c.color} dark={dark} />
           </LayerCard>
         );
       })}
