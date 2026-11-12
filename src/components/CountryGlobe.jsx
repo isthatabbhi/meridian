@@ -521,7 +521,7 @@ export default function CountryGlobe({ data, dark }) {
                     the label is 320px, so the gap past "United States"
                     is ~243px and the bar is ~262px. On mobile the label
                     is 120px so the bar still has room in a ~350px row. */}
-                <span className="text-[12px] leading-4 text-[var(--text-2)] w-[120px] md:w-[320px] shrink-0 truncate">{name}</span>
+                <span className="text-[12px] leading-4 text-[var(--text-2)] w-[120px] md:w-[min(320px,50%)] shrink-0 truncate">{name}</span>
                 {/* Kumo Meter as the bar. The row carries its own
                     label and count, so the Meter's label/value
                     header is hidden by .meter-bar-only in index.css.
