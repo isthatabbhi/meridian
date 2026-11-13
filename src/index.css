@@ -583,18 +583,6 @@ html.light .kumo-tooltip-popup {
   display: inline-block;
   transform: translateY(2px);
 }
-/* Visual refresh pulse (user order 2026-11-13): every 20s the
-   Live refresh icon does one quick spin while the content dims,
-   with NO data fetch. The real fetch stays on the 2-minute
-   interval, so the KV list quota is untouched. The spin is
-   700ms, matching the pulse length in App.jsx. */
-.live-refresh-btn.refresh-pulse svg {
-  animation: live-refresh-spin 700ms ease-in-out;
-}
-@keyframes live-refresh-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
 
 .meter-bar-only .absolute.inset-y-0 {
   background-color: var(--meter-fill);

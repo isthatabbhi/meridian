@@ -324,12 +324,10 @@ export default function App() {
      fetching data, so it looks like it refreshed. The real data
      fetch stays on the 2-minute interval, so the KV list quota is
      untouched. The pulse only runs while live refresh is on.
-     refreshPulse (700ms) spins the Live refresh icon;
      refreshing (1500ms) swaps the content for Kumo skeletons
-     and spinners, matching CF's ~2s loading state. */
-  const [refreshPulse, setRefreshPulse] = useState(false);
+     and spinners, matching CF's ~2s loading state. The Play/Pause
+     icon spin was removed on user order 2026-11-13. */
   const [refreshing, setRefreshing] = useState(false);
-  const pulseTimeoutRef = useRef(null);
   const refreshingTimeoutRef = useRef(null);
   // Sidebar: pinned open by default on desktop (md+, 768px), so the
   // labels show without hovering; on phones it starts as a closed
@@ -512,31 +510,25 @@ export default function App() {
   }, [liveRefresh, doFetch]);
 
   /* 20-second visual pulse only (no data fetch, no KV list).
-     Fires every 20s while live refresh is on: icon spins for
-     700ms, and the content swaps to the Cloudflare-style loading
-     state (skeletons + spinners) for 1500ms, then the real data
-     returns. The real fetch above still runs every 2 minutes. */
+     Fires every 20s while live refresh is on: the content swaps
+     to the Cloudflare-style loading state (skeletons + spinners)
+     for 1500ms, then the real data returns. The real fetch above
+     still runs every 2 minutes. */
   const pulseIntervalRef = useRef(null);
   useEffect(() => {
     if (pulseIntervalRef.current) clearInterval(pulseIntervalRef.current);
-    if (pulseTimeoutRef.current) clearTimeout(pulseTimeoutRef.current);
     if (refreshingTimeoutRef.current) clearTimeout(refreshingTimeoutRef.current);
     if (liveRefresh) {
       pulseIntervalRef.current = setInterval(() => {
-        setRefreshPulse(true);
         setRefreshing(true);
-        if (pulseTimeoutRef.current) clearTimeout(pulseTimeoutRef.current);
-        pulseTimeoutRef.current = setTimeout(() => setRefreshPulse(false), 700);
         if (refreshingTimeoutRef.current) clearTimeout(refreshingTimeoutRef.current);
         refreshingTimeoutRef.current = setTimeout(() => setRefreshing(false), 1500);
       }, 20000);
     } else {
-      setRefreshPulse(false);
       setRefreshing(false);
     }
     return () => {
       if (pulseIntervalRef.current) clearInterval(pulseIntervalRef.current);
-      if (pulseTimeoutRef.current) clearTimeout(pulseTimeoutRef.current);
       if (refreshingTimeoutRef.current) clearTimeout(refreshingTimeoutRef.current);
     };
   }, [liveRefresh]);
@@ -803,7 +795,7 @@ export default function App() {
                 variant="toggle"
                 size="md"
                 active={liveRefresh}
-                className={`live-refresh-btn px-5 text-[13px] rounded-md ${refreshPulse ? 'refresh-pulse' : ''}`}
+                className="live-refresh-btn px-5 text-[13px] rounded-md"
                 icon={liveRefresh ? <Pause weight="regular" size={14} /> : <Play weight="regular" size={14} />}
                 onClick={() => { setLiveRefresh(!liveRefresh); if (!liveRefresh) doFetch(); }}
                 aria-pressed={liveRefresh}
