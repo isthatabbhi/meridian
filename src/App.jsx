@@ -315,7 +315,11 @@ export default function App() {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [liveRefresh, setLiveRefresh] = useState(true);
+  /* Live refresh defaults OFF (user order 2026-11-14): the
+     dashboard loads once and stays still until the user turns
+     live refresh on. The 2-minute fetch and the 20s refresh
+     animation both only run while it is on. */
+  const [liveRefresh, setLiveRefresh] = useState(false);
   const [timeRange, setTimeRange] = useState('24h');
   const [fetching, setFetching] = useState(false);
   /* Visual refresh pulse (user order 2026-11-13): every 20s the
