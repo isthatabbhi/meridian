@@ -656,7 +656,7 @@ export default function App() {
                 title={dark ? 'Switch to light theme' : 'Switch to dark theme'}
                 aria-label={dark ? 'Switch to light theme' : 'Switch to dark theme'}
                 shape="square"
-                className="sm:w-auto sm:px-2"
+                className="top-action-btn sm:w-auto sm:px-2"
                 onClick={() => setDark(!dark)}
               >
                 <span className="hidden sm:inline">{dark ? 'Light' : 'Dark'}</span>
@@ -668,7 +668,7 @@ export default function App() {
                 title="Print"
                 aria-label="Print"
                 shape="square"
-                className="sm:w-auto sm:px-2"
+                className="top-action-btn sm:w-auto sm:px-2"
                 onClick={() => window.print()}
               >
                 <span className="hidden sm:inline">Print</span>
@@ -682,7 +682,7 @@ export default function App() {
                 shape="square"
                 loading={copying}
                 onClick={handleCopyLink}
-                className={copied === 'failed' ? 'text-[var(--cf-status-4xx)]! sm:w-auto sm:px-2' : copied ? 'text-[var(--text)]! bg-[var(--surface-2)]! sm:w-auto sm:px-2' : 'sm:w-auto sm:px-2'}
+                className={copied === 'failed' ? 'text-[var(--cf-status-4xx)]! top-action-btn sm:w-auto sm:px-2' : copied ? 'text-[var(--text)]! bg-[var(--cf-bg-hover)]! top-action-btn sm:w-auto sm:px-2' : 'top-action-btn sm:w-auto sm:px-2'}
               >
                 <span className="hidden sm:inline">{copied === 'failed' ? 'Copy failed' : copied ? 'Copied!' : 'Copy link'}</span>
               </Button>

@@ -508,17 +508,33 @@ html.light .kumo-tooltip-popup {
    this removes the tint and gives it a visible 1px border. The
    border and text use the existing CF variables so both modes
    match. */
-.live-refresh-btn {
-  background-color: transparent !important;
+/* Top-right action buttons (Live refresh, theme, Print, Copy):
+   resting bg is the panel colour (#0F0F0F dark, #ffffff light);
+   hover and highlighted bg is the hover colour (#262626 dark,
+   #ededed light). The Live refresh ON state is the highlighted
+   state, so it sits on the hover colour with blue text and icon.
+   Kumo's toggle variant tints the background blue when active
+   and shows no border, so the tint is removed and the button gets
+   a visible 1px outline border. 2026-11-13. */
+.live-refresh-btn,
+.top-action-btn {
+  background-color: var(--cf-bg-panel) !important;
   background-image: none !important;
+}
+.live-refresh-btn {
   border: 1px solid var(--cf-border-chrome) !important;
   box-shadow: none !important;
+}
+.live-refresh-btn:hover,
+.top-action-btn:hover {
+  background-color: var(--cf-bg-hover) !important;
 }
 .live-refresh-btn[aria-pressed="true"] {
   /* Outline stays the chrome outline colour in both states
      (#333333 dark, #e1e1e1 light); only the text and icon turn
      blue when on. The blue border from the CF copy is removed,
      2026-11-13. */
+  background-color: var(--cf-bg-hover) !important;
   color: var(--cf-accent-blue) !important;
 }
 /* The icon is a geometric shape centred in the button, but the
