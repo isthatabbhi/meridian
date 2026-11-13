@@ -16,6 +16,7 @@ import RequestsChart from './components/RequestsChart';
 import TopList from './components/TopList';
 import EventsTable from './components/EventsTable';
 import { Button, IconButton } from './components/Button';
+import { Play, Pause } from '@phosphor-icons/react';
 
 /* ── Icons ───────────────────────────────────────────── */
 function ExternalLinkIcon() {
@@ -36,20 +37,6 @@ function LinkIcon() {
 function FilterIcon() {
   return (
     <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="m1.774 3.72.37-.836h11.711l.371.836-4.649 5.135v3.26l-.214.411-2.155 1.5-.785-.41V8.855L1.773 3.72Zm1.498.164 4.021 4.443.13.335v3.997l1.154-.804V8.662l.13-.335 4.021-4.443H3.272Z" fill-rule="evenodd"/></svg>
-  );
-}
-function PlayIcon() {
-  return (
-    <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" aria-hidden="true"><path d="M4.5 2.8 L12.5 8 L4.5 13.2 Z" /></svg>
-  );
-}
-function PauseIcon() {
-  /* The Live refresh button's pause icon on Cloudflare's dashboard
-     is just two short vertical bars, no ring (verified live
-     2026-11-13). The ringed pause icon is CF's generic pause.svg,
-     not the one the Live refresh button uses. */
-  return (
-    <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M5.5 3h2v10h-2V3zM8.5 3h2v10h-2V3z" /></svg>
   );
 }
 function CalendarIcon() {
@@ -739,7 +726,7 @@ export default function App() {
                 size="md"
                 active={liveRefresh}
                 className="live-refresh-btn px-5 text-[13px] rounded-md"
-                icon={liveRefresh ? <PauseIcon /> : <PlayIcon />}
+                icon={liveRefresh ? <Pause weight="fill" size={14} /> : <Play weight="regular" size={14} />}
                 onClick={() => { setLiveRefresh(!liveRefresh); if (!liveRefresh) doFetch(); }}
                 aria-pressed={liveRefresh}
                 title={liveRefresh ? 'Live refresh is on, click to turn off' : 'Live refresh is off, click to turn on'}
