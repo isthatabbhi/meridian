@@ -24,9 +24,34 @@ export default function StatusCodesBar({ data, dark }) {
      when the FIRST segment (Pageview) was hovered first; it only
      started working after another segment had been hovered.
      So the dimming is done manually here: the hovered segment
-     stays at full opacity, the rest drop to 0.45, driven by
-     the chart's mouseover/mouseout events. */
+     stays at full opacity, the rest drop to 0.45.
+     Double-hover fix (2026-11-13): the dimming was driven by
+     ECharts events (mouseover, then showTip/mousemove), but
+     those do not fire reliably on the very first hover, while
+     ECharts' own tooltip does show on first hover. Result: the
+     tooltip appeared at once, the dimming only a second later
+     (or on a second hover), looking like the hover happened
+     twice. Now the dimming is driven by a plain DOM mousemove
+     on the bar container: the mouse x maps to a segment from
+     the known percentages, so it fires on the very first move
+     over the bar, in sync with the tooltip. No ECharts event
+     is involved, so there is nothing to miss the first hover. */
   const [hovered, setHovered] = useState(null);
+
+  /* Map a mouse x (relative to the bar container) to the segment
+     under the cursor. Segments fill the bar left to right in
+     percentage order, so the cumulative percentages are the
+     boundaries. */
+  const segmentAtX = (clientX, rect) => {
+    if (!rect || rect.width <= 0) return null;
+    const pct = ((clientX - rect.left) / rect.width) * 100;
+    let acc = 0;
+    for (const s of visible) {
+      acc += s.pct;
+      if (pct <= acc) return s.label;
+    }
+    return visible.length ? visible[visible.length - 1].label : null;
+  };
 
   const segments = useMemo(() => {
     const colors = eventColorsFor(dark);
@@ -129,17 +154,19 @@ export default function StatusCodesBar({ data, dark }) {
             the bar, it sits directly on the card background
             (verified live 2026-11-10). The bar is 32px tall, like
             CF. The container is transparent; the chart fills it. */}
-        <div className="h-[32px] w-full rounded-[6px] overflow-hidden">
+        <div
+          className="h-[32px] w-full rounded-[6px] overflow-hidden"
+          onMouseMove={(e) => {
+            const label = segmentAtX(e.clientX, e.currentTarget.getBoundingClientRect());
+            if (label) setHovered(label);
+          }}
+          onMouseLeave={() => setHovered(null)}
+        >
           <Chart
             echarts={echarts}
             options={options}
             height={32}
             isDarkMode={dark}
-            onEvents={{
-              mouseover: (p) => { if (p && p.seriesName) setHovered(p.seriesName); },
-              mouseout: () => setHovered(null),
-              globalout: () => setHovered(null),
-            }}
           />
         </div>
       </div>
