@@ -595,38 +595,6 @@ html.light .kumo-tooltip-popup {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
-/* Whole-page refresh sweep (user order 2026-11-13, replaces the
-   thin top bar which he removed): a diagonal light band sweeps
-   across the entire viewport on every 20s pulse. Full-page, so
-   it is visible on mobile and desktop alike. pointer-events
-   none, so it never blocks clicks; z-80 sits above the sidebar
-   (z-50), footer (z-60) and dropdown menus (z-70). The band is
-   50% of the viewport wide and travels from fully off-screen
-   left to fully off-screen right, 700ms, matching the pulse
-   length in App.jsx. The overlay mounts fresh each pulse, so the
-   sweep restarts every time. */
-.refresh-sweep {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 80;
-  overflow: hidden;
-}
-.refresh-sweep::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  width: 50%;
-  background: linear-gradient(105deg, transparent, rgba(66, 144, 240, 0.14), transparent);
-  transform: translateX(-100%);
-  animation: refresh-sweep 700ms ease-out forwards;
-}
-@keyframes refresh-sweep {
-  from { transform: translateX(-100%); }
-  to { transform: translateX(300%); }
-}
 
 .meter-bar-only .absolute.inset-y-0 {
   background-color: var(--meter-fill);

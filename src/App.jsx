@@ -3,7 +3,7 @@ import Lenis from 'lenis';
 import { setLenis } from './lib/lenis-instance';
 import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarFooter, SidebarTrigger, SidebarGroup, SidebarGroupLabel, useSidebar } from "@cloudflare/kumo/components/sidebar";
 import { DropdownMenu } from "@cloudflare/kumo/components/dropdown";
-import { SkeletonLine } from "@cloudflare/kumo/components/loader";
+import { SkeletonLine, Loader } from "@cloudflare/kumo/components/loader";
 import { Text } from "@cloudflare/kumo/components/text";
 import { Tooltip } from "@cloudflare/kumo/components/tooltip";
 import { PageHeader } from "./components/kumo/page-header/page-header";
@@ -319,13 +319,18 @@ export default function App() {
   const [timeRange, setTimeRange] = useState('24h');
   const [fetching, setFetching] = useState(false);
   /* Visual refresh pulse (user order 2026-11-13): every 20s the
-     dashboard shows a brief refresh animation (content dims and
-     the Live refresh icon spins) WITHOUT fetching data, so it
-     looks like it refreshed. The real data fetch stays on the
-     2-minute interval, so the KV list quota is untouched. The
-     pulse only runs while live refresh is on. */
+     dashboard shows the Cloudflare-style refresh animation
+     (skeleton bars + circular spinners, like the CF video) WITHOUT
+     fetching data, so it looks like it refreshed. The real data
+     fetch stays on the 2-minute interval, so the KV list quota is
+     untouched. The pulse only runs while live refresh is on.
+     refreshPulse (700ms) spins the Live refresh icon;
+     refreshing (1500ms) swaps the content for Kumo skeletons
+     and spinners, matching CF's ~2s loading state. */
   const [refreshPulse, setRefreshPulse] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const pulseTimeoutRef = useRef(null);
+  const refreshingTimeoutRef = useRef(null);
   // Sidebar: pinned open by default on desktop (md+, 768px), so the
   // labels show without hovering; on phones it starts as a closed
   // drawer. The bottom-left button toggles the pinned state. Hover
@@ -507,25 +512,32 @@ export default function App() {
   }, [liveRefresh, doFetch]);
 
   /* 20-second visual pulse only (no data fetch, no KV list).
-     Fires every 20s while live refresh is on: turns the pulse
-     on for 700ms (content dims, icon spins), then off. The real
-     fetch above still runs every 2 minutes. */
+     Fires every 20s while live refresh is on: icon spins for
+     700ms, and the content swaps to the Cloudflare-style loading
+     state (skeletons + spinners) for 1500ms, then the real data
+     returns. The real fetch above still runs every 2 minutes. */
   const pulseIntervalRef = useRef(null);
   useEffect(() => {
     if (pulseIntervalRef.current) clearInterval(pulseIntervalRef.current);
     if (pulseTimeoutRef.current) clearTimeout(pulseTimeoutRef.current);
+    if (refreshingTimeoutRef.current) clearTimeout(refreshingTimeoutRef.current);
     if (liveRefresh) {
       pulseIntervalRef.current = setInterval(() => {
         setRefreshPulse(true);
+        setRefreshing(true);
         if (pulseTimeoutRef.current) clearTimeout(pulseTimeoutRef.current);
         pulseTimeoutRef.current = setTimeout(() => setRefreshPulse(false), 700);
+        if (refreshingTimeoutRef.current) clearTimeout(refreshingTimeoutRef.current);
+        refreshingTimeoutRef.current = setTimeout(() => setRefreshing(false), 1500);
       }, 20000);
     } else {
       setRefreshPulse(false);
+      setRefreshing(false);
     }
     return () => {
       if (pulseIntervalRef.current) clearInterval(pulseIntervalRef.current);
       if (pulseTimeoutRef.current) clearTimeout(pulseTimeoutRef.current);
+      if (refreshingTimeoutRef.current) clearTimeout(refreshingTimeoutRef.current);
     };
   }, [liveRefresh]);
 
@@ -680,14 +692,6 @@ export default function App() {
       style={{ '--sidebar-width': '220px', '--sidebar-width-icon': '55px', '--sidebar-easing': 'cubic-bezier(0.4, 0, 0.2, 1)', '--sidebar-bg': 'var(--cf-bg-sidebar)' }}
     >
       <MeridianSidebar view={view} onNavigate={(v) => setView(v)} dark={dark} />
-
-      {/* Whole-page refresh sweep (user order 2026-11-13, replaces
-          the thin top bar): a diagonal light band sweeps across the
-          entire viewport on every 20s pulse, visible on mobile and
-          desktop alike. pointer-events none, so it never blocks
-          clicks. No data fetch here, the real fetch stays at
-          2 minutes. */}
-      {refreshPulse && <div className="refresh-sweep" aria-hidden="true" />}
 
       {/* Main content, flexed beside the sidebar (55px rail / 220px expanded) */}
       <main className="flex-1 min-w-0 min-h-screen">
@@ -859,6 +863,38 @@ export default function App() {
                 ))}
               </div>
               <SkeletonLine minWidth={100} maxWidth={100} minDuration={1.5} maxDuration={1.5} minDelay={0} maxDelay={0} className="h-[340px] rounded-[12px] border border-[var(--border)]" />
+              <SkeletonLine minWidth={100} maxWidth={100} minDuration={1.5} maxDuration={1.5} minDelay={0} maxDelay={0} className="h-[280px] rounded-[12px] border border-[var(--border)]" />
+              <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 xl:grid-cols-3 xl:gap-4">
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
+                  <SkeletonLine key={n} minWidth={100} maxWidth={100} minDuration={1.5} maxDuration={1.5} minDelay={0} maxDelay={0} className="h-[260px] rounded-[12px] border border-[var(--border)]" />
+                ))}
+              </div>
+            </div>
+          ) : refreshing && data ? (
+            /* ── 20s refresh loading state (user order 2026-11-13,
+                from the CF video): the same Kumo SkeletonLine
+                placeholders as the initial load, with a circular
+                Kumo Loader spinner centred in the globe and donut
+                cards, exactly like Cloudflare's dashboard on a
+                refresh. No data fetch happens here, the real data
+                returns after 1500ms. Works on mobile and laptop
+                alike because it is a React state swap, not a
+                CSS-only effect. ── */
+            <div className="space-y-4" aria-hidden="true">
+              <SkeletonLine minWidth={100} maxWidth={100} minDuration={1.5} maxDuration={1.5} minDelay={0} maxDelay={0} className="h-[80px] rounded-[12px] border border-[var(--border)]" />
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4 xl:gap-4">
+                {[1, 2, 3, 4].map((n) => (
+                  <SkeletonLine key={n} minWidth={100} maxWidth={100} minDuration={1.5} maxDuration={1.5} minDelay={0} maxDelay={0} className="h-[120px] rounded-[12px] border border-[var(--border)]" />
+                ))}
+              </div>
+              <div className="grid grid-cols-1 gap-4 xl:grid-cols-12">
+                <div className="xl:col-span-7 h-[340px] rounded-[12px] bg-[var(--surface)] ring ring-kumo-line shadow-xs flex items-center justify-center">
+                  <Loader size="lg" />
+                </div>
+                <div className="xl:col-span-5 h-[340px] rounded-[12px] bg-[var(--surface)] ring ring-kumo-line shadow-xs flex items-center justify-center">
+                  <Loader size="lg" />
+                </div>
+              </div>
               <SkeletonLine minWidth={100} maxWidth={100} minDuration={1.5} maxDuration={1.5} minDelay={0} maxDelay={0} className="h-[280px] rounded-[12px] border border-[var(--border)]" />
               <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 xl:grid-cols-3 xl:gap-4">
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
