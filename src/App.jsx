@@ -176,6 +176,32 @@ function SidebarExpandToggle() {
   );
 }
 
+/* Dashboard footer (fixed bottom bar). Its left edge follows the
+   sidebar's VISIBLE width, pinned or peeked, so the vertical
+   divider line down the sidebar's right edge stays continuous
+   from the brandmark to the bottom of the screen (user order
+   2026-11-13, "I want this line to also expand with the
+   sidebar"). Previously it only followed the pinned state, so
+   on hover-peek it stayed at the 55px rail while the sidebar
+   overlay ran to 220px, and the line stopped at the footer's top
+   edge. Now it uses open || isPeeking, the same as the sidebar
+   labels, and slides on the same 200ms easing. The main content
+   does not move on peek (overlay only); only this fixed bar
+   shifts, so no chart re-fit is triggered. */
+function DashboardFooter() {
+  const { open, isPeeking } = useSidebar();
+  const expanded = open || isPeeking;
+  return (
+    <footer className={`fixed bottom-0 right-0 z-[60] print:hidden border-t border-[var(--cf-border-chrome)] bg-[var(--cf-bg-chrome)] px-4 h-8 flex items-center justify-between gap-2 text-xs text-[var(--muted)] transition-[left] duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] left-0 ${expanded ? 'md:left-[220px]' : 'md:left-[55px]'}`}>
+      <span className="flex items-center gap-1.5">
+        <img src="/india-flag.png" alt="India" width="17" height="11" className="shrink-0 rounded-[2px] shadow-[0_0_1px_rgba(255,255,255,0.35)] object-cover" />
+        Bengaluru
+      </span>
+      <span>&copy; 2026 Abhishek Kumar</span>
+    </footer>
+  );
+}
+
 /* Hover peek is Kumo's built-in `peekable` (set on the provider):
    hovering the collapsed rail expands the sidebar as an OVERLAY
    (fixed, z-40) on top of the main body, like Cloudflare, so the
@@ -864,14 +890,10 @@ export default function App() {
           )}
         </div>
 
-        {/* Footer, like the FinGuard site */}
-        <footer className={`fixed bottom-0 right-0 z-[60] print:hidden border-t border-[var(--cf-border-chrome)] bg-[var(--cf-bg-chrome)] px-4 h-8 flex items-center justify-between gap-2 text-xs text-[var(--muted)] transition-[left] duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] left-0 ${sidebarOpen ? 'md:left-[220px]' : 'md:left-[55px]'}`}>
-          <span className="flex items-center gap-1.5">
-            <img src="/india-flag.png" alt="India" width="17" height="11" className="shrink-0 rounded-[2px] shadow-[0_0_1px_rgba(255,255,255,0.35)] object-cover" />
-            Bengaluru
-          </span>
-          <span>&copy; 2026 Abhishek Kumar</span>
-        </footer>
+        {/* Footer, like the FinGuard site. Left edge follows the
+            sidebar's visible width (pinned or peeked) via
+            DashboardFooter, so the divider line stays continuous. */}
+        <DashboardFooter />
       </main>
     </SidebarProvider>
   );
