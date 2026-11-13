@@ -1,8 +1,8 @@
 import { Table } from "@cloudflare/kumo/components/table";
 import { formatIndian, formatIndianShort } from '../lib/dates';
-import { EVENT_COLORS } from '../lib/palette';
+import { eventColorsFor } from '../lib/palette';
 
-export default function EventsTable({ events, loading }) {
+export default function EventsTable({ events, loading, dark }) {
   if (loading && (!events || events.length === 0)) {
     return (
       <div className="space-y-2">
@@ -43,7 +43,7 @@ export default function EventsTable({ events, loading }) {
                 <span className="hidden md:inline">{formatIndian(e.at)}</span>
               </Table.Cell>
               <Table.Cell>
-                <TypeBadge type={e.type} />
+                <TypeBadge type={e.type} dark={dark} />
               </Table.Cell>
               <Table.Cell className="text-[var(--text-2)] max-w-[80px] md:max-w-[150px] truncate">
                 {e.label || '-'}
@@ -60,8 +60,8 @@ export default function EventsTable({ events, loading }) {
   );
 }
 
-function TypeBadge({ type }) {
-  const color = EVENT_COLORS[type];
+function TypeBadge({ type, dark }) {
+  const color = eventColorsFor(dark)[type];
   if (!color) {
     return (
       <span className="inline-block whitespace-nowrap px-2 py-0.5 rounded-md text-[10px] leading-[14px] font-medium bg-[var(--surface-2)] text-[var(--muted)]">
@@ -70,8 +70,8 @@ function TypeBadge({ type }) {
     );
   }
   /* Pageview uses var(--accent) so the badge follows the theme
-     (dark #2b7fff, light #0969da); the other event colors are the
-     same in both themes. */
+     (dark #4290F0, light #2563eb); the other event colors follow
+     the theme too (CF light series, captured 2026-11-13). */
   const style = type === 'pageview'
     ? { color: 'var(--accent)', backgroundColor: 'color-mix(in srgb, var(--accent) 15%, transparent)' }
     : { color, backgroundColor: color + '26' };

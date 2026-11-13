@@ -13,20 +13,22 @@ import { formatCompact } from '../lib/palette';
    the same dark #151E2A in dark mode and pale blue #EAF1FB in light
    mode (light-mode shading fixed 2026-11-12), not the per-card
    series colours. */
-const SPARKLINE_COLOR = '#3B7FD3';
+const SPARKLINE_COLOR_DARK = '#3B7FD3';
+const SPARKLINE_COLOR_LIGHT = '#3b82f6';
 const SPARKLINE_FILL_DARK = '#151E2A';
 const SPARKLINE_FILL_LIGHT = '#EAF1FB';
 const CARDS = [
-  { label: 'Total events', seriesKey: 'events', prevKey: 'events', color: SPARKLINE_COLOR },
-  { label: 'Unique visitors', seriesKey: 'visitors', prevKey: 'visitors', color: SPARKLINE_COLOR },
-  { label: 'Project clicks', seriesKey: 'projectClicks', prevKey: 'projectClicks', color: SPARKLINE_COLOR },
-  { label: 'Resume downloads', seriesKey: 'resumeDownloads', prevKey: 'resumeDownloads', color: SPARKLINE_COLOR },
+  { label: 'Total events', seriesKey: 'events', prevKey: 'events' },
+  { label: 'Unique visitors', seriesKey: 'visitors', prevKey: 'visitors' },
+  { label: 'Project clicks', seriesKey: 'projectClicks', prevKey: 'projectClicks' },
+  { label: 'Resume downloads', seriesKey: 'resumeDownloads', prevKey: 'resumeDownloads' },
 ];
 
-/* Delta colour (user order 2026-11-10): greyed #808080 for all cards,
-   up and down alike. The arrow direction still shows up/down. */
-const DELTA_UP = '#808080';
-const DELTA_DOWN = '#808080';
+/* Delta colour: greyed for all cards, up and down alike. Dark keeps
+   the user's #808080; light uses CF's #6b7280 (captured 2026-11-13).
+   The arrow direction still shows up/down. */
+const DELTA_DARK = '#808080';
+const DELTA_LIGHT = '#6b7280';
 
 /* Sparkline on Kumo's custom Chart (ECharts). The TimeseriesChart
    cannot be a 50px sparkline: it has no axis-hide props and its grid
@@ -181,19 +183,20 @@ function DeltaArrow({ up }) {
 }
 
 const deltaEl = (delta) => {
+    const deltaColor = dark ? DELTA_DARK : DELTA_LIGHT;
     if (delta == null) {
       return <span className="text-[12px] font-medium text-[var(--faint)]">-</span>;
     }
     if (delta > 0) {
       return (
-        <span className="text-[12px] font-medium tabular-nums inline-flex items-center gap-1" style={{ color: DELTA_UP }}>
+        <span className="text-[12px] font-medium tabular-nums inline-flex items-center gap-1" style={{ color: deltaColor }}>
           <DeltaArrow up /> {delta.toFixed(1)}%
         </span>
       );
     }
     if (delta < 0) {
       return (
-        <span className="text-[12px] font-medium tabular-nums inline-flex items-center gap-1" style={{ color: DELTA_DOWN }}>
+        <span className="text-[12px] font-medium tabular-nums inline-flex items-center gap-1" style={{ color: deltaColor }}>
           <DeltaArrow up={false} /> {Math.abs(delta).toFixed(1)}%
         </span>
       );
@@ -221,7 +224,7 @@ const deltaEl = (delta) => {
                 {deltaEl(delta)}
               </div>
             </div>
-            <Sparkline rows={rows} seriesKey={c.seriesKey} color={c.color} dark={dark} />
+            <Sparkline rows={rows} seriesKey={c.seriesKey} color={dark ? SPARKLINE_COLOR_DARK : SPARKLINE_COLOR_LIGHT} dark={dark} />
           </LayerCard>
         );
       })}

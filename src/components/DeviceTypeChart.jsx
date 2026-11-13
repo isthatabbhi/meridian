@@ -7,7 +7,7 @@ import echarts from '../lib/echarts';
    Desktop #4290F0, Mobile #EEB720, Tablet #E8649D, Unknown #8D58EE.
    Assigned by device name so the pie slice and the legend dot always
    match, even when a device has no data. */
-import { DEVICE_COLORS } from '../lib/palette';
+import { deviceColorsFor } from '../lib/palette';
 const DEVICE_ORDER = ['Desktop', 'Mobile', 'Tablet', 'Unknown'];
 
 export default function DeviceTypeChart({ data, dark }) {
@@ -28,11 +28,11 @@ export default function DeviceTypeChart({ data, dark }) {
     const tooltip = {
       trigger: 'item',
       backgroundColor: dark ? '#161b22' : '#ffffff',
-      borderColor: dark ? '#121212' : '#d0d7de',
+      borderColor: dark ? '#121212' : '#e5e7eb',
       borderWidth: 1,
       padding: [8, 12],
       transitionDuration: 0.1,
-      textStyle: { color: dark ? '#ffffff' : '#1f2328', fontSize: 12, fontFamily: 'Inter Variable, system-ui, sans-serif' },
+      textStyle: { color: dark ? '#ffffff' : '#1a1a1a', fontSize: 12, fontFamily: 'Inter Variable, system-ui, sans-serif' },
       extraCssText: 'border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.35);',
       /* HTML tooltip (dot + name + value), like the old custom one.
          Names are fixed device labels, but encode them anyway, as the
@@ -94,7 +94,7 @@ export default function DeviceTypeChart({ data, dark }) {
         data: deviceData.map((d) => ({
           name: d.name,
           value: d.value,
-          itemStyle: { color: DEVICE_COLORS[d.name] },
+          itemStyle: { color: deviceColorsFor(dark)[d.name] },
         })),
       }],
     };
@@ -112,7 +112,7 @@ export default function DeviceTypeChart({ data, dark }) {
         <div className="flex flex-wrap gap-x-5 gap-y-1 mb-4">
           {DEVICE_ORDER.map((name) => (
             <div key={name} className="flex items-center gap-1.5">
-              <span className="inline-block w-[8px] h-[8px] rounded-full" style={{ backgroundColor: DEVICE_COLORS[name] }} />
+              <span className="inline-block w-[8px] h-[8px] rounded-full" style={{ backgroundColor: deviceColorsFor(dark)[name] }} />
               <span className="text-[12px] leading-4 text-[var(--text-2)]">{name}</span>
               <span className="text-[12px] leading-4 text-[var(--text)] font-medium tabular-nums">
                 {(data?.requestsByDevice || {})[name] || 0}

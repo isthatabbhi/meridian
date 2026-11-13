@@ -2,13 +2,13 @@ import { useMemo, useState } from 'react';
 import { Chart } from "@cloudflare/kumo/components/chart";
 import { Text } from "@cloudflare/kumo/components/text";
 import echarts from '../lib/echarts';
-import { EVENT_COLORS, formatCompact } from '../lib/palette';
+import { eventColorsFor, formatCompact } from '../lib/palette';
 
 const TYPES = [
-  { key: 'pageviews', label: 'Pageview', color: EVENT_COLORS.pageview },
-  { key: 'projectClicks', label: 'Project click', color: EVENT_COLORS.project_click },
-  { key: 'resumeDownloads', label: 'Resume download', color: EVENT_COLORS.resume_download },
-  { key: 'contactEvents', label: 'Contact', color: EVENT_COLORS.contact },
+  { key: 'pageviews', label: 'Pageview', colorKey: 'pageview' },
+  { key: 'projectClicks', label: 'Project click', colorKey: 'project_click' },
+  { key: 'resumeDownloads', label: 'Resume download', colorKey: 'resume_download' },
+  { key: 'contactEvents', label: 'Contact', colorKey: 'contact' },
 ];
 
 /* Event distribution as a single segmented bar, now on Kumo's custom
@@ -29,13 +29,15 @@ export default function StatusCodesBar({ data, dark }) {
   const [hovered, setHovered] = useState(null);
 
   const segments = useMemo(() => {
-    if (!data || total === 0) return TYPES.map((t) => ({ ...t, count: 0, pct: 0 }));
+    const colors = eventColorsFor(dark);
+    if (!data || total === 0) return TYPES.map((t) => ({ ...t, color: colors[t.colorKey], count: 0, pct: 0 }));
     return TYPES.map((t) => ({
       ...t,
+      color: colors[t.colorKey],
       count: data[t.key] || 0,
       pct: ((data[t.key] || 0) / total) * 100,
     }));
-  }, [data, total]);
+  }, [data, total, dark]);
 
   /* Visible segments only (count > 0), so the first/last rounded
      corners land on the right segments. */
@@ -65,11 +67,11 @@ export default function StatusCodesBar({ data, dark }) {
          above the card. */
       appendToBody: true,
       backgroundColor: dark ? '#161b22' : '#ffffff',
-      borderColor: dark ? '#121212' : '#d0d7de',
+      borderColor: dark ? '#121212' : '#e5e7eb',
       borderWidth: 1,
       padding: [8, 12],
       transitionDuration: 0.1,
-      textStyle: { color: dark ? '#ffffff' : '#1f2328', fontSize: 12, fontFamily: 'Inter Variable, system-ui, sans-serif' },
+      textStyle: { color: dark ? '#ffffff' : '#1a1a1a', fontSize: 12, fontFamily: 'Inter Variable, system-ui, sans-serif' },
       extraCssText: 'border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.35);',
       /* Cloudflare's tooltip (verified live 2026-11-10): "2xx:
          5.77k (91.23%)" — label regular, count bold white,
@@ -79,7 +81,7 @@ export default function StatusCodesBar({ data, dark }) {
         const d = params.data || {};
         const label = echarts.format.encodeHTML(d.label || params.seriesName || '');
         const pct = typeof d.pct === 'number' ? d.pct.toFixed(2) : '';
-        const pctColor = dark ? '#808080' : '#6e7781';
+        const pctColor = dark ? '#808080' : '#6b7280';
         const count = formatCompact(d.count ?? params.value ?? 0);
         return `${label} <span style="font-weight:600;font-variant-numeric:tabular-nums">${count}</span> <span style="color:${pctColor}">(${pct}%)</span>`;
       },

@@ -22,7 +22,7 @@ const COUNTRY_NAMES = {
 
 /* Cloudflare 10-color categorical series, in rank order (top country
    gets #4290F0). Cycles with modulo past 10 countries. */
-import { CF_SERIES as CHART_COLORS, formatCompact } from '../lib/palette';
+import { seriesFor, formatCompact } from '../lib/palette';
 
 import { istDayKey, istKeyToMs, msToIstKey, formatMsIndian, formatHourKeyShort, formatHourOnly, formatDayKeyShort } from '../lib/dates';
 
@@ -51,6 +51,11 @@ export default function RequestsChart({ data, since, timeRange, dark }) {
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
   }, []);
+
+  /* Series colours are theme-aware: dark keeps the user's palette,
+     light uses CF's captured series colours (#3b82f6, #f5b73d,
+     #ec5f9d, #8b5cf6). */
+  const CHART_COLORS = seriesFor(dark);
 
   const { chartData, topCountries, countryTotals } = useMemo(() => {
     const raw = timeRange === '24h' ? data?.q15ByCountry : data?.dailyByCountry;
@@ -176,11 +181,11 @@ export default function RequestsChart({ data, since, timeRange, dark }) {
      border #30363d, tooltip shadow rgba(0,0,0,0.5). Labels stay in
      the user's 12-hour Indian format, not CF's 24-hour format. */
   const options = useMemo(() => {
-    const axisColor = dark ? '#8b949e' : '#6e7781';
-    const gridColor = dark ? '#30363d' : '#d0d7de';
+    const axisColor = dark ? '#8b949e' : '#6b7280';
+    const gridColor = dark ? '#30363d' : '#e5e7eb';
     const tooltipBg = dark ? '#161b22' : '#ffffff';
-    const tooltipBorder = dark ? '#30363d' : '#d0d7de';
-    const tooltipText = dark ? '#ffffff' : '#1f2328';
+    const tooltipBorder = dark ? '#30363d' : '#e5e7eb';
+    const tooltipText = dark ? '#ffffff' : '#1a1a1a';
     const plotData = timeRange === '24h' ? hourlyData : chartData;
     return {
       animationDuration: 800,
@@ -209,7 +214,7 @@ export default function RequestsChart({ data, since, timeRange, dark }) {
         dangerousHtmlFormatter: (params) => {
           if (!params || params.length === 0) return '';
           const header = echarts.format.encodeHTML(formatTooltipTime(params[0].value[0]));
-          const headerColor = dark ? '#8b949e' : '#6e7781';
+          const headerColor = dark ? '#8b949e' : '#6b7280';
           const lines = [`<div style="margin-bottom:4px;font-size:11px;color:${headerColor}">${header}</div>`];
           for (const p of params) {
             const name = echarts.format.encodeHTML(p.seriesName);

@@ -394,7 +394,7 @@ export default function App() {
     document.documentElement.dataset.mode = dark ? 'dark' : 'light';
     try { localStorage.setItem('meridian-theme', dark ? 'dark' : 'light'); } catch {}
     const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute('content', dark ? '#030303' : '#f6f8fa');
+    if (meta) meta.setAttribute('content', dark ? '#030303' : '#f5f5f5');
   }, [dark]);
 
   /* Lenis smooth inertia scroll for mouse wheel only. Touch stays
@@ -805,7 +805,7 @@ export default function App() {
                 {filteredEvents.length} of {data?.recent?.length || 0} most recent events
                 {typeFilter !== 'all' ? ` · ${currentFilterLabel}` : ''} · {currentRangeLabel}
               </Text>
-              <EventsTable events={filteredEvents} loading={false} />
+              <EventsTable events={filteredEvents} loading={false} dark={dark} />
             </div>
           ) : (
             <div className={`space-y-4 cf-live-refresh ${fetching ? 'polling' : ''}`}>

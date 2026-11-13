@@ -157,39 +157,47 @@
 }
 
 html.light {
-  --cf-bg-page: #f6f8fa;
-  --cf-bg-sidebar: #ffffff;
+  /* Light mode colours captured from Cloudflare's Traffic overview
+     dashboard live, 2026-11-13 (rendered-colour readings, DevTools
+     would not open in the browser, so these are the nearest
+     standard shades, consistent across repeated views). Page #f5f5f5,
+     sidebar #f8f8f9, card #ffffff, border #e5e7eb, text #1a1a1a /
+     #1f2937 / #6b7280, accent #2563eb, series blue #3b82f6. */
+  --cf-bg-page: #f5f5f5;
+  --cf-bg-sidebar: #f8f8f9;
   --cf-bg-panel: #ffffff;
-  --cf-bg-subtle: #f3f4f6;
-  --cf-bg-hover: #f3f4f6;
+  --cf-bg-subtle: #ededed;
+  --cf-bg-hover: #ededed;
   --cf-bg-track: #e5e7eb;
 
-  --cf-border-panel: #d0d7de;
-  --cf-border-hover: #afb8c1;
+  --cf-border-panel: #e5e7eb;
+  --cf-border-hover: #d9d9d9;
   /* Chrome dividers (header, sidebar, footer, Top N headings) are
-     #333333 in dark mode, but that reads as a black line on white
-     cards. In light mode they use the light grey panel border. */
-  --cf-border-chrome: #d0d7de;
+     #333333 in dark mode. In light mode they use CF's #e5e7eb. */
+  --cf-border-chrome: #e5e7eb;
 
-  --cf-delta-up: #1a7f37;
-  --cf-delta-down: #cf222e;
-  --cf-delta-neutral: #6e7781;
+  /* KPI deltas on CF are grey for both up and down. */
+  --cf-delta-up: #6b7280;
+  --cf-delta-down: #6b7280;
+  --cf-delta-neutral: #6b7280;
 
-  --cf-text-primary: #1f2328;
-  --cf-text-secondary: #57606a;
-  --cf-text-muted: #6e7781;
-  --cf-text-faint: #8c959f;
+  --cf-text-primary: #1a1a1a;
+  --cf-text-secondary: #1f2937;
+  --cf-text-muted: #6b7280;
+  --cf-text-faint: #8a8a8a;
 
-  --cf-accent-blue: #0969da;
-  --cf-accent-blue-hover: #0858b8;
+  --cf-accent-blue: #2563eb;
+  --cf-accent-blue-hover: #1d4ed8;
+  /* Meter bar fill in light mode is CF's button blue. */
+  --meter-fill: #2563eb;
 
-  --cf-status-2xx: #0969da;
-  --cf-status-3xx: #1a7f37;
-  --cf-status-4xx: #cf222e;
-  --cf-status-5xx: #bf3989;
+  --cf-status-2xx: #3b82f6;
+  --cf-status-3xx: #f5b73d;
+  --cf-status-4xx: #ec5f9d;
+  --cf-status-5xx: #8b5cf6;
 
-  --cf-globe-land: rgba(9, 105, 218, 0.75);
-  --cf-globe-ocean: rgba(160, 175, 195, 0.25);
+  --cf-globe-land: rgba(59, 130, 246, 0.75);
+  --cf-globe-ocean: rgba(255, 255, 255, 0);
 
   --bg: var(--cf-bg-page);
   --surface: var(--cf-bg-panel);
@@ -239,30 +247,30 @@ html.light {
 }
 
 html.light {
-  --color-kumo-canvas: #f6f8fa;
+  --color-kumo-canvas: #f5f5f5;
   --color-kumo-base: #ffffff;
-  --color-kumo-elevated: #f6f8fa;
-  --color-kumo-recessed: #f6f8fa;
-  --color-kumo-tint: #f3f4f6;
-  --color-kumo-line: #d0d7de;
-  --color-kumo-hairline: #e1e4e8;
-  --color-kumo-brand: #0969da;
-  --color-kumo-brand-hover: #0858b8;
-  --color-kumo-focus: #0969da;
+  --color-kumo-elevated: #f5f5f5;
+  --color-kumo-recessed: #f5f5f5;
+  --color-kumo-tint: #ededed;
+  --color-kumo-line: #e5e7eb;
+  --color-kumo-hairline: #e5e5e5;
+  --color-kumo-brand: #2563eb;
+  --color-kumo-brand-hover: #1d4ed8;
+  --color-kumo-focus: #2563eb;
   --color-kumo-control: #ffffff;
-  --color-kumo-interact: #d0d7de;
-  --color-kumo-fill: #f3f4f6;
+  --color-kumo-interact: #d9d9d9;
+  --color-kumo-fill: #ededed;
   --color-kumo-fill-hover: #e5e7eb;
-  --color-kumo-overlay: #f3f4f6;
-  --color-kumo-contrast: #1f2328;
-  --text-color-kumo-default: #1f2328;
-  --text-color-kumo-strong: #1f2328;
-  --text-color-kumo-subtle: #6e7781;
-  --text-color-kumo-inactive: #8c959f;
-  --text-color-kumo-placeholder: #6e7781;
-  --text-color-kumo-brand: #0969da;
-  --text-color-kumo-link: #0969da;
-  --text-color-kumo-info: #0969da;
+  --color-kumo-overlay: #ededed;
+  --color-kumo-contrast: #1a1a1a;
+  --text-color-kumo-default: #1a1a1a;
+  --text-color-kumo-strong: #1a1a1a;
+  --text-color-kumo-subtle: #6b7280;
+  --text-color-kumo-inactive: #8a8a8a;
+  --text-color-kumo-placeholder: #6b7280;
+  --text-color-kumo-brand: #2563eb;
+  --text-color-kumo-link: #2563eb;
+  --text-color-kumo-info: #2563eb;
 }
 
 /* Live refresh ON state (Kumo Button, outline variant): blue border
@@ -434,8 +442,8 @@ html.lenis, html.lenis body {
 }
 html.light .kumo-tooltip-popup {
   background-color: #ffffff;
-  border: 1px solid #d0d7de;
-  color: #1f2328;
+  border: 1px solid #e5e7eb;
+  color: #1a1a1a;
 }
 
 /* Live Refresh Pulse */

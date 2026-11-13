@@ -61,6 +61,12 @@ const ROTATION_SPEED = 18;
 const CF_LAND_RGB = [100, 140, 190];
 const CF_SCALE_LO = [130, 182, 255]; /* #82b6ff */
 const CF_SCALE_HI = [0, 81, 195]; /* #0051C3 */
+/* Light-mode dot colours, captured from CF's dashboard live
+   2026-11-13: the globe sphere is white with pale blue dots
+   #93c5fd and darker blue #3b82f6 for high-traffic countries. */
+const CF_LAND_RGB_LIGHT = [147, 197, 253]; /* #93c5fd */
+const CF_SCALE_LO_LIGHT = [147, 197, 253]; /* #93c5fd */
+const CF_SCALE_HI_LIGHT = [59, 130, 246]; /* #3b82f6 */
 function lerpColor(lo, hi, t) {
   const r = Math.round(lo[0] + (hi[0] - lo[0]) * t);
   const g = Math.round(lo[1] + (hi[1] - lo[1]) * t);
@@ -308,10 +314,11 @@ export default function CountryGlobe({ data, dark }) {
       ctx.clearRect(0, 0, SIZE, SIZE);
 
       /* Ocean disc, solid fill so the sphere reads as a filled globe,
-         not hollow. Dark uses the user's Black #020204. */
+         not hollow. Dark uses the user's Black #020204. Light uses
+         white, like CF's light-mode globe sphere (captured 2026-11-13). */
       ctx.beginPath();
       ctx.arc(SIZE / 2, SIZE / 2, R, 0, Math.PI * 2);
-      ctx.fillStyle = dark ? '#020204' : '#e5e7eb';
+      ctx.fillStyle = dark ? '#020204' : '#ffffff';
       ctx.fill();
 
       const traffic = trafficCodesRef.current;
@@ -351,17 +358,19 @@ export default function CountryGlobe({ data, dark }) {
           const max = maxCountRef.current || 1;
           const t = max > 0 ? value / max : 0;
           ctx.globalAlpha = (0.7 + 0.3 * t) * (0.35 + 0.65 * depth);
-          ctx.fillStyle = lerpColor(CF_SCALE_LO, CF_SCALE_HI, t);
+          ctx.fillStyle = lerpColor(dark ? CF_SCALE_LO : CF_SCALE_LO_LIGHT, dark ? CF_SCALE_HI : CF_SCALE_HI_LIGHT, t);
           ctx.beginPath();
           ctx.arc(x, y, TOP_R, 0, Math.PI * 2);
           ctx.fill();
         } else {
           /* Non-traffic land: Cloudflare's exact land texture
-             colour rgb(100, 140, 190) at alpha 0.45. The depth
-             factor keeps the sphere shading (limb fade) while
-             the centre matches CF's exact value. */
+             colour rgb(100, 140, 190) at alpha 0.45 in dark mode.
+             Light mode uses CF's pale blue #93c5fd (captured
+             2026-11-13). The depth factor keeps the sphere shading
+             (limb fade) while the centre matches CF's exact value. */
           ctx.globalAlpha = 0.45 * (0.35 + 0.65 * depth);
-          ctx.fillStyle = `rgb(${CF_LAND_RGB[0]}, ${CF_LAND_RGB[1]}, ${CF_LAND_RGB[2]})`;
+          const land = dark ? CF_LAND_RGB : CF_LAND_RGB_LIGHT;
+          ctx.fillStyle = `rgb(${land[0]}, ${land[1]}, ${land[2]})`;
           ctx.beginPath();
           ctx.arc(x, y, DOT_R, 0, Math.PI * 2);
           ctx.fill();
@@ -484,7 +493,7 @@ export default function CountryGlobe({ data, dark }) {
           {/* Hover tooltip, updated imperatively in the draw loop. */}
           <div
             ref={tipRef}
-            className={`absolute pointer-events-none whitespace-nowrap rounded-[8px] border border-[var(--border)] px-3 py-2 text-[12px] leading-4 opacity-0 transition-opacity duration-100 z-10 shadow-[0_4px_12px_rgba(0,0,0,0.35)] ${dark ? 'bg-[#161b22] text-white' : 'bg-white text-[#1f2328]'}`}
+            className={`absolute pointer-events-none whitespace-nowrap rounded-[8px] border border-[var(--border)] px-3 py-2 text-[12px] leading-4 opacity-0 transition-opacity duration-100 z-10 shadow-[0_4px_12px_rgba(0,0,0,0.35)] ${dark ? 'bg-[#161b22] text-white' : 'bg-white text-[#1a1a1a]'}`}
           />
         </div>
         {/* Thin vertical divider between globe and list, md+ only.
