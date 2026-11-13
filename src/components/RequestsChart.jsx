@@ -182,9 +182,9 @@ export default function RequestsChart({ data, since, timeRange, dark }) {
      the user's 12-hour Indian format, not CF's 24-hour format. */
   const options = useMemo(() => {
     const axisColor = dark ? '#8b949e' : '#6b7280';
-    const gridColor = dark ? '#30363d' : '#e5e7eb';
+    const gridColor = dark ? '#30363d' : '#e1e1e1';
     const tooltipBg = dark ? '#161b22' : '#ffffff';
-    const tooltipBorder = dark ? '#30363d' : '#e5e7eb';
+    const tooltipBorder = dark ? '#30363d' : '#e1e1e1';
     const tooltipText = dark ? '#ffffff' : '#1a1a1a';
     const plotData = timeRange === '24h' ? hourlyData : chartData;
     return {

@@ -165,7 +165,7 @@ html.light {
      dashboard live, 2026-11-13 (rendered-colour readings, DevTools
      would not open in the browser, so these are the nearest
      standard shades, consistent across repeated views). Page #f5f5f5,
-     sidebar #f8f8f9, card #ffffff, border #e5e7eb, text #1a1a1a /
+     sidebar #f8f8f9, card #ffffff, border #e1e1e1, text #1a1a1a /
      #1f2937 / #6b7280, accent #2563eb, series blue #3b82f6. */
   --cf-bg-page: #f5f5f5;
   --cf-bg-sidebar: #fafafa;
@@ -175,11 +175,11 @@ html.light {
   --cf-bg-hover: #ededed;
   --cf-bg-track: #e5e7eb;
 
-  --cf-border-panel: #e5e7eb;
+  --cf-border-panel: #e1e1e1;
   --cf-border-hover: #d9d9d9;
   /* Chrome dividers (header, sidebar, footer, Top N headings) are
-     #333333 in dark mode. In light mode they use CF's #e5e7eb. */
-  --cf-border-chrome: #e5e7eb;
+     #333333 in dark mode. In light mode they use #e1e1e1. */
+  --cf-border-chrome: #e1e1e1;
 
   /* KPI deltas on CF are grey for both up and down. */
   --cf-delta-up: #6b7280;
@@ -257,8 +257,8 @@ html.light {
   --color-kumo-elevated: #f5f5f5;
   --color-kumo-recessed: #f5f5f5;
   --color-kumo-tint: #ededed;
-  --color-kumo-line: #e5e7eb;
-  --color-kumo-hairline: #e5e5e5;
+  --color-kumo-line: #e1e1e1;
+  --color-kumo-hairline: #e1e1e1;
   --color-kumo-brand: #2563eb;
   --color-kumo-brand-hover: #1d4ed8;
   --color-kumo-focus: #2563eb;
@@ -454,7 +454,7 @@ html.lenis, html.lenis body {
 }
 html.light .kumo-tooltip-popup {
   background-color: #ffffff;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #e1e1e1;
   color: #1a1a1a;
 }
 

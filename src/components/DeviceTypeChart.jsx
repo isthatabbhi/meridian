@@ -28,7 +28,7 @@ export default function DeviceTypeChart({ data, dark }) {
     const tooltip = {
       trigger: 'item',
       backgroundColor: dark ? '#161b22' : '#ffffff',
-      borderColor: dark ? '#121212' : '#e5e7eb',
+      borderColor: dark ? '#121212' : '#e1e1e1',
       borderWidth: 1,
       padding: [8, 12],
       transitionDuration: 0.1,
