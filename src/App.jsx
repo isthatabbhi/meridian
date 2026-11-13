@@ -681,6 +681,17 @@ export default function App() {
     >
       <MeridianSidebar view={view} onNavigate={(v) => setView(v)} dark={dark} />
 
+      {/* Whole-site refresh bar (user order 2026-11-13): a thin blue
+          bar that sweeps across the very top of the viewport on
+          every 20s pulse, visible on mobile and desktop alike.
+          The old icon-spin + content-dim was too subtle on mobile
+          (verified: the pulse fired but the 14px icon spin was
+          invisible to the user), and the dim is removed on his
+          order. The bar mounts fresh each pulse, so its fill
+          animation restarts every time. No data fetch here, the
+          real fetch stays at 2 minutes. */}
+      {refreshPulse && <div className="refresh-bar" aria-hidden="true" />}
+
       {/* Main content, flexed beside the sidebar (55px rail / 220px expanded) */}
       <main className="flex-1 min-w-0 min-h-screen">
         <div className="px-3 pb-12 md:px-6 w-full">
@@ -867,7 +878,7 @@ export default function App() {
               <EventsTable events={filteredEvents} loading={false} dark={dark} />
             </div>
           ) : (
-            <div className={`space-y-4 cf-live-refresh ${(fetching || refreshPulse) ? 'polling' : ''}`}>
+            <div className={`space-y-4 cf-live-refresh`}>
               {/* Status codes bar */}
               <div className="animate-enter" style={{ animationDelay: '0ms' }}>
                 <StatusCodesBar data={data} dark={dark} />

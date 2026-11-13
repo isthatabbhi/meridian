@@ -476,13 +476,10 @@ html.light .kumo-tooltip-popup {
   color: #1a1a1a;
 }
 
-/* Live Refresh Pulse */
+/* Live Refresh Pulse (dim removed 2026-11-13 on user order;
+   the whole-site refresh bar below is the visible cue now). */
 .cf-live-refresh {
   transition: opacity 200ms ease-in-out;
-}
-
-.cf-live-refresh.polling {
-  opacity: 0.85;
 }
 
 /* Dropdown menu positioner (Kumo / Base UI): the menu popup is
@@ -597,6 +594,29 @@ html.light .kumo-tooltip-popup {
 @keyframes live-refresh-spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+/* Whole-site refresh bar (user order 2026-11-13, replaces the
+   content dim which he removed): a thin blue bar fixed to the
+   very top of the viewport that sweeps 0 to 100% width on every
+   20s pulse. Full viewport width, so it is visible on mobile and
+   desktop alike, unlike the 14px icon spin. z-80 sits above the
+   sidebar (z-50), footer (z-60) and dropdown menus (z-70). The
+   bar mounts fresh each pulse, so the fill animation restarts
+   every time; 700ms matches the pulse length in App.jsx. */
+.refresh-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  background-color: var(--cf-accent-blue);
+  z-index: 80;
+  transform-origin: left;
+  animation: refresh-bar-fill 700ms ease-out forwards;
+}
+@keyframes refresh-bar-fill {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
 }
 
 .meter-bar-only .absolute.inset-y-0 {
