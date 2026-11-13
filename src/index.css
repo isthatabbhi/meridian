@@ -498,6 +498,13 @@ html.light .kumo-tooltip-popup {
   border-color: var(--cf-accent-blue) !important;
   color: var(--cf-accent-blue) !important;
 }
+/* The icon's bounding box is centred in the button, but the text
+   glyphs sit 2px above the button centre (line-height metrics), so
+   the icon looks 2px low next to the text. Nudge it up to sit on
+   the text's visual centreline. */
+.live-refresh-btn svg {
+  transform: translateY(-2px);
+}
 
 .meter-bar-only .absolute.inset-y-0 {
   background-color: var(--meter-fill);

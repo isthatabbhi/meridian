@@ -726,7 +726,7 @@ export default function App() {
                 size="md"
                 active={liveRefresh}
                 className="live-refresh-btn px-5 text-[13px] rounded-md"
-                icon={liveRefresh ? <Pause weight="fill" size={14} /> : <Play weight="regular" size={14} />}
+                icon={liveRefresh ? <Pause weight="regular" size={14} /> : <Play weight="regular" size={14} />}
                 onClick={() => { setLiveRefresh(!liveRefresh); if (!liveRefresh) doFetch(); }}
                 aria-pressed={liveRefresh}
                 title={liveRefresh ? 'Live refresh is on, click to turn off' : 'Live refresh is off, click to turn on'}
