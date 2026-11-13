@@ -290,6 +290,12 @@ aside[data-sidebar="sidebar"] {
 html,
 body {
   background-color: var(--bg);
+  /* No page-level horizontal scrollbar in either mode: any stray
+     wide element is clipped instead of pushing a scrollbar under
+     the footer, which also kept the footer and sidebar lines
+     mismatched. clip (not hidden) so sticky positioning keeps
+     working. Fixed 2026-11-13. */
+  overflow-x: clip;
   /* Cloudflare's font stack, so the dashboard type matches the
      Cloudflare dashboard. Was falling back to Tailwind's default
      sans, which renders the numbers and labels in a different face. */

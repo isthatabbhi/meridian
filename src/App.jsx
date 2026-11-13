@@ -180,7 +180,7 @@ function SidebarExpandToggle() {
   const { open } = useSidebar();
   return (
     <Tooltip content={open ? 'Collapse sidebar' : 'Expand sidebar'} side="top">
-      <SidebarTrigger>
+      <SidebarTrigger className="size-7">
         <span className="inline-flex">
           <PanelLeftIcon />
         </span>
