@@ -738,7 +738,7 @@ export default function App() {
                 variant="toggle"
                 size="md"
                 active={liveRefresh}
-                className="live-refresh-btn text-[13px] rounded-md"
+                className="live-refresh-btn px-5 text-[13px] rounded-md"
                 icon={liveRefresh ? <PauseIcon /> : <PlayIcon />}
                 onClick={() => { setLiveRefresh(!liveRefresh); if (!liveRefresh) doFetch(); }}
                 aria-pressed={liveRefresh}
