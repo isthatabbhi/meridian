@@ -194,7 +194,14 @@ function MeridianSidebar({ view, onNavigate, dark }) {
   };
   return (
     <Sidebar
-      className="print:hidden"
+      /* z-30 on the wrapper: Kumo's wrapper uses `isolation: isolate`,
+         which traps the peek overlay's z-40 inside the wrapper's
+         stacking context, and the cards' entrance animation leaves a
+         persisted transform that paints them above the wrapper in DOM
+         order. A positive z-index lifts the whole sidebar above the
+         cards. z-30, not higher, so the fixed footer (z-40) still
+         stays on top of the sidebar overlay. Fixed 2026-11-13. */
+      className="print:hidden z-30"
     >
       {/* Header: mark + name (name fades with the rail) */}
       <SidebarHeader className="gap-2">
