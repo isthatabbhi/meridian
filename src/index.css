@@ -485,6 +485,22 @@ html.light .kumo-tooltip-popup {
   opacity: 0.85;
 }
 
+/* Dropdown menu positioner (Kumo / Base UI): the menu popup is
+   position:absolute with z-index auto, while the dashboard cards
+   form stacking contexts via the entrance animation's persisted
+   transform (translateY(0)). The cards therefore paint ABOVE the
+   open menu and swallow every click on it, so the menu opens but
+   no item can be selected, on laptop and mobile alike. The menu
+   surface itself is position:static, so a z-index there does
+   nothing; it has to go on the positioned parent. z-70 puts the
+   menu above the sidebar (z-50), header (z-40) and footer (z-60).
+   Root cause found 2026-11-13 via elementFromPoint: the click at
+   the centre of "Last 7 days" hit the Event distribution card,
+   not the menu item. */
+[data-kumo-component="DropdownMenu"][data-kumo-part="positioner"] {
+  z-index: 70;
+}
+
 /* Thin visible scrollbar for the country list (Cloudflare's list
    shows a scrollbar). */
 .thin-scroll {
@@ -569,6 +585,18 @@ html.light .kumo-tooltip-popup {
 .live-refresh-btn > span {
   display: inline-block;
   transform: translateY(2px);
+}
+/* Visual refresh pulse (user order 2026-11-13): every 20s the
+   Live refresh icon does one quick spin while the content dims,
+   with NO data fetch. The real fetch stays on the 2-minute
+   interval, so the KV list quota is untouched. The spin is
+   700ms, matching the pulse length in App.jsx. */
+.live-refresh-btn.refresh-pulse svg {
+  animation: live-refresh-spin 700ms ease-in-out;
+}
+@keyframes live-refresh-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .meter-bar-only .absolute.inset-y-0 {

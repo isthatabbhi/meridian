@@ -318,6 +318,14 @@ export default function App() {
   const [liveRefresh, setLiveRefresh] = useState(true);
   const [timeRange, setTimeRange] = useState('24h');
   const [fetching, setFetching] = useState(false);
+  /* Visual refresh pulse (user order 2026-11-13): every 20s the
+     dashboard shows a brief refresh animation (content dims and
+     the Live refresh icon spins) WITHOUT fetching data, so it
+     looks like it refreshed. The real data fetch stays on the
+     2-minute interval, so the KV list quota is untouched. The
+     pulse only runs while live refresh is on. */
+  const [refreshPulse, setRefreshPulse] = useState(false);
+  const pulseTimeoutRef = useRef(null);
   // Sidebar: pinned open by default on desktop (md+, 768px), so the
   // labels show without hovering; on phones it starts as a closed
   // drawer. The bottom-left button toggles the pinned state. Hover
@@ -497,6 +505,29 @@ export default function App() {
     }
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
   }, [liveRefresh, doFetch]);
+
+  /* 20-second visual pulse only (no data fetch, no KV list).
+     Fires every 20s while live refresh is on: turns the pulse
+     on for 700ms (content dims, icon spins), then off. The real
+     fetch above still runs every 2 minutes. */
+  const pulseIntervalRef = useRef(null);
+  useEffect(() => {
+    if (pulseIntervalRef.current) clearInterval(pulseIntervalRef.current);
+    if (pulseTimeoutRef.current) clearTimeout(pulseTimeoutRef.current);
+    if (liveRefresh) {
+      pulseIntervalRef.current = setInterval(() => {
+        setRefreshPulse(true);
+        if (pulseTimeoutRef.current) clearTimeout(pulseTimeoutRef.current);
+        pulseTimeoutRef.current = setTimeout(() => setRefreshPulse(false), 700);
+      }, 20000);
+    } else {
+      setRefreshPulse(false);
+    }
+    return () => {
+      if (pulseIntervalRef.current) clearInterval(pulseIntervalRef.current);
+      if (pulseTimeoutRef.current) clearTimeout(pulseTimeoutRef.current);
+    };
+  }, [liveRefresh]);
 
   const TIME_RANGES = [
     { value: '24h', label: 'Last 24 hours' },
@@ -760,7 +791,7 @@ export default function App() {
                 variant="toggle"
                 size="md"
                 active={liveRefresh}
-                className="live-refresh-btn px-5 text-[13px] rounded-md"
+                className={`live-refresh-btn px-5 text-[13px] rounded-md ${refreshPulse ? 'refresh-pulse' : ''}`}
                 icon={liveRefresh ? <Pause weight="regular" size={14} /> : <Play weight="regular" size={14} />}
                 onClick={() => { setLiveRefresh(!liveRefresh); if (!liveRefresh) doFetch(); }}
                 aria-pressed={liveRefresh}
@@ -836,7 +867,7 @@ export default function App() {
               <EventsTable events={filteredEvents} loading={false} dark={dark} />
             </div>
           ) : (
-            <div className={`space-y-4 cf-live-refresh ${fetching ? 'polling' : ''}`}>
+            <div className={`space-y-4 cf-live-refresh ${(fetching || refreshPulse) ? 'polling' : ''}`}>
               {/* Status codes bar */}
               <div className="animate-enter" style={{ animationDelay: '0ms' }}>
                 <StatusCodesBar data={data} dark={dark} />
