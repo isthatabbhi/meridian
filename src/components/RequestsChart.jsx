@@ -201,7 +201,12 @@ export default function RequestsChart({ data, since, timeRange, dark }) {
         transitionDuration: 0.1,
         textStyle: { color: tooltipText, fontSize: 12, fontFamily: 'Inter Variable, system-ui, sans-serif' },
         extraCssText: 'border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);',
-        formatter: (params) => {
+        /* Kumo's Chart strips the plain `formatter` property and only
+           honours `dangerousHtmlFormatter` (see transformTooltip in
+           Kumo's EChart wrapper). The plain formatter was silently
+           dropped, so ECharts fell back to its default tooltip and
+           showed the raw "2026-11-12 17:00:00". Fixed 2026-11-13. */
+        dangerousHtmlFormatter: (params) => {
           if (!params || params.length === 0) return '';
           const header = echarts.format.encodeHTML(formatTooltipTime(params[0].value[0]));
           const headerColor = dark ? '#8b949e' : '#6e7781';
