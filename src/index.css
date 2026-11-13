@@ -168,8 +168,8 @@ html.light {
      sidebar #f8f8f9, card #ffffff, border #e5e7eb, text #1a1a1a /
      #1f2937 / #6b7280, accent #2563eb, series blue #3b82f6. */
   --cf-bg-page: #f5f5f5;
-  --cf-bg-sidebar: #f8f8f9;
-  --cf-bg-chrome: #ffffff;
+  --cf-bg-sidebar: #fafafa;
+  --cf-bg-chrome: #fafafa;
   --cf-bg-panel: #ffffff;
   --cf-bg-subtle: #ededed;
   --cf-bg-hover: #ededed;
@@ -298,6 +298,13 @@ aside[data-sidebar="sidebar"] {
   position: sticky;
   top: 0;
   height: 100svh;
+  /* The pinned sidebar's background: Kumo's aside does not apply
+     its own bg-(--sidebar-bg) utility in this build, so the brand
+     area was transparent and showed the page #f5f5f5 behind it,
+     leaving a visible colour gap against the #fafafa header. Set it
+     explicitly to the sidebar colour so logo, header and footer all
+     sit on the same #fafafa in light mode. */
+  background-color: var(--cf-bg-sidebar);
 }
 
 html,
