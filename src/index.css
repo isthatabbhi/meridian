@@ -307,6 +307,24 @@ aside[data-sidebar="sidebar"] {
   background-color: var(--cf-bg-sidebar);
 }
 
+/* Sidebar divider line (user order 2026-11-13): the vertical line
+   down the sidebar's right edge, from the brandmark to the footer,
+   vanished when the sidebar expanded on hover (peek) and came back
+   on collapse. Cause: Kumo's sidebar wrapper
+   ([data-sidebar-wrapper]) has isolation: isolate and z-index auto,
+   so it sits BELOW the sticky main header (z-40) in the root
+   stacking context, and the header's background covered the
+   content container's right border in the top 58px, right where
+   the line leaves the brandmark. The aside's own z-50 is trapped
+   inside the wrapper's stacking context and cannot lift it. Lift
+   the wrapper itself above the header so the whole sidebar,
+   including its right border, paints above the header in every
+   state (collapsed rail, peek overlay, pinned). The footer stays
+   on top (z-60). */
+[data-sidebar-wrapper] {
+  z-index: 50;
+}
+
 html,
 body {
   background-color: var(--bg);
