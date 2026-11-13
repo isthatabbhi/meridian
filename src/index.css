@@ -518,12 +518,18 @@ html.light .kumo-tooltip-popup {
   border-color: var(--cf-accent-blue) !important;
   color: var(--cf-accent-blue) !important;
 }
-/* The icon's bounding box is centred in the button, but the text
-   glyphs sit 2px above the button centre (line-height metrics), so
-   the icon looks 2px low next to the text. Nudge it up to sit on
-   the text's visual centreline. */
-.live-refresh-btn svg {
-  transform: translateY(-2px);
+/* The icon is a geometric shape centred in the button, but the
+   text glyphs sit 2px above the button centre (line-height
+   metrics, "Live refresh" has no descenders), so the text looked
+   2px high next to the icon. The earlier fix nudged the icon up
+   to the text, which left both 2px above the button centre, so
+   the whole content still looked high. The real fix is the other
+   way: keep the icon on the button centre and shift the text
+   down 2px onto it. The text lives in a display:contents span,
+   which generates no box, so give it a box first. */
+.live-refresh-btn > span {
+  display: inline-block;
+  transform: translateY(2px);
 }
 
 .meter-bar-only .absolute.inset-y-0 {
