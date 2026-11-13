@@ -166,6 +166,22 @@ export default function CountryGlobe({ data, dark }) {
      no-ops when the list does not overflow. */
   const listRef = useRef(null);
   useScrollEscape(listRef, true);
+  /* Scroll fade, same as the Top N cards (user order 2026-11-13):
+     when the list overflows, a fade masks the top and bottom edges
+     while scrolling, so rows never hard-touch the card edge. The
+     top fade shows only while scrollTop > 0; at rest the first row
+     is fully visible and only the bottom fades. */
+  const [needsScroll, setNeedsScroll] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const el = listRef.current;
+    if (!el) return;
+    const check = () => setNeedsScroll(el.scrollHeight > el.clientHeight + 1);
+    check();
+    const ro = new ResizeObserver(check);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [sorted.length]);
   const projectionRef = useRef(null);
   /* Rotation as [lambda, phi] degrees. Starts centred on India
      (lon 78.9, lat 20.6), user order 2026-11-09: the globe should
@@ -503,7 +519,7 @@ export default function CountryGlobe({ data, dark }) {
         <div className="hidden md:block w-px self-stretch bg-[var(--cf-border-chrome)] shrink-0" />
         {/* Country list: plain scrollable column, NO bordered box.
             data-lenis-prevent keeps this inner scroll area native. */}
-        <div ref={listRef} data-lenis-prevent className="thin-scroll flex-1 min-w-0 w-full overflow-y-auto overflow-x-hidden max-h-[340px] space-y-0.5">
+        <div ref={listRef} data-lenis-prevent onScroll={(e) => setScrolled(e.currentTarget.scrollTop > 0)} className="thin-scroll flex-1 min-w-0 w-full overflow-y-auto overflow-x-hidden max-h-[340px] space-y-0.5" style={needsScroll ? { maskImage: scrolled ? 'linear-gradient(to bottom, transparent 0, black 28px, black calc(100% - 28px), transparent 100%)' : 'linear-gradient(to bottom, black calc(100% - 28px), transparent 100%)', WebkitMaskImage: scrolled ? 'linear-gradient(to bottom, transparent 0, black 28px, black calc(100% - 28px), transparent 100%)' : 'linear-gradient(to bottom, black calc(100% - 28px), transparent 100%)' } : undefined}>
           {sorted.length === 0 && (
             <p className="text-[12px] leading-4 text-[var(--muted)] py-6 text-center">No data available for this time range</p>
           )}
