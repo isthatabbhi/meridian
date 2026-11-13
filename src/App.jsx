@@ -189,7 +189,15 @@ function SidebarExpandToggle() {
   );
 }
 
-function MeridianSidebar({ view, onNavigate, dark, onPeek }) {
+/* Hover peek is Kumo's built-in `peekable` (set on the provider):
+   hovering the collapsed rail expands the sidebar as an OVERLAY
+   (fixed, z-40) on top of the main body, like Cloudflare, so the
+   body components do not move or collapse. Only the bottom
+   panel button (which pins the sidebar open/closed) shifts the
+   body. Kumo renders the footer outside its peek zone, so hovering
+   the collapse-button area does not trigger a peek. Desktop only;
+   on mobile the sidebar is a drawer. */
+function MeridianSidebar({ view, onNavigate, dark }) {
   const { isMobile, setOpen } = useSidebar();
   const handleNavigate = (v) => {
     onNavigate(v);
@@ -197,31 +205,9 @@ function MeridianSidebar({ view, onNavigate, dark, onPeek }) {
        On desktop this would collapse the rail, so leave it alone. */
     if (isMobile) setOpen(false);
   };
-  /* Hover to peek: hovering the collapsed rail expands it,
-     moving the mouse away collapses it again, no click needed.
-     This only sets the transient peek state; the pinned open
-     state is separate, so a sidebar that is open by default on
-     desktop does not collapse when the mouse moves away. The
-     footer is excluded: hovering the collapse-button area does
-     not expand the rail, only the button itself works there.
-     Desktop only; on mobile the sidebar is a drawer, hover
-     does nothing. */
-  const handleMouseEnter = (e) => {
-    if (isMobile) return;
-    /* The footer (collapse button) does not trigger the hover
-       expand: only the button itself works there, like
-       Cloudflare, where hovering the collapsed rail does nothing
-       until you click. Entering via the footer leaves the rail
-       collapsed. */
-    if (e.target && e.target.closest && e.target.closest('[data-sidebar="footer"]')) return;
-    onPeek(true);
-  };
-  const handleMouseLeave = () => { if (!isMobile) onPeek(false); };
   return (
     <Sidebar
       className="print:hidden"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
     >
       {/* Header: mark + name (name fades with the rail) */}
       <SidebarHeader className="gap-2">
@@ -338,18 +324,20 @@ export default function App() {
       }
     } catch {}
   }, [sidebarPinned]);
-  const [sidebarPeek, setSidebarPeek] = useState(false);
-  const sidebarOpen = sidebarPinned || sidebarPeek;
-  /* Auto-fit charts when the sidebar opens/closes (user order
-     2026-11-10): collapsing the sidebar widens the content area,
-     but that is a layout change, not a window resize, so ECharts
-     does not always re-fit and space is left at the right. After
-     the 200ms sidebar slide finishes, dispatch a window resize
-     so every chart re-measures its container and fills it. */
+  /* Only the pinned state shifts the body layout. Hover peek is an
+     overlay (Kumo `peekable`), so it must not move the body or
+     trigger a chart re-fit. */
+  const sidebarOpen = sidebarPinned;
+  /* Auto-fit charts when the sidebar is pinned open/closed (user
+     order 2026-11-10): collapsing the sidebar widens the content
+     area, but that is a layout change, not a window resize, so
+     ECharts does not always re-fit and space is left at the right.
+     After the 200ms sidebar slide finishes, dispatch a window
+     resize so every chart re-measures its container and fills it. */
   useEffect(() => {
     const t = setTimeout(() => window.dispatchEvent(new Event('resize')), 250);
     return () => clearTimeout(t);
-  }, [sidebarOpen]);
+  }, [sidebarPinned]);
   /* Auto-collapse / auto-expand on window resize (user order
      2026-11-10): when the window is forced below half the screen
      width the side panel collapses to the rail, and when it goes
@@ -620,8 +608,14 @@ export default function App() {
   return (
     <SidebarProvider
       open={sidebarOpen}
-      onOpenChange={(next) => { setSidebarPinned(next); setSidebarPeek(false); }}
+      onOpenChange={(next) => { setSidebarPinned(next); }}
       collapsible="icon"
+      /* peekable: hovering the collapsed rail expands the sidebar
+         as an overlay on top of the body (fixed, z-40), like
+         Cloudflare, instead of pushing the body. Only the bottom
+         panel button (which changes the pinned open state) shifts
+         the body. Fixed 2026-11-13. */
+      peekable
       animationDuration={200}
       className="bg-[var(--bg)] text-[var(--text)] font-sans"
       /* Sidebar background is Cloudflare's sidebar colour, NOT the
@@ -632,7 +626,7 @@ export default function App() {
          style, which beats the class. */
       style={{ '--sidebar-width': '220px', '--sidebar-width-icon': '55px', '--sidebar-easing': 'cubic-bezier(0.4, 0, 0.2, 1)', '--sidebar-bg': 'var(--cf-bg-sidebar)' }}
     >
-      <MeridianSidebar view={view} onNavigate={(v) => setView(v)} dark={dark} onPeek={setSidebarPeek} />
+      <MeridianSidebar view={view} onNavigate={(v) => setView(v)} dark={dark} />
 
       {/* Main content, flexed beside the sidebar (55px rail / 220px expanded) */}
       <main className="flex-1 min-w-0 min-h-screen">
