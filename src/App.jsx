@@ -133,7 +133,7 @@ function SidebarBrand({ dark }) {
   const shown = open || isPeeking;
   const markSrc = dark ? '/meridian-mark-light.png' : '/meridian-mark.png';
   return (
-    <a href="https://meridian.isthatabbhi.tech/" className="flex items-center gap-2 min-w-0 cursor-pointer">
+    <a href="https://meridian.isthatabbhi.tech/" className="relative z-50 flex items-center gap-2 min-w-0 cursor-pointer">
       <img src={markSrc} alt="Meridian" className="sidebar-logo w-9 h-9 object-contain shrink-0" />
       <span className={`whitespace-nowrap overflow-hidden transition-[opacity,transform] duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] text-[22px] leading-7 tracking-[-0.015em] font-semibold text-[var(--text)] ${shown ? 'opacity-100 translate-x-0 max-w-[160px]' : 'opacity-0 -translate-x-2 max-w-0'}`}>
         Meridian
@@ -194,14 +194,16 @@ function MeridianSidebar({ view, onNavigate, dark }) {
   };
   return (
     <Sidebar
-      /* z-30 on the wrapper: Kumo's wrapper uses `isolation: isolate`,
+      /* z-50 on the wrapper: Kumo's wrapper uses `isolation: isolate`,
          which traps the peek overlay's z-40 inside the wrapper's
          stacking context, and the cards' entrance animation leaves a
          persisted transform that paints them above the wrapper in DOM
          order. A positive z-index lifts the whole sidebar above the
-         cards. z-30, not higher, so the fixed footer (z-40) still
-         stays on top of the sidebar overlay. Fixed 2026-11-13. */
-      className="print:hidden z-30"
+         cards. z-50 (was z-30) so the brandmark sits forward of
+         everything, above the header (z-40) and the cards. The fixed
+         footer is raised to z-[60] so it still stays on top of the
+         sidebar overlay. Fixed 2026-11-13. */
+      className="print:hidden z-50"
     >
       {/* Header: mark + name (name fades with the rail) */}
       <SidebarHeader className="gap-2">
@@ -863,7 +865,7 @@ export default function App() {
         </div>
 
         {/* Footer, like the FinGuard site */}
-        <footer className={`fixed bottom-0 right-0 z-40 print:hidden border-t border-[var(--cf-border-chrome)] bg-[var(--cf-bg-chrome)] px-4 h-8 flex items-center justify-between gap-2 text-xs text-[var(--muted)] transition-[left] duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] left-0 ${sidebarOpen ? 'md:left-[220px]' : 'md:left-[55px]'}`}>
+        <footer className={`fixed bottom-0 right-0 z-[60] print:hidden border-t border-[var(--cf-border-chrome)] bg-[var(--cf-bg-chrome)] px-4 h-8 flex items-center justify-between gap-2 text-xs text-[var(--muted)] transition-[left] duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] left-0 ${sidebarOpen ? 'md:left-[220px]' : 'md:left-[55px]'}`}>
           <span className="flex items-center gap-1.5">
             <img src="/india-flag.png" alt="India" width="17" height="11" className="shrink-0 rounded-[2px] shadow-[0_0_1px_rgba(255,255,255,0.35)] object-cover" />
             Bengaluru

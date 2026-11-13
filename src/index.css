@@ -515,7 +515,10 @@ html.light .kumo-tooltip-popup {
   box-shadow: none !important;
 }
 .live-refresh-btn[aria-pressed="true"] {
-  border-color: var(--cf-accent-blue) !important;
+  /* Outline stays the chrome outline colour in both states
+     (#333333 dark, #e1e1e1 light); only the text and icon turn
+     blue when on. The blue border from the CF copy is removed,
+     2026-11-13. */
   color: var(--cf-accent-blue) !important;
 }
 /* The icon is a geometric shape centred in the button, but the
