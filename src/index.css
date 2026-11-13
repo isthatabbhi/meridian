@@ -510,12 +510,13 @@ html.light .kumo-tooltip-popup {
    match. */
 /* Top-right action buttons (Live refresh, theme, Print, Copy):
    resting bg is the panel colour (#0F0F0F dark, #ffffff light);
-   hover and highlighted bg is the hover colour (#262626 dark,
-   #ededed light). The Live refresh ON state is the highlighted
-   state, so it sits on the hover colour with blue text and icon.
-   Kumo's toggle variant tints the background blue when active
-   and shows no border, so the tint is removed and the button gets
-   a visible 1px outline border. 2026-11-13. */
+   hover bg is the hover colour (#262626 dark, #ededed light).
+   The Live refresh ON state is NOT a highlighted background, it
+   sits on the resting colour with blue text and icon; the hover
+   colour appears on hover only. Kumo's toggle variant tints the
+   background blue when active and shows no border, so the tint
+   is removed and the button gets a visible 1px outline border.
+   2026-11-13. */
 .live-refresh-btn,
 .top-action-btn {
   background-color: var(--cf-bg-panel) !important;
@@ -530,11 +531,12 @@ html.light .kumo-tooltip-popup {
   background-color: var(--cf-bg-hover) !important;
 }
 .live-refresh-btn[aria-pressed="true"] {
-  /* Outline stays the chrome outline colour in both states
-     (#333333 dark, #e1e1e1 light); only the text and icon turn
-     blue when on. The blue border from the CF copy is removed,
-     2026-11-13. */
-  background-color: var(--cf-bg-hover) !important;
+  /* ON state is NOT a highlighted background: the button sits on
+     the resting colour (#0F0F0F dark, #ffffff light) with no cursor,
+     in both ON and OFF states. Only the text and icon turn blue
+     when on. #262626 dark / #ededed light appears on hover only.
+     Fixed 2026-11-13 after the ON state was found still
+     highlighted with no cursor. */
   color: var(--cf-accent-blue) !important;
 }
 /* The icon is a geometric shape centred in the button, but the
