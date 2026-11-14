@@ -18,45 +18,71 @@ export default function EventsTable({ events, loading, dark }) {
   }
 
   return (
-    <div className="events-table overflow-x-auto">
-      <Table>
-        <Table.Header>
-          <Table.Row>
-            <Table.Head>Time</Table.Head>
-            <Table.Head>Type</Table.Head>
-            <Table.Head>Label</Table.Head>
-            {/* Page and Country are hidden below md: five columns do not
-                fit a phone, the table ran 598px wide in a 390px viewport
-                and the Page/Country columns sat off-screen. Label already
-                carries the page for project clicks; the columns return
-                at md (768px), where the full table fits. */}
-            <Table.Head className="hidden md:table-cell">Page</Table.Head>
-            <Table.Head className="hidden md:table-cell">Country</Table.Head>
-          </Table.Row>
-        </Table.Header>
-        <Table.Body>
-          {events.map((e, i) => (
-            <Table.Row key={i}>
-              <Table.Cell className="whitespace-nowrap tabular-nums text-[var(--muted)]">
-                {/* Short date (no year) on phones, full date from md up. */}
-                <span className="md:hidden">{formatIndianShort(e.at)}</span>
-                <span className="hidden md:inline">{formatIndian(e.at)}</span>
-              </Table.Cell>
-              <Table.Cell>
-                <TypeBadge type={e.type} dark={dark} />
-              </Table.Cell>
-              <Table.Cell className="text-[var(--text-2)] max-w-[80px] md:max-w-[150px] truncate">
-                {e.label || '-'}
-              </Table.Cell>
-              <Table.Cell className="hidden md:table-cell text-[var(--text-2)] font-mono max-w-[120px] truncate">
-                {e.page || '-'}
-              </Table.Cell>
-              <Table.Cell className="hidden md:table-cell text-[var(--text-2)]">{e.country || '-'}</Table.Cell>
-            </Table.Row>
-          ))}
-        </Table.Body>
-      </Table>
-    </div>
+    <>
+      {/* Mobile: stacked rows. The 3-column table squeezes Label to
+          ~83px on a 390px phone, so every label truncates to
+          "https://fin..." / "mailto:co..." / "Resume_...". The row
+          gives the label the full width (~310px) so most labels fit
+          whole. Pageviews carry no label (the table shows '-'), so
+          the page is shown instead. The table returns at md,
+          unchanged. */}
+      <div className="md:hidden">
+        {events.map((e, i) => (
+          <div key={i} className="py-2.5 border-b border-[var(--cf-border-chrome)] last:border-b-0">
+            <div className="flex items-center justify-between gap-2">
+              <TypeBadge type={e.type} dark={dark} />
+              <span className="whitespace-nowrap tabular-nums text-xs text-[var(--muted)]">
+                {formatIndianShort(e.at)}
+              </span>
+            </div>
+            <div className="mt-1 text-[13px] leading-5 text-[var(--text-2)] truncate">
+              {e.label && e.label !== '-' ? e.label : (e.page || '-')}
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="hidden md:block">
+        <div className="events-table overflow-x-auto">
+          <Table>
+            <Table.Header>
+              <Table.Row>
+                <Table.Head>Time</Table.Head>
+                <Table.Head>Type</Table.Head>
+                <Table.Head>Label</Table.Head>
+                {/* Page and Country are hidden below md: five columns do not
+                    fit a phone, the table ran 598px wide in a 390px viewport
+                    and the Page/Country columns sat off-screen. Label already
+                    carries the page for project clicks; the columns return
+                    at md (768px), where the full table fits. */}
+                <Table.Head className="hidden md:table-cell">Page</Table.Head>
+                <Table.Head className="hidden md:table-cell">Country</Table.Head>
+              </Table.Row>
+            </Table.Header>
+            <Table.Body>
+              {events.map((e, i) => (
+                <Table.Row key={i}>
+                  <Table.Cell className="whitespace-nowrap tabular-nums text-[var(--muted)]">
+                    {/* Short date (no year) on phones, full date from md up. */}
+                    <span className="md:hidden">{formatIndianShort(e.at)}</span>
+                    <span className="hidden md:inline">{formatIndian(e.at)}</span>
+                  </Table.Cell>
+                  <Table.Cell>
+                    <TypeBadge type={e.type} dark={dark} />
+                  </Table.Cell>
+                  <Table.Cell className="text-[var(--text-2)] max-w-[80px] md:max-w-[150px] truncate">
+                    {e.label || '-'}
+                  </Table.Cell>
+                  <Table.Cell className="hidden md:table-cell text-[var(--text-2)] font-mono max-w-[120px] truncate">
+                    {e.page || '-'}
+                  </Table.Cell>
+                  <Table.Cell className="hidden md:table-cell text-[var(--text-2)]">{e.country || '-'}</Table.Cell>
+                </Table.Row>
+              ))}
+            </Table.Body>
+          </Table>
+        </div>
+      </div>
+    </>
   );
 }
 

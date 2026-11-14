@@ -754,8 +754,13 @@ export default function App() {
             </PageHeader>
           </div>
 
-          {/* ── Filter / refresh row ── */}
-          <div className="flex flex-wrap items-center justify-between gap-2 mb-5 print:hidden">
+          {/* ── Filter / refresh row. justify-between only from md up:
+              on a 390px phone the three controls (Add filter 106px +
+              Live refresh 136px + Last 24 hours 141px) exceed the
+              366px content width, so justify-between left Add filter
+              alone on row one with a gap. Without it the controls
+              flow left to right and wrap cleanly. ── */}
+          <div className="flex flex-wrap items-center gap-2 md:justify-between mb-5 print:hidden">
             {/* Event type filter dropdown, Events view only */}
             {view === 'events' ? (
             <DropdownMenu>
@@ -794,7 +799,12 @@ export default function App() {
             ) : (
               <div />
             )}
-            <div className="flex items-center gap-2">
+            {/* contents on mobile so Live refresh and the range dropdown
+                are direct flex children of the row and wrap cleanly
+                (Add filter + Live refresh on row one, range on row
+                two); from md it is a flex group again, so the desktop
+                spread layout is unchanged. */}
+            <div className="contents md:flex md:items-center md:gap-2">
               <Button
                 variant="toggle"
                 size="md"
