@@ -878,14 +878,40 @@ export default function App() {
             </div>
           ) : refreshing && data ? (
             /* ── 20s refresh loading state (user order 2026-11-13,
-                from the CF video): the same Kumo SkeletonLine
-                placeholders as the initial load, with a circular
-                Kumo Loader spinner centred in the globe and donut
-                cards, exactly like Cloudflare's dashboard on a
-                refresh. No data fetch happens here, the real data
-                returns after 1500ms. Works on mobile and laptop
-                alike because it is a React state swap, not a
-                CSS-only effect. ── */
+                from the CF video): Kumo SkeletonLine placeholders
+                with a circular Kumo Loader spinner centred in the
+                globe and donut cards, exactly like Cloudflare's
+                dashboard on a refresh. No data fetch happens here,
+                the real data returns after 1500ms. Works on mobile
+                and laptop alike because it is a React state swap,
+                not a CSS-only effect. The refresh state follows the
+                current view: the Events page is one list component,
+                so its refresh shows one skeleton list shaped like
+                event rows, not the dashboard's 15-block skeleton
+                set (fixed 2026-11-14, the user asked why a single
+                list refreshed as many skeleton blocks). ── */
+            view === 'events' ? (
+              <div className="rounded-[12px] bg-[var(--surface)] px-3 py-4 md:px-5 ring ring-kumo-line shadow-xs" aria-hidden="true">
+                <div className="w-56 mb-3">
+                  <SkeletonLine minWidth={100} maxWidth={100} minDuration={1.5} maxDuration={1.5} minDelay={0} maxDelay={0} className="h-4 rounded" />
+                </div>
+                {[...Array(8)].map((_, i) => (
+                  <div key={i} className="py-2.5 border-b border-[var(--cf-border-chrome)] last:border-b-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="w-[92px] shrink-0">
+                        <SkeletonLine minWidth={100} maxWidth={100} minDuration={1.5} maxDuration={1.5} minDelay={0} maxDelay={0} className="h-[20px] rounded-md" />
+                      </div>
+                      <div className="w-[110px] shrink-0">
+                        <SkeletonLine minWidth={100} maxWidth={100} minDuration={1.5} maxDuration={1.5} minDelay={0} maxDelay={0} className="h-[14px] rounded" />
+                      </div>
+                    </div>
+                    <div className="w-3/4 mt-1.5">
+                      <SkeletonLine minWidth={100} maxWidth={100} minDuration={1.5} maxDuration={1.5} minDelay={0} maxDelay={0} className="h-[18px] rounded" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
             <div className="space-y-4" aria-hidden="true">
               <SkeletonLine minWidth={100} maxWidth={100} minDuration={1.5} maxDuration={1.5} minDelay={0} maxDelay={0} className="h-[80px] rounded-[12px] border border-[var(--border)]" />
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4 xl:gap-4">
@@ -908,6 +934,7 @@ export default function App() {
                 ))}
               </div>
             </div>
+            )
           ) : view === 'events' ? (
             <div className="rounded-[12px] bg-[var(--surface)] px-3 py-4 md:px-5 ring ring-kumo-line shadow-xs">
               <Text variant="secondary" size="xs" DANGEROUS_className="mb-3">

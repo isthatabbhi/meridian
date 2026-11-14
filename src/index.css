@@ -355,6 +355,27 @@ aside[data-sidebar="sidebar"] button {
 /* (The old custom .skeleton shimmer was removed: loading placeholders
    are now Kumo SkeletonLine, so nothing uses this rule anymore.) */
 
+/* Kumo's dark skeleton rule keys off [data-mode="dark"], which the
+   app sets from React state. If that attribute is ever missing (a
+   cached bundle, a slow first paint), the skeleton falls back to
+   its light #f3f4f6 background and renders as white blocks on the
+   dark dashboard, which is what the user's 2026-11-14 screenshot
+   showed. Key the same rule off Meridian's own theme signal
+   instead: html without .light is dark mode. This unlayered rule
+   beats Kumo's @layer base values. */
+html:not(.light) .skeleton-line {
+  background-color: rgba(255, 255, 255, 0.06);
+}
+html:not(.light) .skeleton-line::after {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0) 100%);
+}
+html.light .skeleton-line {
+  background-color: #f3f4f6;
+}
+html.light .skeleton-line::after {
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.08) 50%, rgba(0, 0, 0, 0) 100%);
+}
+
 /* Tooltip fade: opacity 0 to 1 over 100ms ease. Opacity only, so it
    never fights the inline transform that positions the tooltip. */
 
