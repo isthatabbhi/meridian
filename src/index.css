@@ -557,9 +557,18 @@ html.light .kumo-tooltip-popup {
   border: 1px solid var(--cf-border-chrome) !important;
   box-shadow: none !important;
 }
-.live-refresh-btn:hover,
-.top-action-btn:hover {
-  background-color: var(--cf-bg-hover) !important;
+/* Hover background only on devices with a real hover capability
+   (mouse/trackpad). On touch screens a tap triggers :hover and
+   it sticks until the next tap elsewhere, so the button kept
+   the lighter #262626 hover background after every tap and
+   looked greyed. Fixed 2026-11-14 from the user's mobile
+   screenshots: IMG_4882 stuck at the hover grey, IMG_4883
+   normal resting #0F0F0F. */
+@media (hover: hover) {
+  .live-refresh-btn:hover,
+  .top-action-btn:hover {
+    background-color: var(--cf-bg-hover) !important;
+  }
 }
 .live-refresh-btn[aria-pressed="true"] {
   /* ON state is NOT a highlighted background: the button sits on
