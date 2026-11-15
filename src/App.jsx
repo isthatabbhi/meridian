@@ -177,20 +177,19 @@ function SidebarExpandToggle() {
 }
 
 /* Dashboard footer (fixed bottom bar). Its left edge follows the
-   sidebar's VISIBLE width, pinned or peeked, so the vertical
-   divider line down the sidebar's right edge stays continuous
-   from the brandmark to the bottom of the screen (user order
-   2026-11-13, "I want this line to also expand with the
-   sidebar"). Previously it only followed the pinned state, so
-   on hover-peek it stayed at the 55px rail while the sidebar
-   overlay ran to 220px, and the line stopped at the footer's top
-   edge. Now it uses open || isPeeking, the same as the sidebar
-   labels, and slides on the same 200ms easing. The main content
-   does not move on peek (overlay only); only this fixed bar
-   shifts, so no chart re-fit is triggered. */
+   Footer follows the sidebar's PINNED width only, never the
+   hover-peek. The peek is a transient overlay: the main content
+   does not move on peek, so this fixed bar must not either, or
+   the location text slides left to right on every sidebar hover
+   (user order 2026-11-15, fix the sliding Bengaluru). It only
+   shifts when the sidebar is pinned open or closed with the
+   toggle, the same deliberate action that shifts the body. (It
+   previously used open || isPeeking so the sidebar divider line
+   stayed continuous on peek, but that made the location slide;
+   the location staying put takes precedence.) */
 function DashboardFooter() {
-  const { open, isPeeking } = useSidebar();
-  const expanded = open || isPeeking;
+  const { open } = useSidebar();
+  const expanded = open;
   return (
     <footer className={`fixed bottom-0 right-0 z-[60] print:hidden border-t border-[var(--cf-border-chrome)] bg-[var(--cf-bg-chrome)] px-4 h-8 flex items-center justify-between gap-2 text-xs text-[var(--muted)] transition-[left] duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] left-0 ${expanded ? 'md:left-[220px]' : 'md:left-[55px]'}`}>
       <span className="flex items-center gap-1.5">
