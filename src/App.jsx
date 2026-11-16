@@ -316,20 +316,23 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   /* Live refresh defaults OFF (user order 2026-11-14): the
      dashboard loads once and stays still until the user turns
-     live refresh on. The 2-minute fetch and the 20s refresh
-     animation both only run while it is on. */
+     live refresh on. TEMPORARY 2026-11-16, user order 15:04 IST:
+     fetch and refresh animation run every 10s for 2 hours, until
+     5:04 PM IST, then revert to the 2-minute fetch and the 20s
+     refresh animation. Both only run while it is on. */
   const [liveRefresh, setLiveRefresh] = useState(false);
   const [timeRange, setTimeRange] = useState('24h');
   const [fetching, setFetching] = useState(false);
-  /* Visual refresh pulse (user order 2026-11-13): every 20s the
-     dashboard shows the Cloudflare-style refresh animation
-     (skeleton bars + circular spinners, like the CF video) WITHOUT
-     fetching data, so it looks like it refreshed. The real data
-     fetch stays on the 2-minute interval, so the KV list quota is
-     untouched. The pulse only runs while live refresh is on.
-     refreshing (1500ms) swaps the content for Kumo skeletons
-     and spinners, matching CF's ~2s loading state. The Play/Pause
-     icon spin was removed on user order 2026-11-13. */
+  /* Visual refresh pulse (user order 2026-11-13): every 10s
+     TEMPORARILY (was 20s; see the live-refresh comment above,
+     revert at 5:04 PM IST 2026-11-16) the dashboard shows the
+     Cloudflare-style refresh animation (skeleton bars + circular
+     spinners, like the CF video) WITHOUT fetching data, so it
+     looks like it refreshed. The pulse only runs while live
+     refresh is on. refreshing (1500ms) swaps the content for
+     Kumo skeletons and spinners, matching CF's ~2s loading
+     state. The Play/Pause icon spin was removed on user order
+     2026-11-13. */
   const [refreshing, setRefreshing] = useState(false);
   const refreshingTimeoutRef = useRef(null);
   // Sidebar: pinned open by default on desktop (md+, 768px), so the
@@ -507,16 +510,18 @@ export default function App() {
   useEffect(() => {
     if (intervalRef.current) clearInterval(intervalRef.current);
     if (liveRefresh) {
-      intervalRef.current = setInterval(doFetch, 120000);
+      intervalRef.current = setInterval(doFetch, 10000); // TEMP 10s until 5:04 PM IST 2026-11-16, was 120000
     }
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
   }, [liveRefresh, doFetch]);
 
-  /* 20-second visual pulse only (no data fetch, no KV list).
-     Fires every 20s while live refresh is on: the content swaps
+  /* 10-second visual pulse only (no data fetch, no KV list).
+     TEMPORARY, was 20s, revert at 5:04 PM IST 2026-11-16.
+     Fires every 10s while live refresh is on: the content swaps
      to the Cloudflare-style loading state (skeletons + spinners)
      for 1500ms, then the real data returns. The real fetch above
-     still runs every 2 minutes. */
+     also runs every 10s while this temporary interval is in
+     place. */
   const pulseIntervalRef = useRef(null);
   useEffect(() => {
     if (pulseIntervalRef.current) clearInterval(pulseIntervalRef.current);
@@ -526,7 +531,7 @@ export default function App() {
         setRefreshing(true);
         if (refreshingTimeoutRef.current) clearTimeout(refreshingTimeoutRef.current);
         refreshingTimeoutRef.current = setTimeout(() => setRefreshing(false), 1500);
-      }, 20000);
+      }, 10000); // TEMP 10s until 5:04 PM IST 2026-11-16, was 20000
     } else {
       setRefreshing(false);
     }
