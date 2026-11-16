@@ -319,8 +319,29 @@ export default function App() {
      live refresh on. TEMPORARY 2026-11-16, user order 15:04 IST:
      fetch and refresh animation run every 10s for 2 hours, until
      5:04 PM IST, then revert to the 2-minute fetch and the 20s
-     refresh animation. Both only run while it is on. */
-  const [liveRefresh, setLiveRefresh] = useState(false);
+     refresh animation. Both only run while it is on.
+     Fix 2026-11-16, user reported the button auto-toggled off
+     after a few seconds: the only code that ever set this state
+     was the button's own onClick, using a stale `!liveRefresh`
+     closure, through Kumo's toggle-variant Button, which keeps
+     its own pressed state and can fight React's. So the state
+     is now persisted to localStorage (like theme and sidebar),
+     so a remount or reload cannot reset it to OFF, and the
+     toggle uses a ref-guarded handler, not a stale closure. */
+  const [liveRefresh, setLiveRefresh] = useState(() => {
+    try {
+      return window.localStorage.getItem('meridian-live-refresh') === '1';
+    } catch {
+      return false;
+    }
+  });
+  const liveRefreshRef = useRef(liveRefresh);
+  useEffect(() => {
+    liveRefreshRef.current = liveRefresh;
+    try {
+      window.localStorage.setItem('meridian-live-refresh', liveRefresh ? '1' : '0');
+    } catch {}
+  }, [liveRefresh]);
   const [timeRange, setTimeRange] = useState('24h');
   const [fetching, setFetching] = useState(false);
   /* Visual refresh pulse (user order 2026-11-13): every 10s
@@ -506,6 +527,17 @@ export default function App() {
   }, []);
 
   useEffect(() => { doFetch(); }, [doFetch]);
+
+  /* Toggle handler, ref-guarded: reads the current value from the
+     ref, not from a render closure, so a re-render between the
+     click and the state update cannot flip it back. Turning it on
+     fetches immediately; turning it off just stops the intervals. */
+  const toggleLiveRefresh = useCallback(() => {
+    const next = !liveRefreshRef.current;
+    liveRefreshRef.current = next;
+    setLiveRefresh(next);
+    if (next) doFetch();
+  }, [doFetch]);
 
   useEffect(() => {
     if (intervalRef.current) clearInterval(intervalRef.current);
@@ -809,18 +841,24 @@ export default function App() {
                 two); from md it is a flex group again, so the desktop
                 spread layout is unchanged. */}
             <div className="contents md:flex md:items-center md:gap-2">
-              <Button
-                variant="toggle"
-                size="md"
-                active={liveRefresh}
-                className="live-refresh-btn px-5 text-[13px] rounded-md"
-                icon={liveRefresh ? <Pause weight="regular" size={14} /> : <Play weight="regular" size={14} />}
-                onClick={() => { setLiveRefresh(!liveRefresh); if (!liveRefresh) doFetch(); }}
+              {/* Plain <button>, not Kumo's toggle-variant Button:
+                  fix 2026-11-16 for the button auto-toggling off.
+                  Kumo's toggle keeps its own pressed state, which
+                  fought React's `active` prop on re-render. A
+                  native button has no internal toggle state, so
+                  its look comes only from `aria-pressed` and the
+                  liveRefresh state, and it stays on until clicked
+                  again. Same .live-refresh-btn styling as before. */}
+              <button
+                type="button"
+                className="live-refresh-btn px-5 py-2 text-[13px] rounded-md inline-flex items-center gap-1.5 cursor-pointer"
+                onClick={toggleLiveRefresh}
                 aria-pressed={liveRefresh}
                 title={liveRefresh ? 'Live refresh is on, click to turn off' : 'Live refresh is off, click to turn on'}
               >
-                Live refresh
-              </Button>
+                {liveRefresh ? <Pause weight="regular" size={14} /> : <Play weight="regular" size={14} />}
+                <span>Live refresh</span>
+              </button>
               {/* Time range dropdown, a small 8px gap beside Live
                   refresh, like the reference. */}
               <DropdownMenu>
